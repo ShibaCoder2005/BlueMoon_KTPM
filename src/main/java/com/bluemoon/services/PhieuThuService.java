@@ -106,6 +106,34 @@ public interface PhieuThuService {
      * @return true nếu đang được sử dụng, false nếu không
      */
     boolean isFeeUsed(int maKhoanThu);
+
+    /**
+     * Kiểm tra xem phiếu thu có thể được chỉnh sửa/xóa không.
+     * Phiếu thu chỉ có thể chỉnh sửa/xóa nếu chưa thanh toán (trạng thái khác "Đã thu", "Đã thanh toán").
+     *
+     * @param maPhieu mã phiếu thu
+     * @return true nếu có thể chỉnh sửa (chưa thanh toán), false nếu đã thanh toán
+     */
+    boolean canModifyPhieuThu(int maPhieu);
+
+    /**
+     * Cập nhật phiếu thu và chi tiết thu (chỉ cho phép nếu chưa thanh toán).
+     * Kiểm tra trạng thái phiếu thu trước khi cập nhật. Nếu đã thanh toán, không cho phép cập nhật.
+     *
+     * @param phieuThu đối tượng phiếu thu đã cập nhật
+     * @param chiTietList danh sách chi tiết mới (có thể null để giữ nguyên chi tiết hiện tại)
+     * @return true nếu thành công, false nếu đã thanh toán hoặc lỗi
+     */
+    boolean updatePhieuThu(PhieuThu phieuThu, List<ChiTietThu> chiTietList);
+
+    /**
+     * Xóa phiếu thu (chỉ cho phép nếu chưa thanh toán).
+     * Kiểm tra trạng thái phiếu thu trước khi xóa. Nếu đã thanh toán, không cho phép xóa.
+     *
+     * @param maPhieu mã phiếu thu
+     * @return true nếu thành công, false nếu đã thanh toán hoặc lỗi
+     */
+    boolean deletePhieuThu(int maPhieu);
 }
 
 

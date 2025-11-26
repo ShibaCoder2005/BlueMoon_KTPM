@@ -239,24 +239,19 @@ public class LichSuNopTienController implements Initializable {
                 paymentRecord.setNguoiThu(0); // Placeholder - có thể lấy từ session
                 paymentRecord.setNguoiThuName(nguoiThu); // Set tên người thu cho hiển thị
 
-                // Ghi nhận thanh toán
-                boolean paymentSuccess = paymentService.addLichSuNopTien(paymentRecord);
-                if (!paymentSuccess) {
-                    showAlert(AlertType.ERROR, "Thất bại", "Không thể ghi nhận thanh toán. Vui lòng thử lại.");
-                    return;
+                // Ghi nhận thanh toán và cập nhật trạng thái phiếu thu trong một atomic operation
+                // Sử dụng method atomic để đảm bảo tính nhất quán dữ liệu
+                boolean success = paymentService.recordPaymentWithStatusUpdate(paymentRecord, "Đã thu");
+                
+                if (success) {
+                    showAlert(AlertType.INFORMATION, "Thành công",
+                            "Đã ghi nhận thanh toán thành công cho phiếu thu #" + maPhieu);
+                    clearForm();
+                    loadData();
+                } else {
+                    showAlert(AlertType.ERROR, "Thất bại",
+                            "Không thể ghi nhận thanh toán. Vui lòng thử lại.");
                 }
-
-                // Cập nhật trạng thái phiếu thu thành "Đã thu" (Crucial step from diagram)
-                boolean updateSuccess = receiptService.updatePhieuThuStatus(maPhieu, "Đã thu");
-                if (!updateSuccess) {
-                    showAlert(AlertType.WARNING, "Cảnh báo",
-                            "Đã ghi nhận thanh toán nhưng không thể cập nhật trạng thái phiếu thu.");
-                }
-
-                showAlert(AlertType.INFORMATION, "Thành công",
-                        "Đã ghi nhận thanh toán thành công cho phiếu thu #" + maPhieu);
-                clearForm();
-                loadData();
             }
         } catch (Exception e) {
             showAlert(AlertType.ERROR, "Lỗi hệ thống",

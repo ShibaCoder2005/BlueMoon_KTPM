@@ -81,6 +81,17 @@ public interface NhanKhauService {
      * @return true nếu đã tồn tại, false nếu không
      */
     boolean isCCCDExists(String soCCCD, int excludeId);
+
+    /**
+     * Cập nhật trạng thái nhân khẩu và ghi nhận lịch sử biến động trong một transaction.
+     * Sử dụng khi thay đổi tình trạng nhân khẩu (e.g., "Thường trú" -> "Tạm vắng", "Chuyển đi").
+     *
+     * @param nhanKhauId ID nhân khẩu
+     * @param newStatus trạng thái mới (e.g., "Tạm vắng", "Chuyển đi", "TamTru", "ThuongTru")
+     * @param historyRecord bản ghi lịch sử (có thể null nếu không cần ghi lịch sử)
+     * @return true nếu thành công, false nếu thất bại
+     */
+    boolean updateStatusWithHistory(int nhanKhauId, String newStatus, LichSuNhanKhau historyRecord);
 }
 
 

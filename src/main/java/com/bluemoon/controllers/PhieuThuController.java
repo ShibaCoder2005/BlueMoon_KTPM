@@ -187,7 +187,7 @@ public class PhieuThuController implements Initializable {
     private void loadComboBoxData() {
         try {
             // Load households
-            householdList.setAll(hoGiaDinhService.getAll());
+            householdList.setAll(hoGiaDinhService.getAllHoGiaDinh());
             cbHoGiaDinh.setItems(householdList);
             cbHoGiaDinh.setConverter(new StringConverter<HoGiaDinh>() {
                 @Override

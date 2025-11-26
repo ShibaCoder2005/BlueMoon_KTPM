@@ -42,11 +42,20 @@ public interface DotThuService {
 
     /**
      * Xóa đợt thu theo ID.
+     * Kiểm tra ràng buộc: không được xóa nếu có PhieuThu liên quan.
      *
      * @param id ID của đợt thu cần xóa
-     * @return true nếu thành công
+     * @return true nếu thành công, false nếu có ràng buộc hoặc lỗi
      */
     boolean deleteDotThu(int id);
+
+    /**
+     * Tìm kiếm đợt thu theo từ khóa (tên đợt thu, mô tả).
+     *
+     * @param keyword từ khóa tìm kiếm
+     * @return danh sách đợt thu khớp
+     */
+    List<DotThu> searchDotThu(String keyword);
 }
 
 

@@ -7,10 +7,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.bluemoon.models.LichSuNopTien;
 import com.bluemoon.services.LichSuNopTienService;
+import com.bluemoon.services.PhieuThuService;
 
 /**
  * Triển khai {@link LichSuNopTienService} bằng bộ nhớ tạm thời.
@@ -18,10 +21,22 @@ import com.bluemoon.services.LichSuNopTienService;
  */
 public class LichSuNopTienServiceImpl implements LichSuNopTienService {
 
+    private static final Logger logger = Logger.getLogger(LichSuNopTienServiceImpl.class.getName());
+    
     private final Map<Integer, LichSuNopTien> lichSuStore = new ConcurrentHashMap<>();
+    private final PhieuThuService phieuThuService;
     private int nextId = 1;
 
     public LichSuNopTienServiceImpl() {
+        this.phieuThuService = new PhieuThuServiceImpl();
+        seedSampleData();
+    }
+
+    /**
+     * Constructor với dependency injection (cho testing hoặc future DI framework).
+     */
+    public LichSuNopTienServiceImpl(PhieuThuService phieuThuService) {
+        this.phieuThuService = phieuThuService;
         seedSampleData();
     }
 
@@ -59,6 +74,47 @@ public class LichSuNopTienServiceImpl implements LichSuNopTienService {
         // TODO: Implement when relationship is available
         // For now, return empty list
         return new ArrayList<>();
+    }
+
+    @Override
+    public boolean recordPaymentWithStatusUpdate(LichSuNopTien paymentRecord, String updateStatusTo) {
+        if (paymentRecord == null || paymentRecord.getMaPhieu() <= 0) {
+            logger.log(Level.WARNING, "Invalid payment record: paymentRecord is null or maPhieu is invalid");
+            return false;
+        }
+
+        if (updateStatusTo == null || updateStatusTo.trim().isEmpty()) {
+            logger.log(Level.WARNING, "Invalid status: updateStatusTo is null or empty");
+            return false;
+        }
+
+        try {
+            // Step 1: Record the payment
+            boolean paymentSuccess = addLichSuNopTien(paymentRecord);
+            if (!paymentSuccess) {
+                logger.log(Level.WARNING, "Failed to record payment for maPhieu: " + paymentRecord.getMaPhieu());
+                return false;
+            }
+
+            // Step 2: Update receipt status (atomic operation)
+            boolean statusSuccess = phieuThuService.updatePhieuThuStatus(paymentRecord.getMaPhieu(), updateStatusTo);
+            if (!statusSuccess) {
+                logger.log(Level.WARNING, 
+                        "Payment recorded but failed to update receipt status for maPhieu: " + paymentRecord.getMaPhieu());
+                // Note: In a real database transaction, we would rollback here
+                // For in-memory implementation, we log the warning but payment is already recorded
+                return false;
+            }
+
+            logger.log(Level.INFO, 
+                    "Successfully recorded payment and updated status for maPhieu: " + paymentRecord.getMaPhieu());
+            return true;
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, 
+                    "Error in recordPaymentWithStatusUpdate for maPhieu: " + paymentRecord.getMaPhieu(), e);
+            return false;
+        }
     }
 
     private void seedSampleData() {

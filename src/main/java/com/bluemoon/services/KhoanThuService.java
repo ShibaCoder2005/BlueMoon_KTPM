@@ -34,9 +34,11 @@ public interface KhoanThuService {
 
     /**
      * Xóa một KhoanThu theo mã.
+     * Kiểm tra ràng buộc: không được xóa nếu khoản thu đã được sử dụng trong bất kỳ ChiTietThu nào.
+     * Sử dụng PhieuThuService.isFeeUsed() để kiểm tra trước khi xóa.
      *
      * @param maKhoanThu mã cần xóa
-     * @return true nếu thành công
+     * @return true nếu thành công, false nếu có ràng buộc (đã được sử dụng) hoặc lỗi
      */
     boolean deleteKhoanThu(int maKhoanThu);
 }

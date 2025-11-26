@@ -143,7 +143,7 @@ public class HoGiaDinhController implements Initializable {
      */
     private void loadData() {
         try {
-            hoGiaDinhData.setAll(hoGiaDinhService.getAll());
+            hoGiaDinhData.setAll(hoGiaDinhService.getAllHoGiaDinh());
             // Resolve tên chủ hộ cho mỗi hộ gia đình
             for (HoGiaDinh hoGiaDinh : hoGiaDinhData) {
                 resolveTenChuHo(hoGiaDinh);
@@ -194,7 +194,7 @@ public class HoGiaDinhController implements Initializable {
             // Set ngày tạo
             newHoGiaDinh.setNgayTao(LocalDate.now());
 
-            boolean success = hoGiaDinhService.add(newHoGiaDinh);
+            boolean success = hoGiaDinhService.addHoGiaDinh(newHoGiaDinh);
             if (success) {
                 showAlert(AlertType.INFORMATION, "Thành công", "Đã thêm hộ gia đình mới.");
                 clearForm();
@@ -237,7 +237,7 @@ public class HoGiaDinhController implements Initializable {
             updatedHoGiaDinh.setId(selected.getId());
             updatedHoGiaDinh.setNgayTao(selected.getNgayTao());
 
-            boolean success = hoGiaDinhService.update(updatedHoGiaDinh);
+            boolean success = hoGiaDinhService.updateHoGiaDinh(updatedHoGiaDinh);
             if (success) {
                 showAlert(AlertType.INFORMATION, "Thành công", "Đã cập nhật thông tin hộ gia đình.");
                 clearForm();
@@ -285,7 +285,7 @@ public class HoGiaDinhController implements Initializable {
 
             Optional<ButtonType> result = confirmAlert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                boolean success = hoGiaDinhService.delete(selected.getId());
+                boolean success = hoGiaDinhService.deleteHoGiaDinh(selected.getId());
                 if (success) {
                     showAlert(AlertType.INFORMATION, "Thành công", "Đã xóa hộ gia đình.");
                     clearForm();

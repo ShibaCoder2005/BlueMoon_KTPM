@@ -9,13 +9,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.bluemoon.models.NhanKhau;
 import com.bluemoon.models.PhieuThu;
 import com.bluemoon.services.DotThuService;
 import com.bluemoon.services.HoGiaDinhService;
+import com.bluemoon.services.NhanKhauService;
 import com.bluemoon.services.PhieuThuService;
 import com.bluemoon.services.ThongKeService;
 import com.bluemoon.services.impl.DotThuServiceImpl;
 import com.bluemoon.services.impl.HoGiaDinhServiceImpl;
+import com.bluemoon.services.impl.NhanKhauServiceImpl;
 import com.bluemoon.services.impl.PhieuThuServiceImpl;
 
 /**
@@ -26,6 +29,7 @@ public class ThongKeServiceImpl implements ThongKeService {
     private final PhieuThuService phieuThuService = new PhieuThuServiceImpl();
     private final DotThuService dotThuService = new DotThuServiceImpl();
     private final HoGiaDinhService hoGiaDinhService = new HoGiaDinhServiceImpl();
+    private final NhanKhauService nhanKhauService = new NhanKhauServiceImpl();
 
     @Override
     public Map<String, Number> getRevenueStats(LocalDate fromDate, LocalDate toDate) {
@@ -112,7 +116,7 @@ public class ThongKeServiceImpl implements ThongKeService {
                 .map(PhieuThu::getTongTien)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        long totalHouseholds = hoGiaDinhService.getAll().size();
+        long totalHouseholds = hoGiaDinhService.getAllHoGiaDinh().size();
         long totalReceipts = allPhieuThu.size();
 
         stats.put("totalRevenue", totalRevenue);
@@ -216,6 +220,80 @@ public class ThongKeServiceImpl implements ThongKeService {
         }
 
         return details;
+    }
+
+    @Override
+    public Map<String, Object> getResidentDemographics() {
+        Map<String, Object> demographics = new HashMap<>();
+        List<NhanKhau> allResidents = nhanKhauService.getAll();
+        List<com.bluemoon.models.HoGiaDinh> allHouseholds = hoGiaDinhService.getAllHoGiaDinh();
+
+        // Total residents
+        demographics.put("totalResidents", allResidents.size());
+
+        // Total households
+        demographics.put("totalHouseholds", allHouseholds.size());
+
+        // Distribution by status (tinhTrang)
+        Map<String, Integer> byStatus = allResidents.stream()
+                .collect(Collectors.groupingBy(
+                        nk -> {
+                            String status = nk.getTinhTrang();
+                            return status != null ? status : "Không xác định";
+                        },
+                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
+                ));
+        demographics.put("byStatus", byStatus);
+
+        // Distribution by gender (gioiTinh)
+        Map<String, Integer> byGender = allResidents.stream()
+                .collect(Collectors.groupingBy(
+                        nk -> {
+                            String gender = nk.getGioiTinh();
+                            return gender != null ? gender : "Không xác định";
+                        },
+                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
+                ));
+        demographics.put("byGender", byGender);
+
+        // Distribution by age group
+        Map<String, Integer> byAgeGroup = new HashMap<>();
+        int childCount = 0;      // 0-17
+        int adultCount = 0;      // 18-59
+        int seniorCount = 0;     // 60+
+        int unknownCount = 0;    // No birth date
+
+        LocalDate now = LocalDate.now();
+        for (NhanKhau nk : allResidents) {
+            if (nk.getNgaySinh() == null) {
+                unknownCount++;
+                continue;
+            }
+
+            int age = now.getYear() - nk.getNgaySinh().getYear();
+            // Adjust if birthday hasn't occurred this year
+            if (now.getDayOfYear() < nk.getNgaySinh().getDayOfYear()) {
+                age--;
+            }
+
+            if (age < 18) {
+                childCount++;
+            } else if (age < 60) {
+                adultCount++;
+            } else {
+                seniorCount++;
+            }
+        }
+
+        byAgeGroup.put("Trẻ em (0-17)", childCount);
+        byAgeGroup.put("Người lớn (18-59)", adultCount);
+        byAgeGroup.put("Người cao tuổi (60+)", seniorCount);
+        if (unknownCount > 0) {
+            byAgeGroup.put("Không xác định", unknownCount);
+        }
+        demographics.put("byAgeGroup", byAgeGroup);
+
+        return demographics;
     }
 }
 

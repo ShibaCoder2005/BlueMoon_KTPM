@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.bluemoon.models.ChiTietThu;
@@ -16,6 +18,8 @@ import com.bluemoon.services.PhieuThuService;
  */
 public class PhieuThuServiceImpl implements PhieuThuService {
 
+    private static final Logger logger = Logger.getLogger(PhieuThuServiceImpl.class.getName());
+    
     private final List<PhieuThu> phieuThuStore = new ArrayList<>();
     private final Map<Integer, List<ChiTietThu>> chiTietStore = new ConcurrentHashMap<>();
     private int nextId = 1;
@@ -156,16 +160,118 @@ public class PhieuThuServiceImpl implements PhieuThuService {
     @Override
     public boolean isFeeUsed(int maKhoanThu) {
         // Kiểm tra xem khoản thu có đang được sử dụng trong bất kỳ ChiTietThu nào không
-        // Trong thực tế, cần query từ ChiTietThu table
-        // Hiện tại giả lập bằng cách kiểm tra trong chiTietThuStore (nếu có)
+        return chiTietStore.values()
+                .stream()
+                .flatMap(List::stream)
+                .anyMatch(ct -> ct.getMaKhoan() == maKhoanThu);
+    }
+
+    @Override
+    public boolean canModifyPhieuThu(int maPhieu) {
+        PhieuThu phieuThu = getPhieuThuWithDetails(maPhieu);
+        if (phieuThu == null) {
+            return false;
+        }
         
-        // TODO: Implement proper check with ChiTietThu DAO
-        // For now, return false (assume not used)
-        // In real implementation:
-        // List<ChiTietThu> chiTietList = chiTietThuDAO.findByMaKhoan(maKhoanThu);
-        // return !chiTietList.isEmpty();
+        String trangThai = phieuThu.getTrangThai();
+        if (trangThai == null) {
+            return true; // No status means can modify
+        }
         
-        return false; // Placeholder - cần implement với ChiTietThu DAO
+        // Cannot modify if already paid
+        String trangThaiLower = trangThai.toLowerCase();
+        return !trangThaiLower.contains("đã thu") && 
+               !trangThaiLower.contains("đã thanh toán") &&
+               !trangThaiLower.contains("hoàn thành");
+    }
+
+    @Override
+    public boolean updatePhieuThu(PhieuThu phieuThu, List<ChiTietThu> chiTietList) {
+        if (phieuThu == null || phieuThu.getId() == 0) {
+            logger.log(Level.WARNING, "Invalid PhieuThu: null or id is 0");
+            return false;
+        }
+
+        // Check if receipt can be modified
+        if (!canModifyPhieuThu(phieuThu.getId())) {
+            logger.log(Level.WARNING, 
+                    "Cannot update PhieuThu with id: " + phieuThu.getId() + " - already paid");
+            return false;
+        }
+
+        try {
+            // Find and update PhieuThu
+            PhieuThu existing = getPhieuThuWithDetails(phieuThu.getId());
+            if (existing == null) {
+                logger.log(Level.WARNING, "PhieuThu not found with id: " + phieuThu.getId());
+                return false;
+            }
+
+            // Update PhieuThu fields
+            existing.setMaHo(phieuThu.getMaHo());
+            existing.setMaDot(phieuThu.getMaDot());
+            existing.setMaTaiKhoan(phieuThu.getMaTaiKhoan());
+            existing.setNgayLap(phieuThu.getNgayLap());
+            existing.setTongTien(phieuThu.getTongTien());
+            existing.setTrangThai(phieuThu.getTrangThai());
+            existing.setHinhThucThu(phieuThu.getHinhThucThu());
+
+            // Update ChiTietThu if provided
+            if (chiTietList != null) {
+                // Remove old details
+                chiTietStore.remove(phieuThu.getId());
+                
+                // Add new details
+                if (!chiTietList.isEmpty()) {
+                    List<ChiTietThu> newChiTietList = new ArrayList<>();
+                    for (ChiTietThu chiTiet : chiTietList) {
+                        chiTiet.setMaPhieu(phieuThu.getId());
+                        if (chiTiet.getId() == 0) {
+                            chiTiet.setId(nextChiTietId++);
+                        }
+                        newChiTietList.add(cloneChiTietThu(chiTiet));
+                    }
+                    chiTietStore.put(phieuThu.getId(), newChiTietList);
+                }
+            }
+
+            logger.log(Level.INFO, "Successfully updated PhieuThu with id: " + phieuThu.getId());
+            return true;
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error updating PhieuThu with id: " + phieuThu.getId(), e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean deletePhieuThu(int maPhieu) {
+        // Check if receipt can be modified (deleted)
+        if (!canModifyPhieuThu(maPhieu)) {
+            logger.log(Level.WARNING, 
+                    "Cannot delete PhieuThu with id: " + maPhieu + " - already paid");
+            return false;
+        }
+
+        try {
+            // Remove ChiTietThu first
+            chiTietStore.remove(maPhieu);
+            
+            // Remove PhieuThu
+            boolean removed = phieuThuStore.removeIf(p -> p.getId() == maPhieu);
+            
+            if (removed) {
+                logger.log(Level.INFO, "Successfully deleted PhieuThu with id: " + maPhieu);
+            } else {
+                logger.log(Level.WARNING, "PhieuThu not found with id: " + maPhieu);
+            }
+            
+            return removed;
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error deleting PhieuThu with id: " + maPhieu, e);
+            return false;
+        }
     }
 
     private PhieuThu clonePhieuThu(PhieuThu source) {

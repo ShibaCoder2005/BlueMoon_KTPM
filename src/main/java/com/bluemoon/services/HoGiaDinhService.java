@@ -14,45 +14,56 @@ public interface HoGiaDinhService {
      *
      * @return danh sách {@link HoGiaDinh}
      */
-    List<HoGiaDinh> getAll();
+    List<HoGiaDinh> getAllHoGiaDinh();
 
     /**
-     * Tìm hộ gia đình theo mã.
+     * Tìm hộ gia đình theo ID.
      *
-     * @param maHo mã hộ cần tìm
+     * @param id ID hộ gia đình
      * @return {@link HoGiaDinh} nếu tồn tại, {@code null} nếu không
      */
-    HoGiaDinh findById(int maHo);
-
-    /**
-     * Tìm kiếm theo từ khóa (tên chủ hộ, địa chỉ).
-     *
-     * @param keyword từ khóa người dùng nhập
-     * @return danh sách kết quả
-     */
-    List<HoGiaDinh> search(String keyword);
+    HoGiaDinh findById(int id);
 
     /**
      * Thêm mới một hộ gia đình.
+     * Kiểm tra maHo unique và dienTich > 0.
      *
      * @param hoGiaDinh dữ liệu cần thêm
      * @return true nếu thành công
      */
-    boolean add(HoGiaDinh hoGiaDinh);
+    boolean addHoGiaDinh(HoGiaDinh hoGiaDinh);
 
     /**
      * Cập nhật hộ gia đình.
+     * Kiểm tra maHo unique và dienTich > 0.
      *
      * @param hoGiaDinh dữ liệu cần cập nhật
      * @return true nếu thành công
      */
-    boolean update(HoGiaDinh hoGiaDinh);
+    boolean updateHoGiaDinh(HoGiaDinh hoGiaDinh);
 
     /**
-     * Xóa hộ gia đình theo mã.
+     * Xóa hộ gia đình theo ID.
+     * Kiểm tra ràng buộc: không được xóa nếu có NhanKhau hoặc PhieuThu liên quan.
      *
-     * @param maHo mã hộ cần xóa
-     * @return true nếu thành công
+     * @param id ID hộ gia đình cần xóa
+     * @return true nếu thành công, false nếu có ràng buộc hoặc lỗi
      */
-    boolean delete(int maHo);
+    boolean deleteHoGiaDinh(int id);
+
+    /**
+     * Tìm kiếm hộ gia đình theo từ khóa (maHo, ghiChu).
+     *
+     * @param keyword từ khóa tìm kiếm
+     * @return danh sách kết quả
+     */
+    List<HoGiaDinh> searchHoGiaDinh(String keyword);
+
+    /**
+     * Kiểm tra xem mã hộ đã tồn tại chưa.
+     *
+     * @param maHo mã hộ cần kiểm tra
+     * @return true nếu đã tồn tại, false nếu không
+     */
+    boolean checkMaHoExists(String maHo);
 }

@@ -74,6 +74,20 @@ public interface ThongKeService {
      * @return danh sách các bản ghi công nợ
      */
     List<Map<String, Object>> getDebtDetails();
+
+    /**
+     * Lấy thống kê nhân khẩu (theo tình trạng, giới tính, độ tuổi, etc.).
+     * Bao gồm các chỉ số như: tổng số nhân khẩu, phân bố theo tình trạng (Thường trú, Tạm vắng, etc.),
+     * phân bố theo giới tính, phân bố theo độ tuổi, số hộ gia đình, v.v.
+     *
+     * @return Map chứa các chỉ số thống kê nhân khẩu với các key như:
+     *         - "totalResidents": Tổng số nhân khẩu
+     *         - "byStatus": Map<String, Integer> - Phân bố theo tình trạng
+     *         - "byGender": Map<String, Integer> - Phân bố theo giới tính
+     *         - "byAgeGroup": Map<String, Integer> - Phân bố theo nhóm tuổi
+     *         - "totalHouseholds": Tổng số hộ gia đình
+     */
+    Map<String, Object> getResidentDemographics();
 }
 
 

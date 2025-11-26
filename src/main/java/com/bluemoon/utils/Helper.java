@@ -33,5 +33,20 @@ public class Helper {
             return password;
         }
     }
+
+    /**
+     * Xác minh mật khẩu bằng cách so sánh hash.
+     *
+     * @param rawPassword     mật khẩu gốc (plain text)
+     * @param hashedPassword  mật khẩu đã hash
+     * @return true nếu mật khẩu khớp, false nếu không
+     */
+    public static boolean verifyPassword(String rawPassword, String hashedPassword) {
+        if (rawPassword == null || hashedPassword == null) {
+            return false;
+        }
+        String hashedInput = hashPassword(rawPassword);
+        return hashedInput != null && hashedInput.equals(hashedPassword);
+    }
 }
 

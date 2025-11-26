@@ -164,7 +164,7 @@ public class NhanKhauController implements Initializable {
      */
     private void loadHoGiaDinhList() {
         try {
-            hoGiaDinhList.setAll(hoGiaDinhService.getAll());
+            hoGiaDinhList.setAll(hoGiaDinhService.getAllHoGiaDinh());
             cbHoGiaDinh.setItems(hoGiaDinhList);
             cbHoGiaDinh.setConverter(new StringConverter<HoGiaDinh>() {
                 @Override
