@@ -1,52 +1,34 @@
 package com.bluemoon.utils;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 /**
  * Utility class chứa các helper methods.
+ * LƯU Ý: Chỉ sử dụng plain text password cho mục đích testing.
+ * KHÔNG sử dụng logic này cho môi trường production.
  */
 public class Helper {
 
     /**
-     * Hash mật khẩu sử dụng SHA-256.
-     * Trong production, nên sử dụng BCrypt hoặc Argon2.
+     * Trả về mật khẩu gốc (plain text) mà không thực hiện hash.
      *
-     * @param password mật khẩu cần hash
-     * @return mật khẩu đã hash (hex string)
+     * @param password mật khẩu cần "hash"
+     * @return mật khẩu gốc
      */
     public static String hashPassword(String password) {
-        if (password == null || password.isEmpty()) {
-            return null;
-        }
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            // Fallback: return password as-is if hashing fails
-            // In production, this should throw an exception or use a different algorithm
-            return password;
-        }
+        // Disable hashing for testing purposes
+        return password;
     }
 
     /**
-     * Xác minh mật khẩu bằng cách so sánh hash.
+     * So sánh mật khẩu gốc với mật khẩu lưu trữ bằng cách so sánh chuỗi.
      *
-     * @param rawPassword     mật khẩu gốc (plain text)
-     * @param hashedPassword  mật khẩu đã hash
-     * @return true nếu mật khẩu khớp, false nếu không
+     * @param rawPassword    mật khẩu gốc (plain text)
+     * @param storedPassword mật khẩu đã lưu (plain text)
+     * @return true nếu chuỗi giống nhau, false nếu khác hoặc null
      */
-    public static boolean verifyPassword(String rawPassword, String hashedPassword) {
-        if (rawPassword == null || hashedPassword == null) {
+    public static boolean verifyPassword(String rawPassword, String storedPassword) {
+        if (rawPassword == null || storedPassword == null) {
             return false;
         }
-        String hashedInput = hashPassword(rawPassword);
-        return hashedInput != null && hashedInput.equals(hashedPassword);
+        return rawPassword.equals(storedPassword);
     }
 }
-

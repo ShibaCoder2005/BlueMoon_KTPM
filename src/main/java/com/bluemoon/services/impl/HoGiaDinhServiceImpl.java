@@ -19,54 +19,51 @@ import com.bluemoon.utils.DatabaseConnector;
 /**
  * Triển khai {@link HoGiaDinhService} với database integration.
  * Sử dụng PreparedStatement để tránh SQL injection và kiểm tra ràng buộc trước khi xóa.
+ * Sử dụng try-with-resources để đảm bảo resources được đóng tự động.
  */
 public class HoGiaDinhServiceImpl implements HoGiaDinhService {
 
     private static final Logger logger = Logger.getLogger(HoGiaDinhServiceImpl.class.getName());
 
-    // SQL Queries
+    // SQL Queries - PostgreSQL table names
     private static final String SELECT_ALL = 
-            "SELECT id, maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao FROM ho_gia_dinh ORDER BY id";
+            "SELECT id, maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao FROM HoGiaDinh ORDER BY id";
 
     private static final String SELECT_BY_ID = 
-            "SELECT id, maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao FROM ho_gia_dinh WHERE id = ?";
+            "SELECT id, maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao FROM HoGiaDinh WHERE id = ?";
 
     private static final String INSERT = 
-            "INSERT INTO ho_gia_dinh (maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao) VALUES (?, ?, ?, ?, ?, ?)";
+            "INSERT INTO HoGiaDinh (maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao) VALUES (?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE = 
-            "UPDATE ho_gia_dinh SET maHo = ?, soPhong = ?, dienTich = ?, maChuHo = ?, ghiChu = ?, ngayTao = ? WHERE id = ?";
+            "UPDATE HoGiaDinh SET maHo = ?, soPhong = ?, dienTich = ?, maChuHo = ?, ghiChu = ?, ngayTao = ? WHERE id = ?";
 
     private static final String DELETE = 
-            "DELETE FROM ho_gia_dinh WHERE id = ?";
+            "DELETE FROM HoGiaDinh WHERE id = ?";
 
     private static final String CHECK_MAHO_EXISTS = 
-            "SELECT COUNT(*) FROM ho_gia_dinh WHERE maHo = ?";
+            "SELECT COUNT(*) FROM HoGiaDinh WHERE maHo = ?";
 
     private static final String CHECK_MAHO_EXISTS_EXCLUDE_ID = 
-            "SELECT COUNT(*) FROM ho_gia_dinh WHERE maHo = ? AND id != ?";
+            "SELECT COUNT(*) FROM HoGiaDinh WHERE maHo = ? AND id != ?";
 
     private static final String CHECK_NHAN_KHAU_DEPENDENCIES = 
-            "SELECT COUNT(*) FROM nhan_khau WHERE maHo = ?";
+            "SELECT COUNT(*) FROM NhanKhau WHERE maHo = ?";
 
     private static final String CHECK_PHIEU_THU_DEPENDENCIES = 
-            "SELECT COUNT(*) FROM phieu_thu WHERE maHo = ?";
+            "SELECT COUNT(*) FROM PhieuThu WHERE maHo = ?";
 
     private static final String SEARCH = 
-            "SELECT id, maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao FROM ho_gia_dinh " +
+            "SELECT id, maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao FROM HoGiaDinh " +
             "WHERE maHo LIKE ? OR ghiChu LIKE ? ORDER BY id";
 
     @Override
     public List<HoGiaDinh> getAllHoGiaDinh() {
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
         List<HoGiaDinh> result = new ArrayList<>();
 
-        try {
-            conn = DatabaseConnector.getConnection();
-            pstmt = conn.prepareStatement(SELECT_ALL);
-            rs = pstmt.executeQuery();
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SELECT_ALL);
+             ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
                 result.add(buildHoGiaDinhFromResultSet(rs));
@@ -77,35 +74,29 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error retrieving all households", e);
+            e.printStackTrace();
             return new ArrayList<>();
-        } finally {
-            closeResources(conn, pstmt, rs);
         }
     }
 
     @Override
     public HoGiaDinh findById(int id) {
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_ID)) {
 
-        try {
-            conn = DatabaseConnector.getConnection();
-            pstmt = conn.prepareStatement(SELECT_BY_ID);
             pstmt.setInt(1, id);
-            rs = pstmt.executeQuery();
 
-            if (rs.next()) {
-                return buildHoGiaDinhFromResultSet(rs);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return buildHoGiaDinhFromResultSet(rs);
+                }
+                return null;
             }
-
-            return null;
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error retrieving household with id: " + id, e);
+            e.printStackTrace();
             return null;
-        } finally {
-            closeResources(conn, pstmt, rs);
         }
     }
 
@@ -127,18 +118,14 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
             return false;
         }
 
-        // Check maHo uniqueness
+        // Check if maHo already exists
         if (checkMaHoExists(hoGiaDinh.getMaHo())) {
             logger.log(Level.WARNING, "Cannot add household: maHo already exists: " + hoGiaDinh.getMaHo());
             return false;
         }
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-
-        try {
-            conn = DatabaseConnector.getConnection();
-            pstmt = conn.prepareStatement(INSERT);
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(INSERT)) {
 
             pstmt.setString(1, hoGiaDinh.getMaHo().trim());
             pstmt.setInt(2, hoGiaDinh.getSoPhong());
@@ -160,9 +147,8 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error adding household: " + hoGiaDinh.getMaHo(), e);
+            e.printStackTrace();
             return false;
-        } finally {
-            closeResources(conn, pstmt, null);
         }
     }
 
@@ -184,88 +170,80 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
             return false;
         }
 
-        // Check maHo uniqueness (exclude current record)
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            // Check maHo uniqueness (exclude current record)
+            boolean maHoExists = false;
+            try (PreparedStatement pstmt = conn.prepareStatement(CHECK_MAHO_EXISTS_EXCLUDE_ID)) {
+                pstmt.setString(1, hoGiaDinh.getMaHo().trim());
+                pstmt.setInt(2, hoGiaDinh.getId());
 
-        try {
-            conn = DatabaseConnector.getConnection();
-            pstmt = conn.prepareStatement(CHECK_MAHO_EXISTS_EXCLUDE_ID);
-            pstmt.setString(1, hoGiaDinh.getMaHo().trim());
-            pstmt.setInt(2, hoGiaDinh.getId());
-            rs = pstmt.executeQuery();
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        maHoExists = true;
+                    }
+                }
+            }
 
-            if (rs.next() && rs.getInt(1) > 0) {
+            if (maHoExists) {
                 logger.log(Level.WARNING, 
                         "Cannot update household: maHo already exists: " + hoGiaDinh.getMaHo());
                 return false;
             }
 
-            // Close previous statement and result set
-            pstmt.close();
-            rs.close();
-
             // Proceed with update
-            pstmt = conn.prepareStatement(UPDATE);
-            pstmt.setString(1, hoGiaDinh.getMaHo().trim());
-            pstmt.setInt(2, hoGiaDinh.getSoPhong());
-            pstmt.setBigDecimal(3, hoGiaDinh.getDienTich());
-            pstmt.setInt(4, hoGiaDinh.getMaChuHo());
-            pstmt.setString(5, hoGiaDinh.getGhiChu());
-            pstmt.setDate(6, convertToSqlDate(hoGiaDinh.getNgayTao()));
-            pstmt.setInt(7, hoGiaDinh.getId());
+            try (PreparedStatement pstmt = conn.prepareStatement(UPDATE)) {
+                pstmt.setString(1, hoGiaDinh.getMaHo().trim());
+                pstmt.setInt(2, hoGiaDinh.getSoPhong());
+                pstmt.setBigDecimal(3, hoGiaDinh.getDienTich());
+                pstmt.setInt(4, hoGiaDinh.getMaChuHo());
+                pstmt.setString(5, hoGiaDinh.getGhiChu());
+                pstmt.setDate(6, convertToSqlDate(hoGiaDinh.getNgayTao()));
+                pstmt.setInt(7, hoGiaDinh.getId());
 
-            int rowsAffected = pstmt.executeUpdate();
-            boolean success = rowsAffected > 0;
+                int rowsAffected = pstmt.executeUpdate();
+                boolean success = rowsAffected > 0;
 
-            if (success) {
-                logger.log(Level.INFO, "Successfully updated household with id: " + hoGiaDinh.getId());
-            } else {
-                logger.log(Level.WARNING, "Failed to update household with id: " + hoGiaDinh.getId());
+                if (success) {
+                    logger.log(Level.INFO, "Successfully updated household with id: " + hoGiaDinh.getId());
+                } else {
+                    logger.log(Level.WARNING, "Failed to update household with id: " + hoGiaDinh.getId());
+                }
+
+                return success;
             }
-
-            return success;
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error updating household with id: " + hoGiaDinh.getId(), e);
+            e.printStackTrace();
             return false;
-        } finally {
-            closeResources(conn, pstmt, rs);
         }
     }
 
     @Override
     public boolean deleteHoGiaDinh(int id) {
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DatabaseConnector.getConnection();
-
-            // Check for dependencies: NhanKhau records
-            pstmt = conn.prepareStatement(CHECK_NHAN_KHAU_DEPENDENCIES);
-            pstmt.setInt(1, id);
-            rs = pstmt.executeQuery();
-
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            // Constraint Check: Check for dependencies in NhanKhau table
             int nhanKhauCount = 0;
-            if (rs.next()) {
-                nhanKhauCount = rs.getInt(1);
+            try (PreparedStatement pstmt = conn.prepareStatement(CHECK_NHAN_KHAU_DEPENDENCIES)) {
+                pstmt.setInt(1, id);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        nhanKhauCount = rs.getInt(1);
+                    }
+                }
             }
 
-            // Close previous statement and result set
-            pstmt.close();
-            rs.close();
-
-            // Check for dependencies: PhieuThu records
-            pstmt = conn.prepareStatement(CHECK_PHIEU_THU_DEPENDENCIES);
-            pstmt.setInt(1, id);
-            rs = pstmt.executeQuery();
-
+            // Constraint Check: Check for dependencies in PhieuThu table
             int phieuThuCount = 0;
-            if (rs.next()) {
-                phieuThuCount = rs.getInt(1);
+            try (PreparedStatement pstmt = conn.prepareStatement(CHECK_PHIEU_THU_DEPENDENCIES)) {
+                pstmt.setInt(1, id);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        phieuThuCount = rs.getInt(1);
+                    }
+                }
             }
 
             // If either has dependencies, block deletion
@@ -277,30 +255,26 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
                 return false;
             }
 
-            // Close previous statement and result set
-            pstmt.close();
-            rs.close();
-
             // Proceed with deletion
-            pstmt = conn.prepareStatement(DELETE);
-            pstmt.setInt(1, id);
+            try (PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
+                pstmt.setInt(1, id);
 
-            int rowsAffected = pstmt.executeUpdate();
-            boolean success = rowsAffected > 0;
+                int rowsAffected = pstmt.executeUpdate();
+                boolean success = rowsAffected > 0;
 
-            if (success) {
-                logger.log(Level.INFO, "Successfully deleted household with id: " + id);
-            } else {
-                logger.log(Level.WARNING, "Failed to delete household with id: " + id);
+                if (success) {
+                    logger.log(Level.INFO, "Successfully deleted household with id: " + id);
+                } else {
+                    logger.log(Level.WARNING, "Failed to delete household with id: " + id);
+                }
+
+                return success;
             }
-
-            return success;
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error deleting household with id: " + id, e);
+            e.printStackTrace();
             return false;
-        } finally {
-            closeResources(conn, pstmt, rs);
         }
     }
 
@@ -310,23 +284,19 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
             return getAllHoGiaDinh();
         }
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
         List<HoGiaDinh> result = new ArrayList<>();
 
-        try {
-            conn = DatabaseConnector.getConnection();
-            pstmt = conn.prepareStatement(SEARCH);
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SEARCH)) {
 
             String searchPattern = "%" + keyword.trim() + "%";
             pstmt.setString(1, searchPattern);
             pstmt.setString(2, searchPattern);
 
-            rs = pstmt.executeQuery();
-
-            while (rs.next()) {
-                result.add(buildHoGiaDinhFromResultSet(rs));
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(buildHoGiaDinhFromResultSet(rs));
+                }
             }
 
             logger.log(Level.INFO, "Found " + result.size() + " households matching: " + keyword);
@@ -334,9 +304,8 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error searching households with keyword: " + keyword, e);
+            e.printStackTrace();
             return new ArrayList<>();
-        } finally {
-            closeResources(conn, pstmt, rs);
         }
     }
 
@@ -346,28 +315,23 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
             return false;
         }
 
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(CHECK_MAHO_EXISTS)) {
 
-        try {
-            conn = DatabaseConnector.getConnection();
-            pstmt = conn.prepareStatement(CHECK_MAHO_EXISTS);
             pstmt.setString(1, maHo.trim());
-            rs = pstmt.executeQuery();
 
-            if (rs.next()) {
-                int count = rs.getInt(1);
-                return count > 0;
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    return count > 0;
+                }
+                return false;
             }
-
-            return false;
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error checking maHo existence: " + maHo, e);
+            e.printStackTrace();
             return false;
-        } finally {
-            closeResources(conn, pstmt, rs);
         }
     }
 
@@ -386,13 +350,13 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
         hoGiaDinh.setDienTich(rs.getBigDecimal("dienTich"));
         hoGiaDinh.setMaChuHo(rs.getInt("maChuHo"));
         hoGiaDinh.setGhiChu(rs.getString("ghiChu"));
-        
+
         // Convert java.sql.Date to LocalDate
         Date ngayTao = rs.getDate("ngayTao");
         if (ngayTao != null) {
             hoGiaDinh.setNgayTao(ngayTao.toLocalDate());
         }
-        
+
         return hoGiaDinh;
     }
 
@@ -407,28 +371,5 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
             return null;
         }
         return Date.valueOf(localDate);
-    }
-
-    /**
-     * Đóng các tài nguyên database.
-     *
-     * @param conn Connection
-     * @param pstmt PreparedStatement
-     * @param rs    ResultSet
-     */
-    private void closeResources(Connection conn, PreparedStatement pstmt, ResultSet rs) {
-        try {
-            if (rs != null) {
-                rs.close();
-            }
-            if (pstmt != null) {
-                pstmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
-        } catch (SQLException e) {
-            logger.log(Level.WARNING, "Error closing database resources", e);
-        }
     }
 }

@@ -16,8 +16,8 @@ public class DatabaseConnector {
 
     // Database configuration - should be moved to config file in production
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/bluemoon";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "password";
+    private static final String DB_USER = "postgres";
+    private static final String DB_PASSWORD = "admin";
 
     /**
      * Lấy kết nối database PostgreSQL.
