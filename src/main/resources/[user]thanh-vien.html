@@ -31,7 +31,7 @@
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="[user]trang-chu.html">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-building"></i>
                 </div>
@@ -42,8 +42,8 @@
             <hr class="sidebar-divider my-0">
 
             <!-- Nav Item - Dashboard -->
-            <li class="nav-item">
-                <a class="nav-link" href="index.html">
+            <li class="nav-item active">
+                <a class="nav-link" href="[user]trang-chu.html">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -56,27 +56,26 @@
                 Quản lý Cư dân
             </div>
 
-            <!-- Nav Item - Thành viên (Active) -->
-            <li class="nav-item active">
-                <a class="nav-link" href="member_list.html">
+            <li class="nav-item">
+                <a class="nav-link" href="[user]thanh-vien.html">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Thành viên gia đình</span></a>
             </li>
             
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="[user]thanh-toan.html">
                     <i class="fas fa-fw fa-file-invoice-dollar"></i>
                     <span>Hóa đơn & Phí</span></a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="[user]thong-bao.html">
                     <i class="fas fa-fw fa-bullhorn"></i>
                     <span>Thông báo</span></a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="[user]phan-hoi.html">
                     <i class="fas fa-fw fa-comment-dots"></i>
                     <span>Gửi phản hồi</span></a>
             </li>
@@ -111,7 +110,7 @@
 
                         <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            <a class="nav-link dropdown-toggle" href="[user]ho-so.html" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">Nguyễn Văn A</span>
                                 <img class="img-profile rounded-circle"
@@ -144,7 +143,7 @@
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Thông tin Hộ gia đình</h1>
                         
-                        <!-- Nút Gửi danh sách cho BQL (Mở Modal Cảnh báo thay vì gửi ngay) -->
+                        <!-- Nút Gửi danh sách cho BQL -->
                         <div>
                             <span id="lockTimer" class="mr-2 text-danger small font-weight-bold" style="display: none;">
                                 <i class="fas fa-clock"></i> Mở lại sau: <span id="countdown"></span>
@@ -197,7 +196,7 @@
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <h6 class="m-0 font-weight-bold text-primary">Danh sách thành viên trong gia đình</h6>
-                                    <!-- Nút thêm thành viên: Kích hoạt Modal -->
+                                    <!-- Nút thêm thành viên -->
                                     <a href="#" class="btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#addMemberModal">
                                         <i class="fas fa-user-plus fa-sm text-white-50"></i> Thêm thành viên
                                     </a>
@@ -211,9 +210,9 @@
                                                     <th>Họ và Tên</th>
                                                     <th>Ngày sinh</th>
                                                     <th>Giới tính</th>
-                                                    <th>CCCD/CMND</th> <!-- THÊM CỘT CCCD -->
-                                                    <th>Quan hệ với Chủ hộ</th>
-                                                    <th>Nghề nghiệp</th>
+                                                    <th>CCCD/CMND</th>
+                                                    <th>Dân tộc</th> <!-- Cột mới -->
+                                                    <th>Quan hệ</th>
                                                     <th>Thao tác</th>
                                                 </tr>
                                             </thead>
@@ -223,22 +222,23 @@
                                                     <td class="font-weight-bold text-primary">Nguyễn Văn A</td>
                                                     <td>15/05/1980</td>
                                                     <td>Nam</td>
-                                                    <td>001080000001</td> <!-- DỮ LIỆU MẪU CCCD -->
+                                                    <td>001080000001</td>
+                                                    <td>Kinh</td>
                                                     <td><span class="badge badge-success">Chủ hộ</span></td>
-                                                    <td>Kỹ sư</td>
                                                     <td>
                                                         <a href="#" class="btn btn-info btn-circle btn-sm" title="Xem chi tiết"><i class="fas fa-info-circle"></i></a>
                                                         <a href="#" class="btn btn-danger btn-circle btn-sm" title="Xóa" onclick="deleteRow(this)"><i class="fas fa-trash"></i></a>
                                                     </td>
                                                 </tr>
+                                                <!-- Row 2 -->
                                                 <tr>
                                                     <td>2</td>
                                                     <td class="font-weight-bold">Trần Thị B</td>
                                                     <td>20/10/1982</td>
                                                     <td>Nữ</td>
-                                                    <td>001082000002</td> <!-- DỮ LIỆU MẪU CCCD -->
+                                                    <td>001082000002</td>
+                                                    <td>Kinh</td>
                                                     <td>Vợ</td>
-                                                    <td>Giáo viên</td>
                                                     <td>
                                                         <a href="#" class="btn btn-info btn-circle btn-sm" title="Xem chi tiết"><i class="fas fa-info-circle"></i></a>
                                                         <a href="#" class="btn btn-danger btn-circle btn-sm" title="Xóa" onclick="deleteRow(this)"><i class="fas fa-trash"></i></a>
@@ -323,7 +323,6 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Kiểm tra lại</button>
-                    <!-- Nút này sẽ gọi hàm sendToBQL() thực sự -->
                     <button type="button" class="btn btn-warning" onclick="confirmAndSend()">Đồng ý gửi</button>
                 </div>
             </div>
@@ -332,26 +331,27 @@
 
     <!-- ADD MEMBER MODAL (Cửa sổ thêm thành viên) -->
     <div class="modal fade" id="addMemberModal" tabindex="-1" role="dialog" aria-labelledby="addMemberModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-lg" role="document"> <!-- Dùng modal-lg cho rộng -->
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="addMemberModalLabel">Thêm thành viên mới</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <form id="addMemberForm">
-                        <div class="form-group">
-                            <label for="newMemberName">Họ và Tên</label>
-                            <input type="text" class="form-control" id="newMemberName" placeholder="Nhập tên thành viên" required>
-                        </div>
+                        <!-- Hàng 1: Họ tên + Giới tính + Ngày sinh -->
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label for="newMemberDob">Ngày sinh</label>
+                                <label for="newMemberName">Họ và Tên <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="newMemberName" placeholder="Nhập tên thành viên" required>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="newMemberDob">Ngày sinh <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="newMemberDob" required>
                             </div>
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-3">
                                 <label for="newMemberGender">Giới tính</label>
                                 <select id="newMemberGender" class="form-control">
                                     <option>Nam</option>
@@ -360,15 +360,18 @@
                                 </select>
                             </div>
                         </div>
-                        
-                        <!-- THÊM TRƯỜNG CCCD -->
-                        <div class="form-group">
-                            <label for="newMemberCCCD">Số CCCD / CMND / Mã định danh</label>
-                            <input type="text" class="form-control" id="newMemberCCCD" placeholder="Nhập số thẻ căn cước (nếu có)">
-                        </div>
 
+                        <!-- Hàng 2: CCCD + Dân tộc + Quan hệ -->
                         <div class="form-row">
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
+                                <label for="newMemberCCCD">Số CCCD / CMND</label>
+                                <input type="text" class="form-control" id="newMemberCCCD" placeholder="Số định danh">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="newMemberEthnicity">Dân tộc</label>
+                                <input type="text" class="form-control" id="newMemberEthnicity" placeholder="Kinh, Tày, Thái...">
+                            </div>
+                            <div class="form-group col-md-4">
                                 <label for="newMemberRelation">Quan hệ với chủ hộ</label>
                                 <select id="newMemberRelation" class="form-control">
                                     <option>Vợ</option>
@@ -379,11 +382,26 @@
                                     <option>Khác</option>
                                 </select>
                             </div>
-                            <div class="form-group col-md-6">
-                                <label for="newMemberJob">Nghề nghiệp</label>
-                                <input type="text" class="form-control" id="newMemberJob" placeholder="Ví dụ: Học sinh">
-                            </div>
                         </div>
+
+                        <!-- Hàng 3: Nơi sinh -->
+                        <div class="form-group">
+                            <label for="newMemberBirthPlace">Nơi sinh (Tỉnh/Thành phố)</label>
+                            <input type="text" class="form-control" id="newMemberBirthPlace" placeholder="Nhập nơi sinh theo giấy khai sinh">
+                        </div>
+
+                        <!-- Hàng 4: Nguyên quán -->
+                        <div class="form-group">
+                            <label for="newMemberHometown">Nguyên quán</label>
+                            <input type="text" class="form-control" id="newMemberHometown" placeholder="Nhập nguyên quán">
+                        </div>
+
+                        <!-- Hàng 5: Nghề nghiệp -->
+                        <div class="form-group">
+                            <label for="newMemberJob">Nghề nghiệp / Nơi làm việc</label>
+                            <input type="text" class="form-control" id="newMemberJob" placeholder="Ví dụ: Học sinh, Giáo viên...">
+                        </div>
+
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -407,8 +425,6 @@
     <!-- Script Xử lý Logic (Không cần Backend) -->
     <script>
         // --- LOGIC KHÓA NÚT GỬI SAU 24H ---
-        
-        // 1. Kiểm tra trạng thái nút khi tải trang
         document.addEventListener("DOMContentLoaded", function() {
             checkLockStatus();
         });
@@ -422,33 +438,22 @@
             if (lastSent) {
                 var now = new Date().getTime();
                 var timeDiff = now - parseInt(lastSent);
-                var twentyFourHours = 24 * 60 * 60 * 1000; // 24 giờ tính bằng mili giây
+                var twentyFourHours = 24 * 60 * 60 * 1000; 
 
                 if (timeDiff < twentyFourHours) {
-                    // Vẫn trong thời gian khóa
                     var timeLeft = twentyFourHours - timeDiff;
-                    
-                    // Khóa nút: Loại bỏ data-toggle để không mở modal nữa
                     btn.removeAttribute('data-toggle');
                     btn.removeAttribute('data-target');
                     btn.disabled = true;
                     btn.classList.remove('btn-success');
                     btn.classList.add('btn-secondary');
                     btn.innerHTML = '<i class="fas fa-check"></i> Đã gửi (Chờ duyệt)';
-                    
-                    // Hiển thị đếm ngược
                     timerDisplay.style.display = 'inline-block';
-                    
-                    // Tính giờ:phút còn lại
                     var hoursLeft = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     var minutesLeft = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                     countdownSpan.innerText = hoursLeft + "h " + minutesLeft + "p";
-
                 } else {
-                    // Đã qua 24h -> Mở khóa
-                    localStorage.removeItem('lastSentToBQL'); // Xóa mốc thời gian cũ
-                    
-                    // Khôi phục nút và modal trigger
+                    localStorage.removeItem('lastSentToBQL'); 
                     btn.setAttribute('data-toggle', 'modal');
                     btn.setAttribute('data-target', '#confirmSendModal');
                     btn.disabled = false;
@@ -460,32 +465,19 @@
             }
         }
 
-        // 4. Chức năng Gửi cho BQL (Được gọi từ Modal Xác nhận)
         function confirmAndSend() {
-            // Đóng Modal Cảnh báo
             $('#confirmSendModal').modal('hide');
-            
             var btn = document.getElementById('btnSendBQL');
-            
-            // Hiệu ứng đang gửi
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
             btn.disabled = true;
-
             setTimeout(function() {
-                // Lưu thời gian hiện tại vào LocalStorage
                 var now = new Date().getTime();
                 localStorage.setItem('lastSentToBQL', now);
-
                 alert("Đã gửi danh sách thành công! Ban Quản Lý sẽ xác nhận trong 24h.");
-                
-                // Gọi lại hàm kiểm tra để cập nhật giao diện ngay lập tức
                 checkLockStatus();
             }, 1500);
         }
 
-        // --- CÁC CHỨC NĂNG KHÁC GIỮ NGUYÊN ---
-
-        // 1. Chức năng Sửa/Lưu Thông tin chung
         function toggleEditGeneral() {
             var inputs = ['roomNumber', 'householdId', 'oldAddress'];
             var btnText = document.getElementById('btnEditText');
@@ -506,36 +498,39 @@
             }
         }
 
-        // 2. Chức năng Thêm thành viên vào bảng
+        // Cập nhật hàm Add Member để lấy thêm trường mới
         function addNewMember() {
             var name = document.getElementById('newMemberName').value;
             var dob = document.getElementById('newMemberDob').value;
             var gender = document.getElementById('newMemberGender').value;
-            var cccd = document.getElementById('newMemberCCCD').value; // Lấy giá trị CCCD
+            var cccd = document.getElementById('newMemberCCCD').value;
+            var ethnicity = document.getElementById('newMemberEthnicity').value; // Lấy Dân tộc
             var relation = document.getElementById('newMemberRelation').value;
             var job = document.getElementById('newMemberJob').value;
+            // var birthPlace = document.getElementById('newMemberBirthPlace').value; // Có thể lưu ẩn hoặc hiện popup chi tiết
+            // var hometown = document.getElementById('newMemberHometown').value;
 
             if(name === "") {
                 alert("Vui lòng nhập tên thành viên!");
                 return;
             }
 
-            var formattedDob = dob.split('-').reverse().join('/');
+            var formattedDob = dob ? dob.split('-').reverse().join('/') : "";
+            var displayCCCD = cccd ? cccd : "-";
+            var displayEthnicity = ethnicity ? ethnicity : "Kinh"; // Mặc định Kinh nếu trống
+
             var tableBody = document.getElementById('memberTableBody');
             var rowCount = tableBody.rows.length + 1;
             
-            // Xử lý hiển thị CCCD (nếu trống thì hiện dấu gạch ngang)
-            var displayCCCD = cccd ? cccd : "-";
-
             var newRow = `
                 <tr>
                     <td>${rowCount}</td>
                     <td class="font-weight-bold">${name}</td>
                     <td>${formattedDob}</td>
                     <td>${gender}</td>
-                    <td>${displayCCCD}</td> <!-- Hiển thị CCCD -->
+                    <td>${displayCCCD}</td>
+                    <td>${displayEthnicity}</td> <!-- Hiển thị Dân tộc -->
                     <td>${relation}</td>
-                    <td>${job}</td>
                     <td>
                         <a href="#" class="btn btn-info btn-circle btn-sm" title="Xem chi tiết"><i class="fas fa-info-circle"></i></a>
                         <a href="#" class="btn btn-danger btn-circle btn-sm" title="Xóa" onclick="deleteRow(this)"><i class="fas fa-trash"></i></a>
@@ -548,7 +543,6 @@
             document.getElementById('addMemberForm').reset();
         }
 
-        // 3. Chức năng Xóa dòng
         function deleteRow(btn) {
             var row = btn.parentNode.parentNode;
             if (confirm("Bạn có chắc chắn muốn xóa thành viên này không?")) {
