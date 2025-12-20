@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Quản Lý - Khoản Thu (v1.0)</title>
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div id="wrapper">
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-building"></i></div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
+            </a>
+            <hr class="sidebar-divider my-0">
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="can-ho.html">
+                    <i class="fas fa-fw fa-door-open"></i>
+                    <span>Căn hộ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Cư dân</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="khoan-thu.html">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Khoản thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="thong-ke.html">
+                    <i class="fas fa-fw fa-chart-bar"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="thong-bao.html">
+                    <i class="fas fa-fw fa-bullhorn"></i>
+                    <span>Thông báo</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phan-anh.html">
+                    <i class="fas fa-fw fa-comments"></i>
+                    <span>Phản ánh</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="tai-khoan.html">
+                    <i class="fas fa-fw fa-user-cog"></i>
+                    <span>Tài khoản</span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider">
+
+            <li class="nav-item">
+                <a class="nav-link" href="cai-dat.html">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Cài đặt</span>
+                </a>
+            </li>
+
+            <li class="nav-item"><a class="nav-link collapsed" href="#" style="opacity: 0.6;"><i class="fas fa-car"></i><span>Gửi xe (v2.0)</span></a></li>
+        </ul>
+
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    </nav>
+
+                <div class="container-fluid">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Quản lý Thu Phí (v1.0)</h1>
+                        <a href="#" class="btn btn-primary btn-icon-split shadow-sm" data-toggle="modal" data-target="#addFeeModal">
+                            <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
+                            <span class="text">Tạo đợt thu mới</span>
+                        </a>
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách các khoản thu hiện hành</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>Tên khoản thu</th>
+                                            <th>Loại phí</th>
+                                            <th>Đơn giá / Mức thu</th>
+                                            <th>Đối tượng</th>
+                                            <th>Tiến độ</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Dịch vụ Tháng 11/2025</strong><br><small class="text-muted">Vệ sinh, an ninh, rác thải...</small></td>
+                                            <td>Bắt buộc (Theo diện tích)</td>
+                                            <td>7.000 đ/m2</td> <td>Toàn bộ căn hộ</td>
+                                            <td>
+                                                <div class="progress progress-sm mb-2">
+                                                    <div class="progress-bar bg-info" role="progressbar" style="width: 80%"></div>
+                                                </div>
+                                                <small>120/150 hộ đã đóng</small>
+                                            </td>
+                                            <td><span class="badge badge-success">Đang thu</span></td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td><strong>Quản lý Tháng 11/2025</strong><br><small class="text-muted">Vận hành tòa nhà</small></td>
+                                            <td>Bắt buộc (Theo diện tích)</td>
+                                            <td>5.000 đ/m2</td>
+                                            <td>Toàn bộ căn hộ</td>
+                                            <td>
+                                                <div class="progress progress-sm mb-2">
+                                                    <div class="progress-bar bg-info" role="progressbar" style="width: 60%"></div>
+                                                </div>
+                                                <small>90/150 hộ đã đóng</small>
+                                            </td>
+                                            <td><span class="badge badge-success">Đang thu</span></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td><strong>Quỹ vì người nghèo 2025</strong></td>
+                                            <td>Tự nguyện (Đóng góp)</td>
+                                            <td>Tùy tâm</td>
+                                            <td>Tự nguyện</td>
+                                            <td>
+                                                <small>Tổng thu: 15.000.000 đ</small>
+                                            </td>
+                                            <td><span class="badge badge-warning">Đang vận động</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto"><div class="copyright text-center my-auto"><span>Copyright &copy; BlueMoon 2025</span></div></div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addFeeModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Tạo Khoản Thu Mới</h5>
+                    <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label>Tên khoản thu</label>
+                            <input type="text" class="form-control" placeholder="VD: Phí dịch vụ T12/2025">
+                        </div>
+                        <div class="form-group">
+                            <label>Loại phí (Theo quy định v1.0)</label>
+                            <select class="form-control" id="loaiPhiSelect">
+                                <option value="dichvu">Phí dịch vụ chung cư (Bắt buộc)</option>
+                                <option value="quanly">Phí quản lý chung cư (Bắt buộc)</option>
+                                <option value="donggop">Đóng góp / Từ thiện (Tự nguyện)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="donGiaArea">
+                            <label>Đơn giá (VNĐ/m2)</label>
+                            <input type="number" class="form-control" value="7000" placeholder="Nhập số tiền trên 1m2">
+                            <small class="form-text text-muted">Hệ thống sẽ tự nhân với diện tích căn hộ.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Hạn nộp / Thời gian vận động</label>
+                            <input type="date" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button class="btn btn-primary">Tạo & Gửi thông báo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    
+    <script>
+        $('#loaiPhiSelect').change(function() {
+            var selected = $(this).val();
+            if(selected === 'donggop') {
+                $('#donGiaArea').hide(); // Đóng góp thì không cần đơn giá m2
+            } else {
+                $('#donGiaArea').show(); // Phí dịch vụ/quản lý cần đơn giá m2
+            }
+        });
+    </script>
+</body>
+</html>
