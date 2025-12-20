@@ -6,10 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Quản Lý Dân Cư - Danh Sách</title>
 
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <!-- Thay thế link local bằng CDN -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <link href="css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 </head>
 
 <body id="page-top">
@@ -41,7 +42,7 @@
                 </a>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="danh-sach-dan-cu.html">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Cư dân</span>
@@ -112,7 +113,7 @@
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Quản Lý</span>
-                                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+                                <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
@@ -131,10 +132,14 @@
                 <div class="container-fluid">
 
                     <h1 class="h3 mb-2 text-gray-800">Danh Sách Cư Dân</h1>
+                    <p class="mb-4">Quản lý thông tin chi tiết cư dân, hộ khẩu và tình trạng cư trú.</p>
                     
                     <div class="card shadow mb-4">
-                        <div class="card-header py-3">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-primary">Dữ liệu tổng hợp</h6>
+                            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                                <i class="fas fa-user-plus fa-sm text-white-50"></i> Thêm Cư dân
+                            </a>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -142,59 +147,64 @@
                                     <thead>
                                         <tr>
                                             <th>STT</th>
+                                            <th>Mã hộ khẩu</th> <!-- Đã thêm cột này -->
                                             <th>Họ và Tên</th>
                                             <th>Căn hộ</th>
-                                            <th>Diện tích (m2)</th> <th>Quan hệ chủ hộ</th> <th>Số CCCD</th>
-                                            <th>Loại cư trú</th> <th>Hành động</th>
+                                            <th>Quan hệ chủ hộ</th>
+                                            <th>Số CCCD</th>
+                                            <th>Loại cư trú</th>
+                                            <th>Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
                                             <td>1</td>
+                                            <td><strong>010101001</strong></td> <!-- Dữ liệu mẫu 9 số -->
                                             <td>Nguyễn Văn A</td>
                                             <td>P101</td>
-                                            <td>85m2</td>
                                             <td>Chủ hộ</td>
                                             <td>00109000xxxx</td>
                                             <td><span class="badge badge-primary">Thường trú</span></td>
                                             <td class="text-center">
-                                                <a href="#" class="btn btn-info btn-circle btn-sm" title="Xem chi tiết hộ khẩu"><i class="fas fa-eye"></i></a>
-                                                <a href="#" class="btn btn-warning btn-circle btn-sm" title="Khai báo tạm vắng"><i class="fas fa-plane-departure"></i></a>
+                                                <a href="#" class="btn btn-info btn-circle btn-sm" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
+                                                <a href="#" class="btn btn-warning btn-circle btn-sm" title="Sửa"><i class="fas fa-edit"></i></a>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>2</td>
+                                            <td><strong>010101001</strong></td> <!-- Cùng mã hộ với chủ hộ trên -->
                                             <td>Lê Thị B</td>
                                             <td>P101</td>
-                                            <td>85m2</td>
                                             <td>Vợ</td>
                                             <td>00109100xxxx</td>
                                             <td><span class="badge badge-primary">Thường trú</span></td>
                                             <td class="text-center">
                                                 <a href="#" class="btn btn-info btn-circle btn-sm"><i class="fas fa-eye"></i></a>
-                                                <a href="#" class="btn btn-warning btn-circle btn-sm"><i class="fas fa-plane-departure"></i></a>
+                                                <a href="#" class="btn btn-warning btn-circle btn-sm"><i class="fas fa-edit"></i></a>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>3</td>
+                                            <td><strong>010101002</strong></td>
                                             <td>Phạm Văn C</td>
                                             <td>P205</td>
-                                            <td>100m2</td>
                                             <td>Cháu</td>
                                             <td>00109200xxxx</td>
-                                            <td><span class="badge badge-warning">Tạm trú</span></td> <td class="text-center">
+                                            <td><span class="badge badge-warning">Tạm trú</span></td>
+                                            <td class="text-center">
                                                 <a href="#" class="btn btn-info btn-circle btn-sm"><i class="fas fa-eye"></i></a>
                                                 <a href="#" class="btn btn-danger btn-circle btn-sm" title="Xóa/Chuyển đi"><i class="fas fa-trash"></i></a>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>4</td>
+                                            <td><strong>010101003</strong></td>
                                             <td>Trần Văn D</td>
                                             <td>P306</td>
-                                            <td>70m2</td>
                                             <td>Chủ hộ</td>
                                             <td>00109300xxxx</td>
-                                            <td><span class="badge badge-secondary">Tạm vắng</span></td> <td class="text-center">
+                                            <td><span class="badge badge-secondary">Tạm vắng</span></td>
+                                            <td class="text-center">
                                                 <a href="#" class="btn btn-success btn-circle btn-sm" title="Khai báo về lại"><i class="fas fa-check"></i></a>
                                             </td>
                                         </tr>
@@ -241,21 +251,34 @@
         </div>
     </div>
 
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
-    <script src="js/sb-admin-2.min.js"></script>
-    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
-    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <!-- Thay thế script local bằng CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
 
     <script>
         $(document).ready(function() {
+            // Cấu hình DataTables với ngôn ngữ tiếng Việt
             $('#dataTable').DataTable({
                 "language": {
-                    "search": "Tìm kiếm:",
-                    "lengthMenu": "Hiển thị _MENU_ người",
-                    "info": "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ người",
-                    "paginate": { "next": ">", "previous": "<" }
+                    "sProcessing":   "Đang xử lý...",
+                    "sLengthMenu":   "Xem _MENU_ mục",
+                    "sZeroRecords":  "Không tìm thấy dòng nào phù hợp",
+                    "sInfo":         "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
+                    "sInfoEmpty":    "Đang xem 0 đến 0 trong tổng số 0 mục",
+                    "sInfoFiltered": "(được lọc từ _MAX_ mục)",
+                    "sInfoPostFix":  "",
+                    "sSearch":       "Tìm kiếm (Tên/Phòng/Hộ khẩu):",
+                    "sUrl":          "",
+                    "oPaginate": {
+                        "sFirst":    "Đầu",
+                        "sPrevious": "Trước",
+                        "sNext":     "Tiếp",
+                        "sLast":     "Cuối"
+                    }
                 }
             });
         });
