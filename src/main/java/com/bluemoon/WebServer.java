@@ -19,46 +19,9 @@ import java.util.Map;
  * Automatically maps service methods to REST endpoints.
  */
 public class WebServer {
-    
-    private static final int DEFAULT_PORT = 7070;
+
+    private static final int PORT = 7070;
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    
-    /**
-     * Resolves the port number from environment variable, system property, or default.
-     * Priority: 1. Environment variable PORT, 2. System property -Dport, 3. Default 7070
-     * 
-     * @return the resolved port number
-     */
-    private static int resolvePort() {
-        // First priority: Environment variable PORT
-        String envPort = System.getenv("PORT");
-        if (envPort != null && !envPort.trim().isEmpty()) {
-            try {
-                int port = Integer.parseInt(envPort.trim());
-                if (port > 0 && port < 65536) {
-                    return port;
-                }
-            } catch (NumberFormatException e) {
-                System.err.println("Warning: Invalid PORT environment variable: " + envPort + ". Using default port.");
-            }
-        }
-        
-        // Second priority: System property -Dport
-        String systemPort = System.getProperty("port");
-        if (systemPort != null && !systemPort.trim().isEmpty()) {
-            try {
-                int port = Integer.parseInt(systemPort.trim());
-                if (port > 0 && port < 65536) {
-                    return port;
-                }
-            } catch (NumberFormatException e) {
-                System.err.println("Warning: Invalid -Dport system property: " + systemPort + ". Using default port.");
-            }
-        }
-        
-        // Fallback: Default port
-        return DEFAULT_PORT;
-    }
 
     // Service instances
     private final AuthService authService;
@@ -108,11 +71,32 @@ public class WebServer {
                     String html = new String(is.readAllBytes(), StandardCharsets.UTF_8);
                     ctx.html(html);
                 } else {
-                    ctx.html("<h1>BlueMoon KTPM API</h1><p>Server is running. API available at <a href='/api/health'>/api/health</a></p>");
+                    ctx.html("<h1>BlueMoon KTPM</h1><p>Server is running. <a href='/api'>API</a> available at <a href='/api'>/api</a></p>");
                 }
             } catch (Exception e) {
-                ctx.html("<h1>BlueMoon KTPM API</h1><p>Server is running. API available at <a href='/api/health'>/api/health</a></p>");
+                ctx.html("<h1>BlueMoon KTPM</h1><p>Server is running. <a href='/api'>API</a> available at <a href='/api'>/api</a></p>");
             }
+        });
+
+        // ========== API ROOT ENDPOINT ==========
+        app.get("/api", ctx -> {
+            Map<String, Object> apiInfo = new HashMap<>();
+            apiInfo.put("status", "running");
+            apiInfo.put("message", "BlueMoon KTPM API");
+            apiInfo.put("version", "1.0.0");
+            apiInfo.put("endpoints", Map.of(
+                "health", "/api/health",
+                "auth", "/api/login, /api/register",
+                "accounts", "/api/tai-khoan",
+                "fees", "/api/khoan-thu",
+                "collection_drives", "/api/dot-thu",
+                "households", "/api/ho-gia-dinh",
+                "residents", "/api/nhan-khau",
+                "receipts", "/api/phieu-thu",
+                "payment_history", "/api/lich-su-nop-tien",
+                "statistics", "/api/thong-ke"
+            ));
+            ctx.json(apiInfo);
         });
 
         // ========== AUTH ENDPOINTS ==========
@@ -549,10 +533,9 @@ public class WebServer {
         // Health check endpoint
         app.get("/api/health", ctx -> ctx.json(createSuccessResponse("Server is running", null)));
 
-        int port = resolvePort();
-        app.start(port);
-        System.out.println("WebServer started on port " + port);
-        System.out.println("API available at http://localhost:" + port + "/api");
+        app.start(PORT);
+        System.out.println("WebServer started on port " + PORT);
+        System.out.println("API available at http://localhost:" + PORT + "/api");
     }
 
     // ========== AUTH HANDLERS ==========
