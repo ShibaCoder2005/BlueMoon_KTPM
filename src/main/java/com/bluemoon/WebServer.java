@@ -7,6 +7,8 @@ import com.bluemoon.services.impl.*;
 import com.bluemoon.models.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -17,9 +19,46 @@ import java.util.Map;
  * Automatically maps service methods to REST endpoints.
  */
 public class WebServer {
-
-    private static final int PORT = 7000;
+    
+    private static final int DEFAULT_PORT = 7070;
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    
+    /**
+     * Resolves the port number from environment variable, system property, or default.
+     * Priority: 1. Environment variable PORT, 2. System property -Dport, 3. Default 7070
+     * 
+     * @return the resolved port number
+     */
+    private static int resolvePort() {
+        // First priority: Environment variable PORT
+        String envPort = System.getenv("PORT");
+        if (envPort != null && !envPort.trim().isEmpty()) {
+            try {
+                int port = Integer.parseInt(envPort.trim());
+                if (port > 0 && port < 65536) {
+                    return port;
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Invalid PORT environment variable: " + envPort + ". Using default port.");
+            }
+        }
+        
+        // Second priority: System property -Dport
+        String systemPort = System.getProperty("port");
+        if (systemPort != null && !systemPort.trim().isEmpty()) {
+            try {
+                int port = Integer.parseInt(systemPort.trim());
+                if (port > 0 && port < 65536) {
+                    return port;
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("Warning: Invalid -Dport system property: " + systemPort + ". Using default port.");
+            }
+        }
+        
+        // Fallback: Default port
+        return DEFAULT_PORT;
+    }
 
     // Service instances
     private final AuthService authService;
@@ -55,17 +94,36 @@ public class WebServer {
             config.bundledPlugins.enableCors(cors -> {
                 cors.addRule(it -> it.anyHost());
             });
+            // Configure static files to be served from classpath
+            config.staticFiles.add(staticFiles -> {
+                staticFiles.directory = "/";
+                staticFiles.hostedPath = "/";
+            });
+        });
+
+        // ========== ROOT ENDPOINT ==========
+        app.get("/", ctx -> {
+            try (InputStream is = getClass().getResourceAsStream("/index.html")) {
+                if (is != null) {
+                    String html = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                    ctx.html(html);
+                } else {
+                    ctx.html("<h1>BlueMoon KTPM API</h1><p>Server is running. API available at <a href='/api/health'>/api/health</a></p>");
+                }
+            } catch (Exception e) {
+                ctx.html("<h1>BlueMoon KTPM API</h1><p>Server is running. API available at <a href='/api/health'>/api/health</a></p>");
+            }
         });
 
         // ========== AUTH ENDPOINTS ==========
         app.post("/api/login", this::handleLogin);
         app.post("/api/register", this::handleRegister);
         app.post("/api/change-password", this::handleChangePassword);
-        app.get("/api/check-username/:username", this::handleCheckUsername);
+        app.get("/api/check-username/{username}", this::handleCheckUsername);
 
         // ========== TAI KHOAN (Account) ENDPOINTS ==========
         app.get("/api/tai-khoan", ctx -> ctx.json(taiKhoanService.getAllTaiKhoan()));
-        app.get("/api/tai-khoan/:id", ctx -> {
+        app.get("/api/tai-khoan/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             TaiKhoan account = taiKhoanService.findById(id);
             if (account != null) {
@@ -74,7 +132,7 @@ public class WebServer {
                 ctx.status(404).json(createErrorResponse("Account not found"));
             }
         });
-        app.get("/api/tai-khoan/username/:username", ctx -> {
+        app.get("/api/tai-khoan/username/{username}", ctx -> {
             String username = ctx.pathParam("username");
             TaiKhoan account = taiKhoanService.findByUsername(username);
             if (account != null) {
@@ -92,7 +150,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to create account"));
             }
         });
-        app.put("/api/tai-khoan/:id", ctx -> {
+        app.put("/api/tai-khoan/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             TaiKhoan account = ctx.bodyAsClass(TaiKhoan.class);
             account.setId(id);
@@ -103,7 +161,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to update account"));
             }
         });
-        app.put("/api/tai-khoan/:id/status", ctx -> {
+        app.put("/api/tai-khoan/{id}/status", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             Map<String, String> body = ctx.bodyAsClass(Map.class);
             String status = body.get("trangThai");
@@ -126,7 +184,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to create fee"));
             }
         });
-        app.put("/api/khoan-thu/:id", ctx -> {
+        app.put("/api/khoan-thu/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             KhoanThu khoanThu = ctx.bodyAsClass(KhoanThu.class);
             khoanThu.setId(id);
@@ -137,7 +195,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to update fee"));
             }
         });
-        app.delete("/api/khoan-thu/:id", ctx -> {
+        app.delete("/api/khoan-thu/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             boolean success = khoanThuService.deleteKhoanThu(id);
             if (success) {
@@ -149,7 +207,7 @@ public class WebServer {
 
         // ========== DOT THU (Collection Drive) ENDPOINTS ==========
         app.get("/api/dot-thu", ctx -> ctx.json(dotThuService.getAllDotThu()));
-        app.get("/api/dot-thu/:id", ctx -> {
+        app.get("/api/dot-thu/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             DotThu dotThu = dotThuService.getDotThuById(id);
             if (dotThu != null) {
@@ -158,7 +216,7 @@ public class WebServer {
                 ctx.status(404).json(createErrorResponse("Collection drive not found"));
             }
         });
-        app.get("/api/dot-thu/search/:keyword", ctx -> {
+        app.get("/api/dot-thu/search/{keyword}", ctx -> {
             String keyword = ctx.pathParam("keyword");
             ctx.json(dotThuService.searchDotThu(keyword));
         });
@@ -171,7 +229,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to create collection drive"));
             }
         });
-        app.put("/api/dot-thu/:id", ctx -> {
+        app.put("/api/dot-thu/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             DotThu dotThu = ctx.bodyAsClass(DotThu.class);
             dotThu.setId(id);
@@ -182,7 +240,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to update collection drive"));
             }
         });
-        app.delete("/api/dot-thu/:id", ctx -> {
+        app.delete("/api/dot-thu/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             boolean success = dotThuService.deleteDotThu(id);
             if (success) {
@@ -194,7 +252,7 @@ public class WebServer {
 
         // ========== HO GIA DINH (Household) ENDPOINTS ==========
         app.get("/api/ho-gia-dinh", ctx -> ctx.json(hoGiaDinhService.getAllHoGiaDinh()));
-        app.get("/api/ho-gia-dinh/:id", ctx -> {
+        app.get("/api/ho-gia-dinh/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             HoGiaDinh hoGiaDinh = hoGiaDinhService.findById(id);
             if (hoGiaDinh != null) {
@@ -203,7 +261,7 @@ public class WebServer {
                 ctx.status(404).json(createErrorResponse("Household not found"));
             }
         });
-        app.get("/api/ho-gia-dinh/search/:keyword", ctx -> {
+        app.get("/api/ho-gia-dinh/search/{keyword}", ctx -> {
             String keyword = ctx.pathParam("keyword");
             ctx.json(hoGiaDinhService.searchHoGiaDinh(keyword));
         });
@@ -216,7 +274,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to create household"));
             }
         });
-        app.put("/api/ho-gia-dinh/:id", ctx -> {
+        app.put("/api/ho-gia-dinh/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             HoGiaDinh hoGiaDinh = ctx.bodyAsClass(HoGiaDinh.class);
             hoGiaDinh.setId(id);
@@ -227,7 +285,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to update household"));
             }
         });
-        app.delete("/api/ho-gia-dinh/:id", ctx -> {
+        app.delete("/api/ho-gia-dinh/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             boolean success = hoGiaDinhService.deleteHoGiaDinh(id);
             if (success) {
@@ -239,7 +297,7 @@ public class WebServer {
 
         // ========== NHAN KHAU (Resident) ENDPOINTS ==========
         app.get("/api/nhan-khau", ctx -> ctx.json(nhanKhauService.getAll()));
-        app.get("/api/nhan-khau/:id", ctx -> {
+        app.get("/api/nhan-khau/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             NhanKhau nhanKhau = nhanKhauService.findById(id);
             if (nhanKhau != null) {
@@ -248,11 +306,11 @@ public class WebServer {
                 ctx.status(404).json(createErrorResponse("Resident not found"));
             }
         });
-        app.get("/api/nhan-khau/ho-gia-dinh/:maHo", ctx -> {
+        app.get("/api/nhan-khau/ho-gia-dinh/{maHo}", ctx -> {
             int maHo = Integer.parseInt(ctx.pathParam("maHo"));
             ctx.json(nhanKhauService.getNhanKhauByHoGiaDinh(maHo));
         });
-        app.get("/api/nhan-khau/:id/lich-su", ctx -> {
+        app.get("/api/nhan-khau/{id}/lich-su", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             ctx.json(nhanKhauService.getLichSuNhanKhau(id));
         });
@@ -265,7 +323,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to create resident"));
             }
         });
-        app.put("/api/nhan-khau/:id", ctx -> {
+        app.put("/api/nhan-khau/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             NhanKhau nhanKhau = ctx.bodyAsClass(NhanKhau.class);
             nhanKhau.setId(id);
@@ -276,7 +334,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to update resident"));
             }
         });
-        app.delete("/api/nhan-khau/:id", ctx -> {
+        app.delete("/api/nhan-khau/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             boolean success = nhanKhauService.deleteNhanKhau(id);
             if (success) {
@@ -294,7 +352,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to create history record"));
             }
         });
-        app.put("/api/nhan-khau/:id/status", ctx -> {
+        app.put("/api/nhan-khau/{id}/status", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             Map<String, Object> body = ctx.bodyAsClass(Map.class);
             String newStatus = (String) body.get("newStatus");
@@ -311,7 +369,7 @@ public class WebServer {
 
         // ========== PHIEU THU (Receipt) ENDPOINTS ==========
         app.get("/api/phieu-thu", ctx -> ctx.json(phieuThuService.getAllPhieuThu()));
-        app.get("/api/phieu-thu/:id", ctx -> {
+        app.get("/api/phieu-thu/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             PhieuThu phieuThu = phieuThuService.getPhieuThuWithDetails(id);
             if (phieuThu != null) {
@@ -320,15 +378,15 @@ public class WebServer {
                 ctx.status(404).json(createErrorResponse("Receipt not found"));
             }
         });
-        app.get("/api/phieu-thu/:id/chi-tiet", ctx -> {
+        app.get("/api/phieu-thu/{id}/chi-tiet", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             ctx.json(phieuThuService.getChiTietThuByPhieu(id));
         });
-        app.get("/api/phieu-thu/ho-gia-dinh/:maHo", ctx -> {
+        app.get("/api/phieu-thu/ho-gia-dinh/{maHo}", ctx -> {
             int maHo = Integer.parseInt(ctx.pathParam("maHo"));
             ctx.json(phieuThuService.findPhieuThuByHoGiaDinh(maHo));
         });
-        app.get("/api/phieu-thu/dot-thu/:maDotThu", ctx -> {
+        app.get("/api/phieu-thu/dot-thu/{maDotThu}", ctx -> {
             int maDotThu = Integer.parseInt(ctx.pathParam("maDotThu"));
             ctx.json(phieuThuService.findPhieuThuByDotThu(maDotThu));
         });
@@ -365,7 +423,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to add detail"));
             }
         });
-        app.put("/api/phieu-thu/:id", ctx -> {
+        app.put("/api/phieu-thu/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             Map<String, Object> body = ctx.bodyAsClass(Map.class);
             PhieuThu phieuThu = objectMapper.convertValue(body.get("phieuThu"), PhieuThu.class);
@@ -382,7 +440,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to update receipt (may be paid)"));
             }
         });
-        app.put("/api/phieu-thu/:id/status", ctx -> {
+        app.put("/api/phieu-thu/{id}/status", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             Map<String, String> body = ctx.bodyAsClass(Map.class);
             String status = body.get("newStatus");
@@ -393,7 +451,7 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to update status"));
             }
         });
-        app.delete("/api/phieu-thu/:id", ctx -> {
+        app.delete("/api/phieu-thu/{id}", ctx -> {
             int id = Integer.parseInt(ctx.pathParam("id"));
             boolean success = phieuThuService.deletePhieuThu(id);
             if (success) {
@@ -402,12 +460,12 @@ public class WebServer {
                 ctx.status(400).json(createErrorResponse("Failed to delete receipt (may be paid)"));
             }
         });
-        app.post("/api/phieu-thu/generate/:maDot", ctx -> {
+        app.post("/api/phieu-thu/generate/{maDot}", ctx -> {
             int maDot = Integer.parseInt(ctx.pathParam("maDot"));
             int count = phieuThuService.generateReceiptsForDrive(maDot);
             ctx.json(createSuccessResponse("Generated " + count + " receipts", count));
         });
-        app.get("/api/phieu-thu/ho-gia-dinh/:maHo/unpaid", ctx -> {
+        app.get("/api/phieu-thu/ho-gia-dinh/{maHo}/unpaid", ctx -> {
             int maHo = Integer.parseInt(ctx.pathParam("maHo"));
             boolean hasUnpaid = phieuThuService.hasUnpaidFees(maHo);
             ctx.json(createSuccessResponse("Check completed", hasUnpaid));
@@ -415,11 +473,11 @@ public class WebServer {
 
         // ========== LICH SU NOP TIEN (Payment History) ENDPOINTS ==========
         app.get("/api/lich-su-nop-tien", ctx -> ctx.json(lichSuNopTienService.getAllLichSuNopTien()));
-        app.get("/api/lich-su-nop-tien/phieu-thu/:maPhieu", ctx -> {
+        app.get("/api/lich-su-nop-tien/phieu-thu/{maPhieu}", ctx -> {
             int maPhieu = Integer.parseInt(ctx.pathParam("maPhieu"));
             ctx.json(lichSuNopTienService.getLichSuNopTienByPhieuThu(maPhieu));
         });
-        app.get("/api/lich-su-nop-tien/ho-gia-dinh/:maHo", ctx -> {
+        app.get("/api/lich-su-nop-tien/ho-gia-dinh/{maHo}", ctx -> {
             int maHo = Integer.parseInt(ctx.pathParam("maHo"));
             ctx.json(lichSuNopTienService.getLichSuNopTienByHoGiaDinh(maHo));
         });
@@ -483,7 +541,7 @@ public class WebServer {
         app.get("/api/thong-ke/debt/total", ctx -> 
             ctx.json(createSuccessResponse("Total debt", thongKeService.getTotalDebt())));
         app.get("/api/thong-ke/debt/details", ctx -> ctx.json(thongKeService.getDebtStats()));
-        app.get("/api/thong-ke/report/:maDotThu", ctx -> {
+        app.get("/api/thong-ke/report/{maDotThu}", ctx -> {
             int maDotThu = Integer.parseInt(ctx.pathParam("maDotThu"));
             ctx.json(thongKeService.generateCollectionReport(maDotThu));
         });
@@ -491,9 +549,10 @@ public class WebServer {
         // Health check endpoint
         app.get("/api/health", ctx -> ctx.json(createSuccessResponse("Server is running", null)));
 
-        app.start(PORT);
-        System.out.println("WebServer started on port " + PORT);
-        System.out.println("API available at http://localhost:" + PORT + "/api");
+        int port = resolvePort();
+        app.start(port);
+        System.out.println("WebServer started on port " + port);
+        System.out.println("API available at http://localhost:" + port + "/api");
     }
 
     // ========== AUTH HANDLERS ==========
