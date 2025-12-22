@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>BlueMoon - Thông báo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="trang-chu.html">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
+            </a>
+
+            <hr class="sidebar-divider my-0">
+
+            <li class="nav-item">
+                <a class="nav-link" href="trang-chu.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="can-ho.html">
+                    <i class="fas fa-fw fa-door-open"></i>
+                    <span>Căn hộ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="cu-dan.html">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Cư dân</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="khoan-thu.html">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Khoản thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="thong-ke.html">
+                    <i class="fas fa-fw fa-chart-bar"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="thong-bao.html">
+                    <i class="fas fa-fw fa-bullhorn"></i>
+                    <span>Thông báo</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phan-anh.html">
+                    <i class="fas fa-fw fa-comments"></i>
+                    <span>Phản ánh</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="tai-khoan.html">
+                    <i class="fas fa-fw fa-user-cog"></i>
+                    <span>Tài khoản</span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider">
+
+            <li class="nav-item">
+                <a class="nav-link" href="cai-dat.html">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Cài đặt</span>
+                </a>
+            </li>
+
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+        <!-- End Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3"><i class="fa fa-bars"></i></button>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Quản Lý</span>
+                                <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
+                                <a class="dropdown-item" href="#"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+
+                <!-- Page Content -->
+                <div class="container-fluid">
+                    <h1 class="h3 mb-4 text-gray-800">Quản lý Thông báo</h1>
+
+                    <div class="row">
+                        <!-- Cột Trái: Tạo thông báo mới -->
+                        <div class="col-lg-5">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Soạn thông báo mới</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="notificationForm">
+                                        <div class="form-group">
+                                            <label class="small font-weight-bold">Tiêu đề thông báo <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="title" placeholder="Ví dụ: Lịch cắt nước định kỳ..." required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="small font-weight-bold">Nội dung chi tiết <span class="text-danger">*</span></label>
+                                            <textarea class="form-control" id="content" rows="6" placeholder="Nhập nội dung thông báo..." required></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="small font-weight-bold">Đối tượng nhận</label>
+                                            <select class="form-control" id="target">
+                                                <option value="all">Toàn bộ cư dân</option>
+                                                <option value="blockA">Cư dân Block A</option>
+                                                <option value="blockB">Cư dân Block B</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="small font-weight-bold">Mức độ ưu tiên</label>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input type="radio" id="priorityNormal" name="priority" class="custom-control-input" checked>
+                                                <label class="custom-control-label" for="priorityNormal">Bình thường</label>
+                                            </div>
+                                            <div class="custom-control custom-radio custom-control-inline">
+                                                <input type="radio" id="priorityUrgent" name="priority" class="custom-control-input">
+                                                <label class="custom-control-label text-danger font-weight-bold" for="priorityUrgent">Khẩn cấp</label>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-paper-plane mr-2"></i> Gửi thông báo</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cột Phải: Lịch sử thông báo -->
+                        <div class="col-lg-7">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                    <h6 class="m-0 font-weight-bold text-primary">Lịch sử thông báo đã gửi</h6>
+                                    <div class="dropdown no-arrow">
+                                        <a href="#" class="btn btn-sm btn-light border" onclick="alert('Tính năng lọc đang phát triển')"><i class="fas fa-filter fa-sm text-gray-400"></i> Lọc</a>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th>Tiêu đề</th>
+                                                    <th>Thời gian gửi</th>
+                                                    <th>Đối tượng</th>
+                                                    <th class="text-center">Trạng thái</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="notiHistoryTable">
+                                                <!-- Mock Data -->
+                                                <tr>
+                                                    <td>
+                                                        <div class="font-weight-bold">Bảo trì thang máy B</div>
+                                                        <div class="small text-gray-500 text-truncate" style="max-width: 150px;">Thang máy B sẽ tạm dừng hoạt động từ 8h-10h...</div>
+                                                    </td>
+                                                    <td class="small">10:30 20/06/2024</td>
+                                                    <td><span class="badge badge-info">Block B</span></td>
+                                                    <td class="text-center"><span class="badge badge-success">Đã gửi</span></td>
+                                                    <td><button class="btn btn-sm btn-circle btn-light text-danger"><i class="fas fa-trash"></i></button></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div class="font-weight-bold text-danger">BÁO CHÁY GIẢ ĐỊNH</div>
+                                                        <div class="small text-gray-500 text-truncate" style="max-width: 150px;">Yêu cầu cư dân chú ý diễn tập...</div>
+                                                    </td>
+                                                    <td class="small">08:00 15/06/2024</td>
+                                                    <td><span class="badge badge-secondary">Toàn bộ</span></td>
+                                                    <td class="text-center"><span class="badge badge-success">Đã gửi</span></td>
+                                                    <td><button class="btn btn-sm btn-circle btn-light text-danger"><i class="fas fa-trash"></i></button></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto"><span>Copyright &copy; BlueMoon 2024</span></div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Đăng xuất?</h5><button class="close" type="button" data-dismiss="modal"><span>×</span></button></div>
+                <div class="modal-body">Chọn "Đăng xuất" để kết thúc phiên làm việc.</div>
+                <div class="modal-footer"><button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button><a class="btn btn-primary" href="#">Đăng xuất</a></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
+
+    <script>
+        // Xử lý form gửi thông báo (Giả lập)
+        $('#notificationForm').on('submit', function(e) {
+            e.preventDefault();
+            const title = $('#title').val();
+            const target = $('#target option:selected').text();
+            const isUrgent = $('#priorityUrgent').is(':checked');
+            
+            const now = new Date();
+            const timeString = `${now.getHours()}:${now.getMinutes()} ${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+            
+            const titleHtml = isUrgent ? `<div class="font-weight-bold text-danger">${title.toUpperCase()}</div>` : `<div class="font-weight-bold">${title}</div>`;
+
+            // Thêm vào bảng lịch sử
+            const newRow = `
+                <tr class="bg-light">
+                    <td>
+                        ${titleHtml}
+                        <div class="small text-gray-500">Vừa xong</div>
+                    </td>
+                    <td class="small">${timeString}</td>
+                    <td><span class="badge badge-secondary">${target}</span></td>
+                    <td class="text-center"><span class="badge badge-success">Đã gửi</span></td>
+                    <td><button class="btn btn-sm btn-circle btn-light text-danger"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `;
+            
+            $('#notiHistoryTable').prepend(newRow);
+            alert('Đã gửi thông báo thành công!');
+            this.reset();
+        });
+    </script>
+</body>
+</html>
