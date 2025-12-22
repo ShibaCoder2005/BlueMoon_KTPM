@@ -139,43 +139,62 @@
                             </div>
                             
                             <!-- Form -->
-                            <form class="user">
+                            <form class="user" id="registerForm">
+                                <div id="registerError" class="alert alert-danger" style="display: none;"></div>
+                                <div id="registerSuccess" class="alert alert-success" style="display: none;"></div>
 
                                 <div class="form-group">
-                                    <label for="inputEmail">Email</label>
-                                    <input type="email" class="form-control form-control-user" id="inputEmail" placeholder="Email">
-                                    <!-- Email Validation Message -->
-                                    <small id="emailError" class="validation-message text-danger">
-                                        <i class="fas fa-exclamation-circle"></i> Email must end with @gmail.com
-                                    </small>
-                                    <small id="emailSuccess" class="validation-message text-success">
-                                        <i class="fas fa-check-circle"></i> Valid email!
+                                    <label for="inputUsername">Tên đăng nhập</label>
+                                    <input type="text" class="form-control form-control-user" id="inputUsername" placeholder="Tên đăng nhập" required>
+                                    <small id="usernameError" class="validation-message text-danger" style="display: none;">
+                                        <i class="fas fa-exclamation-circle"></i> Tên đăng nhập đã tồn tại
                                     </small>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="inputPassword">Password</label>
-                                    <input type="password" class="form-control form-control-user" id="inputPassword" placeholder="Password">
+                                    <label for="inputHoTen">Họ tên</label>
+                                    <input type="text" class="form-control form-control-user" id="inputHoTen" placeholder="Họ và tên" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputDienThoai">Số điện thoại</label>
+                                    <input type="tel" class="form-control form-control-user" id="inputDienThoai" placeholder="Số điện thoại">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputVaiTro">Vai trò</label>
+                                    <select class="form-control form-control-user" id="inputVaiTro" required>
+                                        <option value="">Chọn vai trò</option>
+                                        <option value="BanQuanLy">Ban Quản Lý</option>
+                                        <option value="KeToan">Kế Toán</option>
+                                        <option value="ToTruong">Tổ Trưởng</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="inputPassword">Mật khẩu</label>
+                                    <input type="password" class="form-control form-control-user" id="inputPassword" placeholder="Mật khẩu" required>
                                     <!-- Password Validation Message -->
                                     <small id="passwordError" class="validation-message text-danger">
-                                        <i class="fas fa-exclamation-circle"></i> Password must have at least 8 characters, including lowercase, uppercase, numbers, and special characters.
+                                        <i class="fas fa-exclamation-circle"></i> Mật khẩu phải có ít nhất 8 ký tự
                                     </small>
                                     <small id="passwordSuccess" class="validation-message text-success">
-                                        <i class="fas fa-check-circle"></i> Strong password!
+                                        <i class="fas fa-check-circle"></i> Mật khẩu hợp lệ!
                                     </small>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="inputConfirmPassword">Confirm password</label>
-                                    <input type="password" class="form-control form-control-user" id="inputConfirmPassword" placeholder="Confirm password">
+                                    <label for="inputConfirmPassword">Xác nhận mật khẩu</label>
+                                    <input type="password" class="form-control form-control-user" id="inputConfirmPassword" placeholder="Xác nhận mật khẩu" required>
                                     <small id="confirmError" class="validation-message text-danger">
-                                        <i class="fas fa-exclamation-circle"></i> Passwords do not match.
+                                        <i class="fas fa-exclamation-circle"></i> Mật khẩu không khớp
                                     </small>
                                 </div>
 
-                                <a href="login.html" class="btn btn-signup btn-primary btn-block mt-4">
-                                    Register
-                                </a>
+                                <button type="submit" class="btn btn-signup btn-primary btn-block mt-4">
+                                    <span id="registerBtnText">Đăng ký</span>
+                                    <span id="registerBtnSpinner" class="spinner-border spinner-border-sm" style="display: none;"></span>
+                                </button>
                                 
                             </form>
                             
@@ -202,46 +221,41 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
+    <script src="js/api.js"></script>
 
-    <!-- Validation Script -->
+    <!-- Validation and Registration Script -->
     <script>
         $(document).ready(function() {
-            
-            // 1. Email Validation (@gmail.com check)
-            $('#inputEmail').on('input', function() {
-                var email = $(this).val();
-                var $input = $(this);
-                
-                // Hide messages initially
-                $('#emailError').hide();
-                $('#emailSuccess').hide();
-                $input.removeClass('is-invalid is-valid');
-
-                if (email.length > 0) {
-                    if (email.endsWith('@gmail.com')) {
-                        $input.addClass('is-valid');
-                        $('#emailSuccess').show();
-                    } else {
-                        $input.addClass('is-invalid');
-                        $('#emailError').show();
+            // Username availability check
+            $('#inputUsername').on('blur', async function() {
+                const username = $(this).val();
+                if (username.length > 0) {
+                    try {
+                        const result = await AuthAPI.checkUsername(username);
+                        if (result.data) {
+                            $(this).addClass('is-invalid');
+                            $('#usernameError').show();
+                        } else {
+                            $(this).removeClass('is-invalid').addClass('is-valid');
+                            $('#usernameError').hide();
+                        }
+                    } catch (error) {
+                        console.error('Error checking username:', error);
                     }
                 }
             });
 
-            // 2. Password Validation
+            // Password Validation
             $('#inputPassword').on('input', function() {
                 var password = $(this).val();
                 var $input = $(this);
-                
-                // Regex for: 8 chars, 1 lower, 1 upper, 1 digit, 1 special char
-                var strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
 
                 $('#passwordError').hide();
                 $('#passwordSuccess').hide();
                 $input.removeClass('is-invalid is-valid');
 
                 if (password.length > 0) {
-                    if (strongRegex.test(password)) {
+                    if (password.length >= 8) {
                         $input.addClass('is-valid');
                         $('#passwordSuccess').show();
                     } else {
@@ -250,13 +264,12 @@
                     }
                 }
                 
-                // Trigger confirm password check if it has value
                 if ($('#inputConfirmPassword').val().length > 0) {
                     $('#inputConfirmPassword').trigger('input');
                 }
             });
 
-            // 3. Confirm Password Validation
+            // Confirm Password Validation
             $('#inputConfirmPassword').on('input', function() {
                 var confirmPass = $(this).val();
                 var originalPass = $('#inputPassword').val();
@@ -272,6 +285,61 @@
                         $input.addClass('is-invalid');
                         $('#confirmError').show();
                     }
+                }
+            });
+
+            // Form submission
+            $('#registerForm').on('submit', async function(e) {
+                e.preventDefault();
+                
+                const username = $('#inputUsername').val();
+                const password = $('#inputPassword').val();
+                const confirmPassword = $('#inputConfirmPassword').val();
+                const hoTen = $('#inputHoTen').val();
+                const dienThoai = $('#inputDienThoai').val();
+                const vaiTro = $('#inputVaiTro').val();
+                
+                if (password !== confirmPassword) {
+                    $('#registerError').text('Mật khẩu không khớp').show();
+                    return;
+                }
+                
+                if (password.length < 8) {
+                    $('#registerError').text('Mật khẩu phải có ít nhất 8 ký tự').show();
+                    return;
+                }
+                
+                $('#registerBtnText').hide();
+                $('#registerBtnSpinner').show();
+                $('#registerError').hide();
+                $('#registerSuccess').hide();
+                $(this).find('button[type="submit"]').prop('disabled', true);
+                
+                try {
+                    const accountData = {
+                        tenDangNhap: username,
+                        matKhau: password,
+                        hoTen: hoTen,
+                        vaiTro: vaiTro || 'ToTruong',
+                        dienThoai: dienThoai || '',
+                        trangThai: 'Hoạt động'
+                    };
+                    
+                    const result = await AuthAPI.register(accountData);
+                    if (result.success) {
+                        $('#registerSuccess').text('Đăng ký thành công! Đang chuyển đến trang đăng nhập...').show();
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    } else {
+                        $('#registerError').text(result.message || 'Đăng ký thất bại').show();
+                    }
+                } catch (error) {
+                    $('#registerError').text(error.message || 'Lỗi kết nối đến server').show();
+                } finally {
+                    $('#registerBtnText').show();
+                    $('#registerBtnSpinner').hide();
+                    $(this).find('button[type="submit"]').prop('disabled', false);
                 }
             });
         });

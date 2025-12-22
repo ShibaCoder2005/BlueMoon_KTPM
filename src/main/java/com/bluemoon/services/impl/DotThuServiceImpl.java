@@ -23,28 +23,28 @@ public class DotThuServiceImpl implements DotThuService {
 
     private static final Logger logger = Logger.getLogger(DotThuServiceImpl.class.getName());
 
-    // SQL Queries
+    // SQL Queries - PostgreSQL table names (case-sensitive, use exact name from CREATE TABLE)
     private static final String SELECT_ALL = 
-            "SELECT id, tenDot, ngayBatDau, ngayKetThuc, trangThai, moTa FROM dot_thu ORDER BY id";
+            "SELECT id, tenDot, ngayBatDau, ngayKetThuc, trangThai, ghiChu FROM DotThu ORDER BY id";
 
     private static final String SELECT_BY_ID = 
-            "SELECT id, tenDot, ngayBatDau, ngayKetThuc, trangThai, moTa FROM dot_thu WHERE id = ?";
+            "SELECT id, tenDot, ngayBatDau, ngayKetThuc, trangThai, ghiChu FROM DotThu WHERE id = ?";
 
     private static final String INSERT = 
-            "INSERT INTO dot_thu (tenDot, ngayBatDau, ngayKetThuc, trangThai, moTa) VALUES (?, ?, ?, ?, ?)";
+            "INSERT INTO DotThu (tenDot, ngayBatDau, ngayKetThuc, trangThai, ghiChu) VALUES (?, ?, ?, ?, ?)";
 
     private static final String UPDATE = 
-            "UPDATE dot_thu SET tenDot = ?, ngayBatDau = ?, ngayKetThuc = ?, trangThai = ?, moTa = ? WHERE id = ?";
+            "UPDATE DotThu SET tenDot = ?, ngayBatDau = ?, ngayKetThuc = ?, trangThai = ?, ghiChu = ? WHERE id = ?";
 
     private static final String DELETE = 
-            "DELETE FROM dot_thu WHERE id = ?";
+            "DELETE FROM DotThu WHERE id = ?";
 
     private static final String CHECK_DEPENDENCIES = 
-            "SELECT COUNT(*) FROM phieu_thu WHERE maDot = ?";
+            "SELECT COUNT(*) FROM PhieuThu WHERE maDot = ?";
 
     private static final String SEARCH = 
-            "SELECT id, tenDot, ngayBatDau, ngayKetThuc, trangThai, moTa FROM dot_thu " +
-            "WHERE tenDot LIKE ? OR moTa LIKE ? ORDER BY id";
+            "SELECT id, tenDot, ngayBatDau, ngayKetThuc, trangThai, ghiChu FROM DotThu " +
+            "WHERE tenDot LIKE ? OR ghiChu LIKE ? ORDER BY id";
 
     @Override
     public List<DotThu> getAllDotThu() {
@@ -124,7 +124,7 @@ public class DotThuServiceImpl implements DotThuService {
             pstmt.setDate(2, convertToSqlDate(dotThu.getNgayBatDau()));
             pstmt.setDate(3, convertToSqlDate(dotThu.getNgayKetThuc()));
             pstmt.setString(4, dotThu.getTrangThai());
-            pstmt.setString(5, dotThu.getMoTa());
+            pstmt.setString(5, dotThu.getMoTa()); // Map moTa to ghiChu column
 
             int rowsAffected = pstmt.executeUpdate();
             boolean success = rowsAffected > 0;
@@ -170,7 +170,7 @@ public class DotThuServiceImpl implements DotThuService {
             pstmt.setDate(2, convertToSqlDate(dotThu.getNgayBatDau()));
             pstmt.setDate(3, convertToSqlDate(dotThu.getNgayKetThuc()));
             pstmt.setString(4, dotThu.getTrangThai());
-            pstmt.setString(5, dotThu.getMoTa());
+            pstmt.setString(5, dotThu.getMoTa()); // Map moTa to ghiChu column
             pstmt.setInt(6, dotThu.getId());
 
             int rowsAffected = pstmt.executeUpdate();
@@ -303,7 +303,7 @@ public class DotThuServiceImpl implements DotThuService {
         }
         
         dotThu.setTrangThai(rs.getString("trangThai"));
-        dotThu.setMoTa(rs.getString("moTa"));
+        dotThu.setMoTa(rs.getString("ghiChu")); // Map ghiChu column to moTa field
         
         return dotThu;
     }

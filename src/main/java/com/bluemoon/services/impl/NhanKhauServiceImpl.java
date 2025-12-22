@@ -1,11 +1,14 @@
 package com.bluemoon.services.impl;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -13,98 +16,276 @@ import java.util.stream.Collectors;
 import com.bluemoon.models.LichSuNhanKhau;
 import com.bluemoon.models.NhanKhau;
 import com.bluemoon.services.NhanKhauService;
+import com.bluemoon.utils.DatabaseConnector;
 
 /**
- * Triển khai {@link NhanKhauService} bằng bộ nhớ tạm thời.
- * Có thể thay thế bằng DAO khi kết nối cơ sở dữ liệu.
+ * Triển khai {@link NhanKhauService} với database integration.
+ * Sử dụng PostgreSQL database để lưu trữ dữ liệu.
  */
 public class NhanKhauServiceImpl implements NhanKhauService {
 
     private static final Logger logger = Logger.getLogger(NhanKhauServiceImpl.class.getName());
-    
-    private final Map<Integer, NhanKhau> nhanKhauStore = new ConcurrentHashMap<>();
-    private final Map<Integer, LichSuNhanKhau> lichSuStore = new ConcurrentHashMap<>();
-    private int nextId = 1;
-    private int nextLichSuId = 1;
 
-    public NhanKhauServiceImpl() {
-        seedSampleData();
-    }
+    // SQL Queries for NhanKhau
+    private static final String SELECT_ALL = 
+            "SELECT id, maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang FROM NhanKhau ORDER BY id";
+
+    private static final String SELECT_BY_ID = 
+            "SELECT id, maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang FROM NhanKhau WHERE id = ?";
+
+    private static final String SELECT_BY_MAHO = 
+            "SELECT id, maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang FROM NhanKhau WHERE maHo = ? ORDER BY id";
+
+    private static final String INSERT = 
+            "INSERT INTO NhanKhau (maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+    private static final String UPDATE = 
+            "UPDATE NhanKhau SET maHo = ?, hoTen = ?, ngaySinh = ?, gioiTinh = ?, soCCCD = ?, ngheNghiep = ?, quanHeVoiChuHo = ?, tinhTrang = ? WHERE id = ?";
+
+    private static final String UPDATE_STATUS = 
+            "UPDATE NhanKhau SET tinhTrang = ? WHERE id = ?";
+
+    private static final String DELETE = 
+            "DELETE FROM NhanKhau WHERE id = ?";
+
+    private static final String CHECK_CCCD_EXISTS = 
+            "SELECT COUNT(*) FROM NhanKhau WHERE LOWER(TRIM(soCCCD)) = LOWER(TRIM(?)) AND id != ?";
+
+    // SQL Queries for LichSuNhanKhau
+    private static final String SELECT_LICHSU_BY_NHAN_KHAU = 
+            "SELECT id, maNhanKhau, loaiBienDong, ngayBatDau, ngayKetThuc, nguoiGhi FROM LichSuNhanKhau WHERE maNhanKhau = ? ORDER BY ngayBatDau DESC";
+
+    private static final String INSERT_LICHSU = 
+            "INSERT INTO LichSuNhanKhau (maNhanKhau, loaiBienDong, ngayBatDau, ngayKetThuc, nguoiGhi) VALUES (?, ?, ?, ?, ?)";
 
     @Override
     public List<NhanKhau> getAll() {
-        return nhanKhauStore.values()
-                .stream()
-                .sorted(Comparator.comparingInt(NhanKhau::getId))
-                .collect(Collectors.toList());
+        List<NhanKhau> result = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SELECT_ALL);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                result.add(buildNhanKhauFromResultSet(rs));
+            }
+
+            logger.log(Level.INFO, "Retrieved " + result.size() + " residents");
+            return result;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving all residents", e);
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     @Override
     public NhanKhau findById(int id) {
-        return nhanKhauStore.get(id);
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_ID)) {
+
+            pstmt.setInt(1, id);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return buildNhanKhauFromResultSet(rs);
+                }
+                return null;
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving resident with id: " + id, e);
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
     public List<NhanKhau> getNhanKhauByHoGiaDinh(int maHo) {
-        return nhanKhauStore.values()
-                .stream()
-                .filter(nk -> nk.getMaHo() == maHo)
-                .sorted(Comparator.comparingInt(NhanKhau::getId))
-                .collect(Collectors.toList());
+        List<NhanKhau> result = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_MAHO)) {
+
+            pstmt.setInt(1, maHo);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(buildNhanKhauFromResultSet(rs));
+                }
+            }
+
+            logger.log(Level.INFO, "Retrieved " + result.size() + " residents for household: " + maHo);
+            return result;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving residents for household: " + maHo, e);
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     @Override
     public boolean addNhanKhau(NhanKhau nhanKhau) {
         if (nhanKhau == null) {
+            logger.log(Level.WARNING, "Cannot add resident: nhanKhau is null");
             return false;
         }
-        // Kiểm tra CCCD unique
+
+        // Validate required fields
+        if (nhanKhau.getHoTen() == null || nhanKhau.getHoTen().trim().isEmpty()) {
+            logger.log(Level.WARNING, "Cannot add resident: hoTen is empty");
+            return false;
+        }
+
+        // Check CCCD uniqueness if provided
         if (nhanKhau.getSoCCCD() != null && !nhanKhau.getSoCCCD().trim().isEmpty()) {
             if (isCCCDExists(nhanKhau.getSoCCCD(), 0)) {
+                logger.log(Level.WARNING, "Cannot add resident: CCCD already exists: " + nhanKhau.getSoCCCD());
                 return false;
             }
         }
-        if (nhanKhau.getId() == 0) {
-            nhanKhau.setId(nextId++);
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(INSERT)) {
+
+            pstmt.setInt(1, nhanKhau.getMaHo());
+            pstmt.setString(2, nhanKhau.getHoTen().trim());
+            pstmt.setDate(3, convertToSqlDate(nhanKhau.getNgaySinh()));
+            pstmt.setString(4, nhanKhau.getGioiTinh());
+            pstmt.setString(5, nhanKhau.getSoCCCD());
+            pstmt.setString(6, nhanKhau.getNgheNghiep());
+            pstmt.setString(7, nhanKhau.getQuanHeVoiChuHo());
+            pstmt.setString(8, nhanKhau.getTinhTrang() != null ? nhanKhau.getTinhTrang() : "CuTru");
+
+            int rowsAffected = pstmt.executeUpdate();
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                logger.log(Level.INFO, "Successfully added resident: " + nhanKhau.getHoTen() + " (rows affected: " + rowsAffected + ")");
+            } else {
+                logger.log(Level.WARNING, "Failed to add resident: " + nhanKhau.getHoTen() + " (rows affected: " + rowsAffected + ")");
+            }
+
+            return success;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error adding resident: " + nhanKhau.getHoTen(), e);
+            e.printStackTrace();
+            return false;
         }
-        nhanKhauStore.put(nhanKhau.getId(), cloneEntity(nhanKhau));
-        return true;
     }
 
     @Override
     public boolean updateNhanKhau(NhanKhau nhanKhau) {
-        if (nhanKhau == null || !nhanKhauStore.containsKey(nhanKhau.getId())) {
+        if (nhanKhau == null || nhanKhau.getId() == 0) {
+            logger.log(Level.WARNING, "Cannot update resident: nhanKhau is null or id is 0");
             return false;
         }
-        // Kiểm tra CCCD unique (loại trừ chính nó)
+
+        // Validate required fields
+        if (nhanKhau.getHoTen() == null || nhanKhau.getHoTen().trim().isEmpty()) {
+            logger.log(Level.WARNING, "Cannot update resident: hoTen is empty");
+            return false;
+        }
+
+        // Check CCCD uniqueness (exclude current record)
         if (nhanKhau.getSoCCCD() != null && !nhanKhau.getSoCCCD().trim().isEmpty()) {
             if (isCCCDExists(nhanKhau.getSoCCCD(), nhanKhau.getId())) {
+                logger.log(Level.WARNING, "Cannot update resident: CCCD already exists: " + nhanKhau.getSoCCCD());
                 return false;
             }
         }
-        nhanKhauStore.put(nhanKhau.getId(), cloneEntity(nhanKhau));
-        return true;
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(UPDATE)) {
+
+            pstmt.setInt(1, nhanKhau.getMaHo());
+            pstmt.setString(2, nhanKhau.getHoTen().trim());
+            pstmt.setDate(3, convertToSqlDate(nhanKhau.getNgaySinh()));
+            pstmt.setString(4, nhanKhau.getGioiTinh());
+            pstmt.setString(5, nhanKhau.getSoCCCD());
+            pstmt.setString(6, nhanKhau.getNgheNghiep());
+            pstmt.setString(7, nhanKhau.getQuanHeVoiChuHo());
+            pstmt.setString(8, nhanKhau.getTinhTrang());
+            pstmt.setInt(9, nhanKhau.getId());
+
+            int rowsAffected = pstmt.executeUpdate();
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                logger.log(Level.INFO, "Successfully updated resident with id: " + nhanKhau.getId() + " (rows affected: " + rowsAffected + ")");
+            } else {
+                logger.log(Level.WARNING, "Failed to update resident with id: " + nhanKhau.getId() + " (rows affected: " + rowsAffected + ")");
+            }
+
+            return success;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error updating resident with id: " + nhanKhau.getId(), e);
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean addLichSuNhanKhau(LichSuNhanKhau history) {
         if (history == null) {
+            logger.log(Level.WARNING, "Cannot add history: history is null");
             return false;
         }
-        if (history.getId() == 0) {
-            history.setId(nextLichSuId++);
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(INSERT_LICHSU)) {
+
+            pstmt.setInt(1, history.getMaNhanKhau());
+            pstmt.setString(2, history.getLoaiBienDong());
+            pstmt.setDate(3, convertToSqlDate(history.getNgayBatDau()));
+            pstmt.setDate(4, convertToSqlDate(history.getNgayKetThuc()));
+            pstmt.setInt(5, history.getNguoiGhi());
+
+            int rowsAffected = pstmt.executeUpdate();
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                logger.log(Level.INFO, "Successfully added history for resident: " + history.getMaNhanKhau() + " (rows affected: " + rowsAffected + ")");
+            } else {
+                logger.log(Level.WARNING, "Failed to add history for resident: " + history.getMaNhanKhau() + " (rows affected: " + rowsAffected + ")");
+            }
+
+            return success;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error adding history for resident: " + history.getMaNhanKhau(), e);
+            e.printStackTrace();
+            return false;
         }
-        lichSuStore.put(history.getId(), cloneLichSu(history));
-        return true;
     }
 
     @Override
     public List<LichSuNhanKhau> getLichSuNhanKhau(int maNhanKhau) {
-        return lichSuStore.values()
-                .stream()
-                .filter(ls -> ls.getMaNhanKhau() == maNhanKhau)
-                .sorted(Comparator.comparing(LichSuNhanKhau::getNgayBatDau).reversed())
-                .collect(Collectors.toList());
+        List<LichSuNhanKhau> result = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SELECT_LICHSU_BY_NHAN_KHAU)) {
+
+            pstmt.setInt(1, maNhanKhau);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(buildLichSuFromResultSet(rs));
+                }
+            }
+
+            logger.log(Level.INFO, "Retrieved " + result.size() + " history records for resident: " + maNhanKhau);
+            return result;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving history for resident: " + maNhanKhau, e);
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     @Override
@@ -114,54 +295,76 @@ public class NhanKhauServiceImpl implements NhanKhauService {
             return false;
         }
 
-        // Step 1: Get the resident
-        NhanKhau nhanKhau = nhanKhauStore.get(nhanKhauId);
-        if (nhanKhau == null) {
-            logger.log(Level.WARNING, "Resident not found with id: " + nhanKhauId);
-            return false;
-        }
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            // Get old status
+            NhanKhau existing = findById(nhanKhauId);
+            if (existing == null) {
+                logger.log(Level.WARNING, "Resident not found with id: " + nhanKhauId);
+                return false;
+            }
+            String oldStatus = existing.getTinhTrang();
 
-        try {
-            // Step 2: Update the status
-            String oldStatus = nhanKhau.getTinhTrang();
-            nhanKhau.setTinhTrang(newStatus.trim());
-            nhanKhauStore.put(nhanKhauId, cloneEntity(nhanKhau));
+            // Update status
+            try (PreparedStatement pstmt = conn.prepareStatement(UPDATE_STATUS)) {
+                pstmt.setString(1, newStatus.trim());
+                pstmt.setInt(2, nhanKhauId);
 
-            // Step 3: Record history if provided
+                int rowsAffected = pstmt.executeUpdate();
+                if (rowsAffected <= 0) {
+                    logger.log(Level.WARNING, "Failed to update status for resident: " + nhanKhauId);
+                    return false;
+                }
+            }
+
+            // Record history if provided
             if (historyRecord != null) {
                 historyRecord.setMaNhanKhau(nhanKhauId);
-                // Set default values if not provided
                 if (historyRecord.getNgayBatDau() == null) {
                     historyRecord.setNgayBatDau(LocalDate.now());
                 }
                 if (historyRecord.getLoaiBienDong() == null || historyRecord.getLoaiBienDong().trim().isEmpty()) {
-                    // Auto-generate loaiBienDong from status change
                     historyRecord.setLoaiBienDong("Thay đổi từ " + oldStatus + " sang " + newStatus);
                 }
                 
                 boolean historySuccess = addLichSuNhanKhau(historyRecord);
                 if (!historySuccess) {
-                    logger.log(Level.WARNING, 
-                            "Status updated but failed to record history for resident id: " + nhanKhauId);
-                    // Status is already updated, so we return true but log the warning
+                    logger.log(Level.WARNING, "Status updated but failed to record history for resident id: " + nhanKhauId);
                 }
             }
 
-            logger.log(Level.INFO, 
-                    "Successfully updated status from '" + oldStatus + "' to '" + newStatus + 
-                    "' for resident id: " + nhanKhauId);
+            logger.log(Level.INFO, "Successfully updated status from '" + oldStatus + "' to '" + newStatus + "' for resident id: " + nhanKhauId);
             return true;
 
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, 
-                    "Error in updateStatusWithHistory for resident id: " + nhanKhauId, e);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error in updateStatusWithHistory for resident id: " + nhanKhauId, e);
+            e.printStackTrace();
             return false;
         }
     }
 
     @Override
     public boolean deleteNhanKhau(int id) {
-        return nhanKhauStore.remove(id) != null;
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
+
+            pstmt.setInt(1, id);
+
+            int rowsAffected = pstmt.executeUpdate();
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                logger.log(Level.INFO, "Successfully deleted resident with id: " + id + " (rows affected: " + rowsAffected + ")");
+            } else {
+                logger.log(Level.WARNING, "Failed to delete resident with id: " + id + " (rows affected: " + rowsAffected + ")");
+            }
+
+            return success;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error deleting resident with id: " + id, e);
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
@@ -169,48 +372,82 @@ public class NhanKhauServiceImpl implements NhanKhauService {
         if (soCCCD == null || soCCCD.trim().isEmpty()) {
             return false;
         }
-        String cccdTrimmed = soCCCD.trim();
-        return nhanKhauStore.values()
-                .stream()
-                .filter(nk -> nk.getId() != excludeId)
-                .anyMatch(nk -> cccdTrimmed.equalsIgnoreCase(nk.getSoCCCD()));
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(CHECK_CCCD_EXISTS)) {
+
+            pstmt.setString(1, soCCCD.trim());
+            pstmt.setInt(2, excludeId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    return count > 0;
+                }
+                return false;
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error checking CCCD existence: " + soCCCD, e);
+            e.printStackTrace();
+            return false;
+        }
     }
 
-    private void seedSampleData() {
-        List<NhanKhau> samples = new ArrayList<>();
-        samples.add(new NhanKhau(1, 1, "Nguyễn Văn A", LocalDate.of(1980, 1, 15),
-                "Nam", "001234567890", "Kỹ sư", "Chủ hộ", "Thường trú"));
-        samples.add(new NhanKhau(2, 1, "Nguyễn Thị B", LocalDate.of(1985, 5, 20),
-                "Nữ", "001234567891", "Giáo viên", "Vợ", "Thường trú"));
-        samples.add(new NhanKhau(3, 2, "Trần Văn C", LocalDate.of(1975, 3, 10),
-                "Nam", "001234567892", "Bác sĩ", "Chủ hộ", "Thường trú"));
-        nextId = 4;
-        samples.forEach(item -> nhanKhauStore.put(item.getId(), item));
+    /**
+     * Xây dựng đối tượng NhanKhau từ ResultSet.
+     */
+    private NhanKhau buildNhanKhauFromResultSet(ResultSet rs) throws SQLException {
+        NhanKhau nhanKhau = new NhanKhau();
+        nhanKhau.setId(rs.getInt("id"));
+        nhanKhau.setMaHo(rs.getInt("maHo"));
+        nhanKhau.setHoTen(rs.getString("hoTen"));
+        
+        Date ngaySinh = rs.getDate("ngaySinh");
+        if (ngaySinh != null) {
+            nhanKhau.setNgaySinh(ngaySinh.toLocalDate());
+        }
+        
+        nhanKhau.setGioiTinh(rs.getString("gioiTinh"));
+        nhanKhau.setSoCCCD(rs.getString("soCCCD"));
+        nhanKhau.setNgheNghiep(rs.getString("ngheNghiep"));
+        nhanKhau.setQuanHeVoiChuHo(rs.getString("quanHeVoiChuHo"));
+        nhanKhau.setTinhTrang(rs.getString("tinhTrang"));
+        
+        return nhanKhau;
     }
 
-    private NhanKhau cloneEntity(NhanKhau source) {
-        return new NhanKhau(
-                source.getId(),
-                source.getMaHo(),
-                source.getHoTen(),
-                source.getNgaySinh(),
-                source.getGioiTinh(),
-                source.getSoCCCD(),
-                source.getNgheNghiep(),
-                source.getQuanHeVoiChuHo(),
-                source.getTinhTrang()
-        );
+    /**
+     * Xây dựng đối tượng LichSuNhanKhau từ ResultSet.
+     */
+    private LichSuNhanKhau buildLichSuFromResultSet(ResultSet rs) throws SQLException {
+        LichSuNhanKhau lichSu = new LichSuNhanKhau();
+        lichSu.setId(rs.getInt("id"));
+        lichSu.setMaNhanKhau(rs.getInt("maNhanKhau"));
+        lichSu.setLoaiBienDong(rs.getString("loaiBienDong"));
+        
+        Date ngayBatDau = rs.getDate("ngayBatDau");
+        if (ngayBatDau != null) {
+            lichSu.setNgayBatDau(ngayBatDau.toLocalDate());
+        }
+        
+        Date ngayKetThuc = rs.getDate("ngayKetThuc");
+        if (ngayKetThuc != null) {
+            lichSu.setNgayKetThuc(ngayKetThuc.toLocalDate());
+        }
+        
+        lichSu.setNguoiGhi(rs.getInt("nguoiGhi"));
+        
+        return lichSu;
     }
 
-    private LichSuNhanKhau cloneLichSu(LichSuNhanKhau source) {
-        return new LichSuNhanKhau(
-                source.getId(),
-                source.getMaNhanKhau(),
-                source.getLoaiBienDong(),
-                source.getNgayBatDau(),
-                source.getNgayKetThuc(),
-                source.getNguoiGhi()
-        );
+    /**
+     * Chuyển đổi LocalDate sang java.sql.Date.
+     */
+    private Date convertToSqlDate(LocalDate localDate) {
+        if (localDate == null) {
+            return null;
+        }
+        return Date.valueOf(localDate);
     }
 }
-

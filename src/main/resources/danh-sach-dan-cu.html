@@ -137,9 +137,9 @@
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-primary">Dữ liệu tổng hợp</h6>
-                            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                            <button type="button" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id="btnAddResident" data-toggle="modal" data-target="#residentModal">
                                 <i class="fas fa-user-plus fa-sm text-white-50"></i> Thêm Cư dân
-                            </a>
+                            </button>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -156,58 +156,8 @@
                                             <th>Hành động</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>1</td>
-                                            <td><strong>010101001</strong></td> <!-- Dữ liệu mẫu 9 số -->
-                                            <td>Nguyễn Văn A</td>
-                                            <td>P101</td>
-                                            <td>Chủ hộ</td>
-                                            <td>00109000xxxx</td>
-                                            <td><span class="badge badge-primary">Thường trú</span></td>
-                                            <td class="text-center">
-                                                <a href="#" class="btn btn-info btn-circle btn-sm" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
-                                                <a href="#" class="btn btn-warning btn-circle btn-sm" title="Sửa"><i class="fas fa-edit"></i></a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>2</td>
-                                            <td><strong>010101001</strong></td> <!-- Cùng mã hộ với chủ hộ trên -->
-                                            <td>Lê Thị B</td>
-                                            <td>P101</td>
-                                            <td>Vợ</td>
-                                            <td>00109100xxxx</td>
-                                            <td><span class="badge badge-primary">Thường trú</span></td>
-                                            <td class="text-center">
-                                                <a href="#" class="btn btn-info btn-circle btn-sm"><i class="fas fa-eye"></i></a>
-                                                <a href="#" class="btn btn-warning btn-circle btn-sm"><i class="fas fa-edit"></i></a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>3</td>
-                                            <td><strong>010101002</strong></td>
-                                            <td>Phạm Văn C</td>
-                                            <td>P205</td>
-                                            <td>Cháu</td>
-                                            <td>00109200xxxx</td>
-                                            <td><span class="badge badge-warning">Tạm trú</span></td>
-                                            <td class="text-center">
-                                                <a href="#" class="btn btn-info btn-circle btn-sm"><i class="fas fa-eye"></i></a>
-                                                <a href="#" class="btn btn-danger btn-circle btn-sm" title="Xóa/Chuyển đi"><i class="fas fa-trash"></i></a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>4</td>
-                                            <td><strong>010101003</strong></td>
-                                            <td>Trần Văn D</td>
-                                            <td>P306</td>
-                                            <td>Chủ hộ</td>
-                                            <td>00109300xxxx</td>
-                                            <td><span class="badge badge-secondary">Tạm vắng</span></td>
-                                            <td class="text-center">
-                                                <a href="#" class="btn btn-success btn-circle btn-sm" title="Khai báo về lại"><i class="fas fa-check"></i></a>
-                                            </td>
-                                        </tr>
+                                    <tbody id="residentsTableBody">
+                                        <tr><td colspan="8" class="text-center">Đang tải dữ liệu...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -231,6 +181,99 @@
     <a class="scroll-to-top rounded" href="#page-top">
         <i class="fas fa-angle-up"></i>
     </a>
+
+    <!-- Resident Add/Edit Modal -->
+    <div class="modal fade" id="residentModal" tabindex="-1" role="dialog" aria-labelledby="residentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="residentModalLabel">Thêm Cư dân</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="residentForm">
+                    <div class="modal-body">
+                        <input type="hidden" id="residentId" name="id">
+                        
+                        <div class="form-group">
+                            <label for="residentMaHo">Mã hộ gia đình <span class="text-danger">*</span></label>
+                            <select class="form-control" id="residentMaHo" name="maHo" required>
+                                <option value="">-- Chọn hộ gia đình --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="residentHoTen">Họ và tên <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="residentHoTen" name="hoTen" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="residentNgaySinh">Ngày sinh <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="residentNgaySinh" name="ngaySinh" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="residentGioiTinh">Giới tính <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="residentGioiTinh" name="gioiTinh" required>
+                                        <option value="">-- Chọn --</option>
+                                        <option value="Nam">Nam</option>
+                                        <option value="Nữ">Nữ</option>
+                                        <option value="Khác">Khác</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="residentSoCCCD">Số CCCD/CMND</label>
+                            <input type="text" class="form-control" id="residentSoCCCD" name="soCCCD" maxlength="20">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="residentNgheNghiep">Nghề nghiệp</label>
+                            <input type="text" class="form-control" id="residentNgheNghiep" name="ngheNghiep" maxlength="100">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="residentQuanHeChuHo">Quan hệ với chủ hộ <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="residentQuanHeChuHo" name="quanHeVoiChuHo" required>
+                                        <option value="">-- Chọn --</option>
+                                        <option value="Chủ hộ">Chủ hộ</option>
+                                        <option value="Vợ/Chồng">Vợ/Chồng</option>
+                                        <option value="Con">Con</option>
+                                        <option value="Cha/Mẹ">Cha/Mẹ</option>
+                                        <option value="Anh/Chị/Em">Anh/Chị/Em</option>
+                                        <option value="Khác">Khác</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="residentTinhTrang">Tình trạng cư trú <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="residentTinhTrang" name="tinhTrang" required>
+                                        <option value="CuTru">Thường trú</option>
+                                        <option value="TamTru">Tạm trú</option>
+                                        <option value="TamVang">Tạm vắng</option>
+                                        <option value="ChuyenDi">Chuyển đi</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary" id="btnSaveResident">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
@@ -258,30 +301,306 @@
     <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+    <script src="js/api.js"></script>
 
     <script>
-        $(document).ready(function() {
-            // Cấu hình DataTables với ngôn ngữ tiếng Việt
-            $('#dataTable').DataTable({
-                "language": {
-                    "sProcessing":   "Đang xử lý...",
-                    "sLengthMenu":   "Xem _MENU_ mục",
-                    "sZeroRecords":  "Không tìm thấy dòng nào phù hợp",
-                    "sInfo":         "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
-                    "sInfoEmpty":    "Đang xem 0 đến 0 trong tổng số 0 mục",
-                    "sInfoFiltered": "(được lọc từ _MAX_ mục)",
-                    "sInfoPostFix":  "",
-                    "sSearch":       "Tìm kiếm (Tên/Phòng/Hộ khẩu):",
-                    "sUrl":          "",
-                    "oPaginate": {
-                        "sFirst":    "Đầu",
-                        "sPrevious": "Trước",
-                        "sNext":     "Tiếp",
-                        "sLast":     "Cuối"
-                    }
-                }
+        let dataTable;
+        let editingResidentId = null;
+
+        $(document).ready(async function() {
+            await loadHouseholds();
+            await loadResidents();
+            
+            // Wire up Add button
+            $('#btnAddResident').on('click', function() {
+                editingResidentId = null;
+                $('#residentModalLabel').text('Thêm Cư dân');
+                $('#residentForm')[0].reset();
+                $('#residentId').val('');
+            });
+            
+            // Wire up form submission
+            $('#residentForm').on('submit', async function(e) {
+                e.preventDefault();
+                await saveResident();
+            });
+            
+            // Reset modal on close
+            $('#residentModal').on('hidden.bs.modal', function() {
+                editingResidentId = null;
+                $('#residentForm')[0].reset();
+            });
+            
+            // Event delegation for DataTables buttons
+            $(document).on('click', '.btn-view-resident', async function() {
+                const id = $(this).data('id');
+                if (id) await viewResident(id);
+            });
+            
+            $(document).on('click', '.btn-edit-resident', async function() {
+                const id = $(this).data('id');
+                if (id) await editResident(id);
+            });
+            
+            $(document).on('click', '.btn-delete-resident', async function() {
+                const id = $(this).data('id');
+                if (id) await deleteResident(id);
+            });
+            
+            $(document).on('click', '.btn-return-resident', async function() {
+                const id = $(this).data('id');
+                if (id) await returnResident(id);
             });
         });
+
+        async function loadHouseholds() {
+            try {
+                const households = await HoGiaDinhAPI.getAll();
+                const select = $('#residentMaHo');
+                select.empty();
+                select.append('<option value="">-- Chọn hộ gia đình --</option>');
+                households.forEach(h => {
+                    const label = h.id ? `Hộ ${h.id}${h.soPhong ? ' - Phòng ' + h.soPhong : ''}` : `Hộ ${h.id}`;
+                    select.append(`<option value="${h.id}">${label}</option>`);
+                });
+            } catch (error) {
+                console.error('Error loading households:', error);
+            }
+        }
+
+        /**
+         * Build table rows from residents data
+         * @param {Array} residents - Array of resident objects
+         * @param {Object} householdMap - Map of household id to household object
+         * @returns {Array} Array of row data arrays for DataTable
+         */
+        function buildResidentRows(residents, householdMap) {
+            return residents.map((resident, index) => {
+                const household = householdMap[resident.maHo] || {};
+                // Map tinhTrang to display text
+                let loaiCuTru = 'Thường trú';
+                if (resident.tinhTrang === 'TamTru') loaiCuTru = 'Tạm trú';
+                else if (resident.tinhTrang === 'TamVang') loaiCuTru = 'Tạm vắng';
+                else if (resident.tinhTrang === 'ChuyenDi') loaiCuTru = 'Chuyển đi';
+                
+                let badgeClass = 'badge-primary';
+                if (resident.tinhTrang === 'TamTru') badgeClass = 'badge-warning';
+                else if (resident.tinhTrang === 'TamVang') badgeClass = 'badge-secondary';
+                else if (resident.tinhTrang === 'ChuyenDi') badgeClass = 'badge-danger';
+
+                const residentId = resident.id || resident.maNhanKhau;
+                const actionButtons = resident.tinhTrang === 'TamVang' ? 
+                    `<button class="btn btn-success btn-circle btn-sm btn-return-resident" data-id="${residentId}" title="Khai báo về lại"><i class="fas fa-check"></i></button>` :
+                    `<button class="btn btn-danger btn-circle btn-sm btn-delete-resident" data-id="${residentId}" title="Xóa"><i class="fas fa-trash"></i></button>`;
+                
+                return [
+                    index + 1,
+                    `<strong>${resident.maHo || ''}</strong>`,
+                    resident.hoTen || '',
+                    household.soPhong || resident.maHo || '',
+                    resident.quanHeVoiChuHo || '',
+                    resident.soCCCD || '',
+                    `<span class="badge ${badgeClass}">${loaiCuTru}</span>`,
+                    `<div class="text-center">
+                        <button class="btn btn-info btn-circle btn-sm btn-view-resident" data-id="${residentId}" title="Xem chi tiết">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-warning btn-circle btn-sm btn-edit-resident" data-id="${residentId}" title="Sửa">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${actionButtons}
+                    </div>`
+                ];
+            });
+        }
+
+        /**
+         * Reload residents table without full page reload
+         * Efficiently updates DataTable with new data
+         */
+        async function reloadResidentsTable() {
+            try {
+                // Fetch latest data
+                const residents = await NhanKhauAPI.getAll();
+                const households = await HoGiaDinhAPI.getAll();
+                
+                // Build household map
+                const householdMap = {};
+                households.forEach(h => {
+                    householdMap[h.id] = h;
+                });
+
+                // Build rows for DataTable
+                const rows = buildResidentRows(residents || [], householdMap);
+
+                // Update DataTable
+                if (dataTable) {
+                    // Clear and add new rows
+                    dataTable.clear();
+                    if (rows.length > 0) {
+                        dataTable.rows.add(rows);
+                    }
+                    dataTable.draw(false); // false = don't reset paging
+                } else {
+                    // First time initialization
+                    const tbody = $('#residentsTableBody');
+                    tbody.empty();
+                    
+                    if (rows.length === 0) {
+                        tbody.html('<tr><td colspan="8" class="text-center">Chưa có dữ liệu cư dân</td></tr>');
+                        return;
+                    }
+
+                    // Initialize DataTable with data
+                    dataTable = $('#dataTable').DataTable({
+                        "data": rows,
+                        "language": {
+                            "sProcessing":   "Đang xử lý...",
+                            "sLengthMenu":   "Xem _MENU_ mục",
+                            "sZeroRecords":  "Không tìm thấy dòng nào phù hợp",
+                            "sInfo":         "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
+                            "sInfoEmpty":    "Đang xem 0 đến 0 trong tổng số 0 mục",
+                            "sInfoFiltered": "(được lọc từ _MAX_ mục)",
+                            "sInfoPostFix":  "",
+                            "sSearch":       "Tìm kiếm (Tên/Phòng/Hộ khẩu):",
+                            "sUrl":          "",
+                            "oPaginate": {
+                                "sFirst":    "Đầu",
+                                "sPrevious": "Trước",
+                                "sNext":     "Tiếp",
+                                "sLast":     "Cuối"
+                            }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error reloading residents table:', error);
+                APIUtils.showError('Không thể tải danh sách cư dân: ' + error.message);
+            }
+        }
+
+        /**
+         * Initial load of residents (first page load)
+         */
+        async function loadResidents() {
+            await reloadResidentsTable();
+        }
+
+        async function saveResident() {
+            const form = $('#residentForm')[0];
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const btnSave = $('#btnSaveResident');
+            btnSave.prop('disabled', true).text('Đang lưu...');
+
+            try {
+                const residentData = {
+                    maHo: parseInt($('#residentMaHo').val()),
+                    hoTen: $('#residentHoTen').val().trim(),
+                    ngaySinh: $('#residentNgaySinh').val(),
+                    gioiTinh: $('#residentGioiTinh').val(),
+                    soCCCD: $('#residentSoCCCD').val().trim() || null,
+                    ngheNghiep: $('#residentNgheNghiep').val().trim() || null,
+                    quanHeVoiChuHo: $('#residentQuanHeChuHo').val(),
+                    tinhTrang: $('#residentTinhTrang').val()
+                };
+
+                if (editingResidentId) {
+                    // Update
+                    await NhanKhauAPI.update(editingResidentId, residentData);
+                    APIUtils.showSuccess('Cập nhật cư dân thành công');
+                } else {
+                    // Create
+                    await NhanKhauAPI.create(residentData);
+                    APIUtils.showSuccess('Thêm cư dân thành công');
+                }
+
+                $('#residentModal').modal('hide');
+                await reloadResidentsTable();
+            } catch (error) {
+                APIUtils.showError(error.message);
+            } finally {
+                btnSave.prop('disabled', false).text('Lưu');
+            }
+        }
+
+        async function viewResident(id) {
+            try {
+                if (!APIUtils.validateId(id, 'cư dân')) return;
+                const resident = await NhanKhauAPI.getById(id);
+                let loaiCuTru = 'Thường trú';
+                if (resident.tinhTrang === 'TamTru') loaiCuTru = 'Tạm trú';
+                else if (resident.tinhTrang === 'TamVang') loaiCuTru = 'Tạm vắng';
+                else if (resident.tinhTrang === 'ChuyenDi') loaiCuTru = 'Chuyển đi';
+                
+                const ngaySinhDisplay = resident.ngaySinh ? APIUtils.formatDate(resident.ngaySinh) : 'N/A';
+                alert(`Thông tin cư dân:\n\nHọ tên: ${resident.hoTen || 'N/A'}\nSố CCCD: ${resident.soCCCD || 'N/A'}\nNgày sinh: ${ngaySinhDisplay}\nGiới tính: ${resident.gioiTinh || 'N/A'}\nNghề nghiệp: ${resident.ngheNghiep || 'N/A'}\nQuan hệ chủ hộ: ${resident.quanHeVoiChuHo || 'N/A'}\nTình trạng: ${loaiCuTru}`);
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
+        async function editResident(id) {
+            try {
+                if (!APIUtils.validateId(id, 'cư dân')) return;
+                editingResidentId = id;
+                const resident = await NhanKhauAPI.getById(id);
+                
+                // Populate form
+                $('#residentModalLabel').text('Sửa Cư dân');
+                $('#residentId').val(resident.id || id);
+                $('#residentMaHo').val(resident.maHo || '');
+                $('#residentHoTen').val(resident.hoTen || '');
+                // Use normalizeDate to safely convert any date format to yyyy-MM-dd
+                // Handle all possible formats: string, Date object, object with year/month/day, null
+                const normalizedDate = APIUtils.normalizeDate(resident.ngaySinh);
+                $('#residentNgaySinh').val(normalizedDate);
+                $('#residentGioiTinh').val(resident.gioiTinh || '');
+                $('#residentSoCCCD').val(resident.soCCCD || '');
+                $('#residentNgheNghiep').val(resident.ngheNghiep || '');
+                $('#residentQuanHeChuHo').val(resident.quanHeVoiChuHo || '');
+                $('#residentTinhTrang').val(resident.tinhTrang || 'CuTru');
+                
+                // Show modal
+                $('#residentModal').modal('show');
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
+        async function returnResident(id) {
+            if (!confirm('Xác nhận khai báo cư dân về lại?')) {
+                return;
+            }
+            try {
+                if (!APIUtils.validateId(id, 'cư dân')) return;
+                await NhanKhauAPI.updateStatus(id, 'CuTru', {
+                    ngayThayDoi: new Date().toISOString().split('T')[0],
+                    lyDo: 'Khai báo về lại'
+                });
+                APIUtils.showSuccess('Cập nhật trạng thái thành công');
+                await reloadResidentsTable();
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
+        async function deleteResident(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa cư dân này?')) {
+                return;
+            }
+            try {
+                if (!APIUtils.validateId(id, 'cư dân')) return;
+                await NhanKhauAPI.delete(id);
+                APIUtils.showSuccess('Xóa cư dân thành công');
+                await reloadResidentsTable();
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
     </script>
 
 </body>

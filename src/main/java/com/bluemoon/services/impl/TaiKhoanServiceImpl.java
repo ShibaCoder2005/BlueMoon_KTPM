@@ -1,40 +1,92 @@
 package com.bluemoon.services.impl;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.bluemoon.models.TaiKhoan;
 import com.bluemoon.services.TaiKhoanService;
+import com.bluemoon.utils.DatabaseConnector;
 
 /**
- * Triển khai {@link TaiKhoanService} bằng bộ nhớ tạm thời.
- * Có thể thay thế bằng DAO khi kết nối cơ sở dữ liệu.
+ * Triển khai {@link TaiKhoanService} với database integration.
+ * Sử dụng PostgreSQL database để lưu trữ dữ liệu.
  */
 public class TaiKhoanServiceImpl implements TaiKhoanService {
 
-    private final Map<Integer, TaiKhoan> taiKhoanStore = new ConcurrentHashMap<>();
-    private final Map<String, Integer> usernameToIdMap = new ConcurrentHashMap<>();
-    private int nextId = 1;
+    private static final Logger logger = Logger.getLogger(TaiKhoanServiceImpl.class.getName());
 
-    public TaiKhoanServiceImpl() {
-        seedSampleData();
-    }
+    // SQL Queries
+    private static final String SELECT_ALL = 
+            "SELECT id, tenDangNhap, matKhau, hoTen, vaiTro, dienThoai, trangThai FROM TaiKhoan ORDER BY id";
+
+    private static final String SELECT_BY_ID = 
+            "SELECT id, tenDangNhap, matKhau, hoTen, vaiTro, dienThoai, trangThai FROM TaiKhoan WHERE id = ?";
+
+    private static final String SELECT_BY_USERNAME = 
+            "SELECT id, tenDangNhap, matKhau, hoTen, vaiTro, dienThoai, trangThai FROM TaiKhoan WHERE LOWER(TRIM(tenDangNhap)) = LOWER(TRIM(?))";
+
+    private static final String INSERT = 
+            "INSERT INTO TaiKhoan (tenDangNhap, matKhau, hoTen, vaiTro, dienThoai, trangThai) VALUES (?, ?, ?, ?, ?, ?)";
+
+    private static final String UPDATE = 
+            "UPDATE TaiKhoan SET tenDangNhap = ?, matKhau = ?, hoTen = ?, vaiTro = ?, dienThoai = ?, trangThai = ? WHERE id = ?";
+
+    private static final String UPDATE_STATUS = 
+            "UPDATE TaiKhoan SET trangThai = ? WHERE id = ?";
+
+    private static final String UPDATE_PASSWORD = 
+            "UPDATE TaiKhoan SET matKhau = ? WHERE id = ?";
+
+    private static final String CHECK_USERNAME_EXISTS = 
+            "SELECT COUNT(*) FROM TaiKhoan WHERE LOWER(TRIM(tenDangNhap)) = LOWER(TRIM(?)) AND id != ?";
 
     @Override
     public List<TaiKhoan> getAllTaiKhoan() {
-        return taiKhoanStore.values()
-                .stream()
-                .sorted(Comparator.comparingInt(TaiKhoan::getId))
-                .collect(Collectors.toList());
+        List<TaiKhoan> result = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SELECT_ALL);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                result.add(buildTaiKhoanFromResultSet(rs));
+            }
+
+            logger.log(Level.INFO, "Retrieved " + result.size() + " accounts");
+            return result;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving all accounts", e);
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     @Override
     public TaiKhoan findById(int id) {
-        return taiKhoanStore.get(id);
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_ID)) {
+
+            pstmt.setInt(1, id);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return buildTaiKhoanFromResultSet(rs);
+                }
+                return null;
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving account with id: " + id, e);
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
@@ -42,11 +94,24 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
         if (tenDangNhap == null || tenDangNhap.trim().isEmpty()) {
             return null;
         }
-        Integer id = usernameToIdMap.get(tenDangNhap.trim().toLowerCase());
-        if (id == null) {
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SELECT_BY_USERNAME)) {
+
+            pstmt.setString(1, tenDangNhap.trim());
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return buildTaiKhoanFromResultSet(rs);
+                }
+                return null;
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving account with username: " + tenDangNhap, e);
+            e.printStackTrace();
             return null;
         }
-        return taiKhoanStore.get(id);
     }
 
     @Override
@@ -54,89 +119,187 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
         if (tenDangNhap == null || tenDangNhap.trim().isEmpty()) {
             return false;
         }
-        String usernameLower = tenDangNhap.trim().toLowerCase();
-        Integer existingId = usernameToIdMap.get(usernameLower);
-        return existingId != null && existingId != excludeId;
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(CHECK_USERNAME_EXISTS)) {
+
+            pstmt.setString(1, tenDangNhap.trim());
+            pstmt.setInt(2, excludeId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    return count > 0;
+                }
+                return false;
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error checking username existence: " + tenDangNhap, e);
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
     public boolean addTaiKhoan(TaiKhoan taiKhoan) {
         if (taiKhoan == null) {
+            logger.log(Level.WARNING, "Cannot add account: taiKhoan is null");
             return false;
         }
+
+        // Validate required fields
+        if (taiKhoan.getTenDangNhap() == null || taiKhoan.getTenDangNhap().trim().isEmpty()) {
+            logger.log(Level.WARNING, "Cannot add account: tenDangNhap is empty");
+            return false;
+        }
+
         // Check username uniqueness
         if (isUsernameExists(taiKhoan.getTenDangNhap(), 0)) {
+            logger.log(Level.WARNING, "Cannot add account: username already exists: " + taiKhoan.getTenDangNhap());
             return false;
         }
-        if (taiKhoan.getId() == 0) {
-            taiKhoan.setId(nextId++);
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(INSERT)) {
+
+            pstmt.setString(1, taiKhoan.getTenDangNhap().trim());
+            pstmt.setString(2, taiKhoan.getMatKhau());
+            pstmt.setString(3, taiKhoan.getHoTen());
+            pstmt.setString(4, taiKhoan.getVaiTro());
+            pstmt.setString(5, taiKhoan.getDienThoai());
+            pstmt.setString(6, taiKhoan.getTrangThai() != null ? taiKhoan.getTrangThai() : "Hoạt động");
+
+            int rowsAffected = pstmt.executeUpdate();
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                logger.log(Level.INFO, "Successfully added account: " + taiKhoan.getTenDangNhap() + " (rows affected: " + rowsAffected + ")");
+            } else {
+                logger.log(Level.WARNING, "Failed to add account: " + taiKhoan.getTenDangNhap() + " (rows affected: " + rowsAffected + ")");
+            }
+
+            return success;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error adding account: " + taiKhoan.getTenDangNhap(), e);
+            e.printStackTrace();
+            return false;
         }
-        taiKhoanStore.put(taiKhoan.getId(), cloneEntity(taiKhoan));
-        usernameToIdMap.put(taiKhoan.getTenDangNhap().trim().toLowerCase(), taiKhoan.getId());
-        return true;
     }
 
     @Override
     public boolean updateTaiKhoan(TaiKhoan taiKhoan) {
-        if (taiKhoan == null || !taiKhoanStore.containsKey(taiKhoan.getId())) {
+        if (taiKhoan == null || taiKhoan.getId() == 0) {
+            logger.log(Level.WARNING, "Cannot update account: taiKhoan is null or id is 0");
             return false;
         }
+
+        // Validate required fields
+        if (taiKhoan.getTenDangNhap() == null || taiKhoan.getTenDangNhap().trim().isEmpty()) {
+            logger.log(Level.WARNING, "Cannot update account: tenDangNhap is empty");
+            return false;
+        }
+
         // Check username uniqueness (exclude current account)
         if (isUsernameExists(taiKhoan.getTenDangNhap(), taiKhoan.getId())) {
+            logger.log(Level.WARNING, "Cannot update account: username already exists: " + taiKhoan.getTenDangNhap());
             return false;
         }
-        TaiKhoan oldAccount = taiKhoanStore.get(taiKhoan.getId());
-        // Remove old username mapping if username changed
-        if (!oldAccount.getTenDangNhap().equalsIgnoreCase(taiKhoan.getTenDangNhap())) {
-            usernameToIdMap.remove(oldAccount.getTenDangNhap().trim().toLowerCase());
-            usernameToIdMap.put(taiKhoan.getTenDangNhap().trim().toLowerCase(), taiKhoan.getId());
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(UPDATE)) {
+
+            pstmt.setString(1, taiKhoan.getTenDangNhap().trim());
+            pstmt.setString(2, taiKhoan.getMatKhau());
+            pstmt.setString(3, taiKhoan.getHoTen());
+            pstmt.setString(4, taiKhoan.getVaiTro());
+            pstmt.setString(5, taiKhoan.getDienThoai());
+            pstmt.setString(6, taiKhoan.getTrangThai());
+            pstmt.setInt(7, taiKhoan.getId());
+
+            int rowsAffected = pstmt.executeUpdate();
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                logger.log(Level.INFO, "Successfully updated account with id: " + taiKhoan.getId() + " (rows affected: " + rowsAffected + ")");
+            } else {
+                logger.log(Level.WARNING, "Failed to update account with id: " + taiKhoan.getId() + " (rows affected: " + rowsAffected + ")");
+            }
+
+            return success;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error updating account with id: " + taiKhoan.getId(), e);
+            e.printStackTrace();
+            return false;
         }
-        taiKhoanStore.put(taiKhoan.getId(), cloneEntity(taiKhoan));
-        return true;
     }
 
     @Override
     public boolean updateStatus(int id, String trangThai) {
-        TaiKhoan taiKhoan = taiKhoanStore.get(id);
-        if (taiKhoan == null) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(UPDATE_STATUS)) {
+
+            pstmt.setString(1, trangThai);
+            pstmt.setInt(2, id);
+
+            int rowsAffected = pstmt.executeUpdate();
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                logger.log(Level.INFO, "Successfully updated status for account id: " + id + " to " + trangThai + " (rows affected: " + rowsAffected + ")");
+            } else {
+                logger.log(Level.WARNING, "Failed to update status for account id: " + id + " (rows affected: " + rowsAffected + ")");
+            }
+
+            return success;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error updating status for account id: " + id, e);
+            e.printStackTrace();
             return false;
         }
-        taiKhoan.setTrangThai(trangThai);
-        return true;
     }
 
     @Override
     public boolean updatePassword(int id, String hashedPassword) {
-        TaiKhoan taiKhoan = taiKhoanStore.get(id);
-        if (taiKhoan == null) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(UPDATE_PASSWORD)) {
+
+            pstmt.setString(1, hashedPassword);
+            pstmt.setInt(2, id);
+
+            int rowsAffected = pstmt.executeUpdate();
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                logger.log(Level.INFO, "Successfully updated password for account id: " + id + " (rows affected: " + rowsAffected + ")");
+            } else {
+                logger.log(Level.WARNING, "Failed to update password for account id: " + id + " (rows affected: " + rowsAffected + ")");
+            }
+
+            return success;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error updating password for account id: " + id, e);
+            e.printStackTrace();
             return false;
         }
-        taiKhoan.setMatKhau(hashedPassword);
-        return true;
     }
 
-    private void seedSampleData() {
-        List<TaiKhoan> samples = new ArrayList<>();
-        samples.add(new TaiKhoan(1, "admin", "admin123", "Quản trị hệ thống", "BanQuanLy", "0900000000", "Hoạt động"));
-        samples.add(new TaiKhoan(2, "ketoan", "ketoan123", "Nguyễn Văn A", "KeToan", "0900000001", "Hoạt động"));
-        samples.add(new TaiKhoan(3, "totruong", "totruong123", "Trần Thị B", "ToTruong", "0900000002", "Hoạt động"));
-        nextId = 4;
-        samples.forEach(item -> {
-            taiKhoanStore.put(item.getId(), item);
-            usernameToIdMap.put(item.getTenDangNhap().trim().toLowerCase(), item.getId());
-        });
-    }
-
-    private TaiKhoan cloneEntity(TaiKhoan source) {
-        TaiKhoan clone = new TaiKhoan();
-        clone.setId(source.getId());
-        clone.setTenDangNhap(source.getTenDangNhap());
-        clone.setMatKhau(source.getMatKhau());
-        clone.setHoTen(source.getHoTen());
-        clone.setVaiTro(source.getVaiTro());
-        clone.setDienThoai(source.getDienThoai());
-        clone.setTrangThai(source.getTrangThai());
-        return clone;
+    /**
+     * Xây dựng đối tượng TaiKhoan từ ResultSet.
+     */
+    private TaiKhoan buildTaiKhoanFromResultSet(ResultSet rs) throws SQLException {
+        TaiKhoan taiKhoan = new TaiKhoan();
+        taiKhoan.setId(rs.getInt("id"));
+        taiKhoan.setTenDangNhap(rs.getString("tenDangNhap"));
+        taiKhoan.setMatKhau(rs.getString("matKhau"));
+        taiKhoan.setHoTen(rs.getString("hoTen"));
+        taiKhoan.setVaiTro(rs.getString("vaiTro"));
+        taiKhoan.setDienThoai(rs.getString("dienThoai"));
+        taiKhoan.setTrangThai(rs.getString("trangThai"));
+        return taiKhoan;
     }
 }
-

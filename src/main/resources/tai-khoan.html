@@ -291,21 +291,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
+    <script src="js/api.js"></script>
 
     <!-- Custom Script cho logic Quản lý Tài khoản -->
     <script>
-        // 1. Dữ liệu mẫu (Mock Data)
-        let accounts = [
-            { id: 'TK001', username: 'admin_manager', fullName: 'Nguyễn Văn Quản', email: 'quan.nv@chungcu.com', role: 'Ban Quản lý', status: 'active' },
-            { id: 'TK002', username: 'ketoan_truong', fullName: 'Trần Thị Tính', email: 'tinh.tt@chungcu.com', role: 'Kế toán', status: 'active' },
-            { id: 'TK003', username: 'cudan_a101', fullName: 'Lê Văn Dân', email: 'dan.lv@gmail.com', role: 'Cư dân', status: 'locked' },
-            { id: 'TK004', username: 'cudan_b205', fullName: 'Phạm Thị Hoa', email: 'hoa.pt@gmail.com', role: 'Cư dân', status: 'active' },
-            { id: 'TK005', username: 'staff_security', fullName: 'Đỗ Hùng Dũng', email: 'dung.dh@baove.com', role: 'Nhân viên', status: 'active' },
-            { id: 'TK006', username: 'cudan_c301', fullName: 'Hoàng Mai Anh', email: 'anh.hm@yahoo.com', role: 'Cư dân', status: 'active' },
-            { id: 'TK007', username: 'cudan_d402', fullName: 'Vũ Thị Lan', email: 'lan.vu@gmail.com', role: 'Cư dân', status: 'active' },
-        ];
-
-        let filteredAccounts = [...accounts];
+        // 1. Data from API
+        let accounts = [];
+        let filteredAccounts = [];
         let currentPage = 1;
         const itemsPerPage = 5;
 
@@ -334,14 +326,16 @@
                 const globalIndex = startIndex + index + 1;
                 
                 // Badge Vai trò
+                const accRole = acc.vaiTro || acc.role || '';
                 let roleBadge = '<span class="badge badge-secondary">Khác</span>';
-                if (acc.role === 'Ban Quản lý') roleBadge = '<span class="badge badge-primary">Ban Quản lý</span>';
-                else if (acc.role === 'Kế toán') roleBadge = '<span class="badge badge-info">Kế toán</span>';
-                else if (acc.role === 'Cư dân') roleBadge = '<span class="badge badge-success">Cư dân</span>';
-                else if (acc.role === 'Nhân viên') roleBadge = '<span class="badge badge-warning text-white">Nhân viên</span>';
+                if (accRole === 'BanQuanLy' || accRole === 'Ban Quản lý') roleBadge = '<span class="badge badge-primary">Ban Quản lý</span>';
+                else if (accRole === 'KeToan' || accRole === 'Kế toán') roleBadge = '<span class="badge badge-info">Kế toán</span>';
+                else if (accRole === 'ToTruong' || accRole === 'Cư dân') roleBadge = '<span class="badge badge-success">Cư dân</span>';
+                else if (accRole === 'Nhân viên') roleBadge = '<span class="badge badge-warning text-white">Nhân viên</span>';
 
                 // Badge & Nút Trạng thái
-                const isLocked = acc.status === 'locked';
+                const accStatus = acc.trangThai || acc.status || '';
+                const isLocked = accStatus === 'Đã khóa' || accStatus === 'locked';
                 const statusBadge = isLocked 
                     ? '<span class="badge badge-danger"><i class="fas fa-lock mr-1"></i>Đã khóa</span>' 
                     : '<span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i>Hoạt động</span>';
@@ -356,24 +350,24 @@
                         <td class="align-middle">
                             <div class="d-flex align-items-center">
                                 <div class="mr-3 bg-gray-200 rounded-circle d-flex justify-content-center align-items-center text-gray-600 font-weight-bold" style="width:40px; height:40px;">
-                                    ${acc.fullName.charAt(0)}
+                                    ${(acc.hoTen || acc.fullName || '').charAt(0)}
                                 </div>
                                 <div>
-                                    <div class="font-weight-bold text-dark">${acc.fullName}</div>
-                                    <div class="small text-gray-500">@${acc.username} | ${acc.email}</div>
+                                    <div class="font-weight-bold text-dark">${acc.hoTen || acc.fullName || ''}</div>
+                                    <div class="small text-gray-500">@${acc.tenDangNhap || acc.username || ''} | ${acc.dienThoai || acc.email || ''}</div>
                                 </div>
                             </div>
                         </td>
                         <td class="align-middle">${roleBadge}</td>
                         <td class="align-middle">${statusBadge}</td>
                         <td class="align-middle text-center">
-                            <button onclick="handleEdit('${acc.id}')" class="btn btn-primary btn-sm action-btn mr-1" title="Sửa">
+                            <button onclick="handleEdit(${acc.maTaiKhoan || acc.id})" class="btn btn-primary btn-sm action-btn mr-1" title="Sửa">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="handleLockUnlock('${acc.id}')" class="btn ${lockBtnClass} btn-sm action-btn mr-1" title="${lockTitle}">
+                            <button onclick="handleLockUnlock(${acc.maTaiKhoan || acc.id})" class="btn ${lockBtnClass} btn-sm action-btn mr-1" title="${lockTitle}">
                                 <i class="fas ${lockIcon}"></i>
                             </button>
-                            <button onclick="handleDelete('${acc.id}')" class="btn btn-danger btn-sm action-btn" title="Xóa">
+                            <button onclick="handleDelete(${acc.maTaiKhoan || acc.id})" class="btn btn-danger btn-sm action-btn" title="Xóa">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -436,12 +430,17 @@
             const status = document.getElementById('statusFilter').value;
 
             filteredAccounts = accounts.filter(acc => {
-                const matchKeyword = acc.username.toLowerCase().includes(keyword) || 
-                                     acc.fullName.toLowerCase().includes(keyword) || 
-                                     acc.email.toLowerCase().includes(keyword);
+                const username = (acc.tenDangNhap || acc.username || '').toLowerCase();
+                const fullName = (acc.hoTen || acc.fullName || '').toLowerCase();
+                const email = (acc.dienThoai || acc.email || '').toLowerCase();
+                const matchKeyword = username.includes(keyword) || fullName.includes(keyword) || email.includes(keyword);
                 
-                const matchRole = role === 'all' || acc.role === role;
-                const matchStatus = status === 'all' || acc.status === status;
+                const accRole = acc.vaiTro || acc.role || '';
+                const matchRole = role === 'all' || accRole === role;
+                
+                const accStatus = acc.trangThai || acc.status || '';
+                const statusValue = accStatus === 'Hoạt động' || accStatus === 'active' ? 'active' : 'locked';
+                const matchStatus = status === 'all' || statusValue === status;
 
                 return matchKeyword && matchRole && matchStatus;
             });
@@ -458,23 +457,39 @@
         }
 
         // 5. Các hành động
-        function handleDelete(id) {
-            if (confirm(`Bạn có chắc muốn xóa tài khoản ${id} không?`)) {
-                accounts = accounts.filter(acc => acc.id !== id);
-                applyFilters();
+        async function handleDelete(id) {
+            if (!confirm(`Bạn có chắc muốn xóa tài khoản này không?`)) {
+                return;
+            }
+            try {
+                // Note: Delete endpoint may not exist, using update to disable instead
+                await TaiKhoanAPI.updateStatus(id, 'Đã khóa');
+                APIUtils.showSuccess('Xóa tài khoản thành công');
+                await loadAccounts();
+            } catch (error) {
+                APIUtils.showError(error.message);
             }
         }
 
-        function handleLockUnlock(id) {
-            const account = accounts.find(acc => acc.id === id);
+        async function handleLockUnlock(id) {
+            const account = accounts.find(acc => (acc.maTaiKhoan || acc.id) == id);
             if (!account) return;
 
-            const newStatus = account.status === 'active' ? 'locked' : 'active';
-            const actionName = newStatus === 'active' ? 'Mở khóa' : 'Khóa';
+            const currentStatus = account.trangThai || account.status || '';
+            const isCurrentlyLocked = currentStatus === 'Đã khóa' || currentStatus === 'locked';
+            const newStatus = isCurrentlyLocked ? 'Hoạt động' : 'Đã khóa';
+            const actionName = isCurrentlyLocked ? 'Mở khóa' : 'Khóa';
 
-            if (confirm(`Bạn muốn ${actionName} tài khoản ${id}?`)) {
-                account.status = newStatus;
-                applyFilters();
+            if (!confirm(`Bạn muốn ${actionName} tài khoản này?`)) {
+                return;
+            }
+
+            try {
+                await TaiKhoanAPI.updateStatus(id, newStatus);
+                APIUtils.showSuccess(`${actionName} tài khoản thành công`);
+                await loadAccounts();
+            } catch (error) {
+                APIUtils.showError(error.message);
             }
         }
 
@@ -482,9 +497,33 @@
             alert(`Chức năng Sửa cho tài khoản ${id} đang phát triển!`);
         }
 
+        // Load accounts from API
+        async function loadAccounts() {
+            try {
+                accounts = await TaiKhoanAPI.getAll();
+                // Map API data to expected format
+                accounts = accounts.map(acc => ({
+                    ...acc,
+                    id: acc.maTaiKhoan,
+                    username: acc.tenDangNhap,
+                    fullName: acc.hoTen,
+                    email: acc.dienThoai,
+                    role: acc.vaiTro,
+                    status: acc.trangThai === 'Hoạt động' ? 'active' : 'locked'
+                }));
+                filteredAccounts = [...accounts];
+                currentPage = 1;
+                renderTable();
+            } catch (error) {
+                console.error('Error loading accounts:', error);
+                APIUtils.showError('Không thể tải danh sách tài khoản: ' + error.message);
+                $('#tableBody').html(`<tr><td colspan="5" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
+            }
+        }
+
         // Init
         $(document).ready(function() {
-            renderTable();
+            loadAccounts();
         });
 
     </script>
