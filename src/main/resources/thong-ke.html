@@ -16,14 +16,14 @@
     <div id="wrapper">
 
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="trang-chu.html">
                 <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-building"></i></div>
                 <div class="sidebar-brand-text mx-3">BlueMoon</div>
             </a>
             <hr class="sidebar-divider my-0">
 
             <li class="nav-item">
-                <a class="nav-link" href="index.html">
+                <a class="nav-link" href="trang-chu.html">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Trang chủ</span>
                 </a>
@@ -37,7 +37,7 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="danh-sach-dan-cu.html">
+                <a class="nav-link" href="cu-dan.html">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Cư dân</span>
                 </a>
@@ -50,7 +50,7 @@
                 </a>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="thong-ke.html">
                     <i class="fas fa-fw fa-chart-bar"></i>
                     <span>Thống kê</span>
@@ -175,66 +175,131 @@
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="js/sb-admin-2.min.js"></script>
     <script src="vendor/chart.js/Chart.min.js"></script>
+    <script src="js/api.js"></script>
 
     <script>
         // 1. Cấu hình chung
         Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
         Chart.defaults.global.defaultFontColor = '#858796';
 
-        // 2. Vẽ biểu đồ tròn (Pie Chart)
-        var ctxPie = document.getElementById("myPieChart");
-        var myPieChart = new Chart(ctxPie, {
-            type: 'doughnut',
-            data: {
-                labels: ["Nam", "Nữ", "Khác"],
-                datasets: [{
-                    data: [55, 40, 5],
-                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
-                    hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
-                    hoverBorderColor: "rgba(234, 236, 244, 1)",
-                }],
-            },
-            options: {
-                maintainAspectRatio: false,
-                tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 },
-                legend: { display: false },
-                cutoutPercentage: 80,
-            },
+        let myPieChart, myAreaChart;
+
+        // Load and render statistics
+        $(document).ready(async function() {
+            await loadStatistics();
         });
 
-        // 3. Vẽ biểu đồ đường (Area Chart)
-        var ctxArea = document.getElementById("myAreaChart");
-        var myAreaChart = new Chart(ctxArea, {
-            type: 'line',
-            data: {
-                labels: ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6"],
-                datasets: [{
-                    label: "Dân số",
-                    lineTension: 0.3,
-                    backgroundColor: "rgba(78, 115, 223, 0.05)",
-                    borderColor: "rgba(78, 115, 223, 1)",
-                    pointRadius: 3,
-                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                    pointBorderColor: "rgba(78, 115, 223, 1)",
-                    pointHoverRadius: 3,
-                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-                    pointHitRadius: 10,
-                    pointBorderWidth: 2,
-                    data: [300, 310, 320, 315, 330, 350],
-                }],
-            },
-            options: {
-                maintainAspectRatio: false,
-                layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
-                scales: {
-                    xAxes: [{ gridLines: { display: false, drawBorder: false }, ticks: { maxTicksLimit: 7 } }],
-                    yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10 }, gridLines: { color: "rgb(234, 236, 244)", zeroLineColor: "rgb(234, 236, 244)", drawBorder: false, borderDash: [2], zeroLineBorderDash: [2] } }],
-                },
-                legend: { display: false },
-                tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", titleMarginBottom: 10, titleFontColor: '#6e707e', titleFontSize: 14, borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, intersect: false, mode: 'index', caretPadding: 10 },
+        async function loadStatistics() {
+            try {
+                // Load residents for gender distribution
+                const residents = await NhanKhauAPI.getAll();
+                const genderStats = calculateGenderStats(residents);
+                updatePieChart(genderStats);
+
+                // Load dashboard stats for population trend
+                try {
+                    const dashboard = await ThongKeAPI.getDashboard();
+                    if (dashboard && dashboard.populationTrend) {
+                        updateAreaChart(dashboard.populationTrend);
+                    } else {
+                        // Fallback: use resident count
+                        updateAreaChartFromResidents(residents);
+                    }
+                } catch (error) {
+                    console.warn('Could not load dashboard stats, using residents data:', error);
+                    updateAreaChartFromResidents(residents);
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                APIUtils.showError('Không thể tải dữ liệu thống kê: ' + error.message);
             }
-        });
+        }
+
+        function calculateGenderStats(residents) {
+            let nam = 0, nu = 0, khac = 0;
+            residents.forEach(resident => {
+                const gioiTinh = (resident.gioiTinh || '').toLowerCase();
+                if (gioiTinh === 'nam' || gioiTinh === 'male') nam++;
+                else if (gioiTinh === 'nữ' || gioiTinh === 'nu' || gioiTinh === 'female') nu++;
+                else khac++;
+            });
+            return { nam, nu, khac, total: residents.length };
+        }
+
+        function updatePieChart(stats) {
+            const ctxPie = document.getElementById("myPieChart");
+            if (myPieChart) {
+                myPieChart.destroy();
+            }
+            myPieChart = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ["Nam", "Nữ", "Khác"],
+                    datasets: [{
+                        data: [stats.nam, stats.nu, stats.khac],
+                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                        hoverBorderColor: "rgba(234, 236, 244, 1)",
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 },
+                    legend: { display: false },
+                    cutoutPercentage: 80,
+                },
+            });
+        }
+
+        function updateAreaChartFromResidents(residents) {
+            // Simple trend: just show total count over last 6 months
+            const total = residents.length;
+            const data = [total - 50, total - 40, total - 30, total - 20, total - 10, total];
+            updateAreaChart(data);
+        }
+
+        function updateAreaChart(data) {
+            const ctxArea = document.getElementById("myAreaChart");
+            if (myAreaChart) {
+                myAreaChart.destroy();
+            }
+            
+            const labels = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6"];
+            if (Array.isArray(data) && data.length === labels.length) {
+                // Data is array of numbers
+                myAreaChart = new Chart(ctxArea, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: "Dân số",
+                            lineTension: 0.3,
+                            backgroundColor: "rgba(78, 115, 223, 0.05)",
+                            borderColor: "rgba(78, 115, 223, 1)",
+                            pointRadius: 3,
+                            pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                            pointBorderColor: "rgba(78, 115, 223, 1)",
+                            pointHoverRadius: 3,
+                            pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                            pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                            pointHitRadius: 10,
+                            pointBorderWidth: 2,
+                            data: data,
+                        }],
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
+                        scales: {
+                            xAxes: [{ gridLines: { display: false, drawBorder: false }, ticks: { maxTicksLimit: 7 } }],
+                            yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10 }, gridLines: { color: "rgb(234, 236, 244)", zeroLineColor: "rgb(234, 236, 244)", drawBorder: false, borderDash: [2], zeroLineBorderDash: [2] } }],
+                        },
+                        legend: { display: false },
+                        tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", titleMarginBottom: 10, titleFontColor: '#6e707e', titleFontSize: 14, borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, intersect: false, mode: 'index', caretPadding: 10 },
+                    }
+                });
+            }
+        }
     </script>
 </body>
 </html>

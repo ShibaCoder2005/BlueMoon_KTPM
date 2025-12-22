@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Quản Lý - Khoản Thu (v1.0)</title>
+    <title>Bluemoon - Khoản Thu</title>
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
@@ -16,7 +16,9 @@
                 <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-building"></i></div>
                 <div class="sidebar-brand-text mx-3">BlueMoon</div>
             </a>
+
             <hr class="sidebar-divider my-0">
+            
             <li class="nav-item">
                 <a class="nav-link" href="index.html">
                     <i class="fas fa-fw fa-home"></i>
@@ -32,7 +34,7 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="danh-sach-dan-cu.html">
+                <a class="nav-link" href="cu-dan.html">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Cư dân</span>
                 </a>
@@ -114,46 +116,11 @@
                                             <th>Đối tượng</th>
                                             <th>Tiến độ</th>
                                             <th>Trạng thái</th>
+                                            <th>Hành động</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><strong>Dịch vụ Tháng 11/2025</strong><br><small class="text-muted">Vệ sinh, an ninh, rác thải...</small></td>
-                                            <td>Bắt buộc (Theo diện tích)</td>
-                                            <td>7.000 đ/m2</td> <td>Toàn bộ căn hộ</td>
-                                            <td>
-                                                <div class="progress progress-sm mb-2">
-                                                    <div class="progress-bar bg-info" role="progressbar" style="width: 80%"></div>
-                                                </div>
-                                                <small>120/150 hộ đã đóng</small>
-                                            </td>
-                                            <td><span class="badge badge-success">Đang thu</span></td>
-                                        </tr>
-                                        
-                                        <tr>
-                                            <td><strong>Quản lý Tháng 11/2025</strong><br><small class="text-muted">Vận hành tòa nhà</small></td>
-                                            <td>Bắt buộc (Theo diện tích)</td>
-                                            <td>5.000 đ/m2</td>
-                                            <td>Toàn bộ căn hộ</td>
-                                            <td>
-                                                <div class="progress progress-sm mb-2">
-                                                    <div class="progress-bar bg-info" role="progressbar" style="width: 60%"></div>
-                                                </div>
-                                                <small>90/150 hộ đã đóng</small>
-                                            </td>
-                                            <td><span class="badge badge-success">Đang thu</span></td>
-                                        </tr>
-
-                                        <tr>
-                                            <td><strong>Quỹ vì người nghèo 2025</strong></td>
-                                            <td>Tự nguyện (Đóng góp)</td>
-                                            <td>Tùy tâm</td>
-                                            <td>Tự nguyện</td>
-                                            <td>
-                                                <small>Tổng thu: 15.000.000 đ</small>
-                                            </td>
-                                            <td><span class="badge badge-warning">Đang vận động</span></td>
-                                        </tr>
+                                    <tbody id="khoanThuTableBody">
+                                        <tr><td colspan="7" class="text-center">Đang tải dữ liệu...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -175,35 +142,41 @@
                     <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <form>
+                    <form id="khoanThuForm">
+                        <input type="hidden" id="khoanThuId">
                         <div class="form-group">
                             <label>Tên khoản thu</label>
-                            <input type="text" class="form-control" placeholder="VD: Phí dịch vụ T12/2025">
+                            <input type="text" class="form-control" id="tenKhoanThu" placeholder="VD: Phí dịch vụ T12/2025" required>
                         </div>
                         <div class="form-group">
-                            <label>Loại phí (Theo quy định v1.0)</label>
-                            <select class="form-control" id="loaiPhiSelect">
-                                <option value="dichvu">Phí dịch vụ chung cư (Bắt buộc)</option>
-                                <option value="quanly">Phí quản lý chung cư (Bắt buộc)</option>
-                                <option value="donggop">Đóng góp / Từ thiện (Tự nguyện)</option>
+                            <label>Loại phí</label>
+                            <select class="form-control" id="loaiPhiSelect" required>
+                                <option value="">Chọn loại phí</option>
+                                <option value="BatBuoc">Bắt buộc</option>
+                                <option value="TuNguyen">Tự nguyện</option>
                             </select>
                         </div>
 
                         <div class="form-group" id="donGiaArea">
-                            <label>Đơn giá (VNĐ/m2)</label>
-                            <input type="number" class="form-control" value="7000" placeholder="Nhập số tiền trên 1m2">
+                            <label>Đơn giá (VND/m<sup>2</sup>)</label>
+                            <input type="number" class="form-control" id="donGia" value="7000" placeholder="Nhập số tiền trên 1m2" min="0">
                             <small class="form-text text-muted">Hệ thống sẽ tự nhân với diện tích căn hộ.</small>
                         </div>
 
                         <div class="form-group">
-                            <label>Hạn nộp / Thời gian vận động</label>
-                            <input type="date" class="form-control">
+                            <label>Mô tả</label>
+                            <textarea class="form-control" id="moTa" rows="3" placeholder="Mô tả khoản thu"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Hạn nộp</label>
+                            <input type="date" class="form-control" id="hanNop">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                    <button class="btn btn-primary">Tạo & Gửi thông báo</button>
+                    <button type="button" class="btn btn-primary" id="saveKhoanThuBtn">Lưu</button>
                 </div>
             </div>
         </div>
@@ -213,16 +186,190 @@
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="js/sb-admin-2.min.js"></script>
+    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="js/api.js"></script>
     
     <script>
-        $('#loaiPhiSelect').change(function() {
-            var selected = $(this).val();
-            if(selected === 'donggop') {
-                $('#donGiaArea').hide(); // Đóng góp thì không cần đơn giá m2
-            } else {
-                $('#donGiaArea').show(); // Phí dịch vụ/quản lý cần đơn giá m2
-            }
+        let dataTable;
+        let editingId = null;
+
+        // Load data on page load
+        $(document).ready(async function() {
+            await loadKhoanThu();
+            
+            $('#loaiPhiSelect').change(function() {
+                var selected = $(this).val();
+                if(selected === 'TuNguyen') {
+                    $('#donGiaArea').hide();
+                } else {
+                    $('#donGiaArea').show();
+                }
+            });
+
+            // Form submission
+            $('#saveKhoanThuBtn').on('click', async function() {
+                const form = $('#khoanThuForm');
+                if (!form[0].checkValidity()) {
+                    form[0].reportValidity();
+                    return;
+                }
+
+                // Validate and prepare payload
+                const tenKhoanThu = $('#tenKhoanThu').val()?.trim();
+                if (!tenKhoanThu) {
+                    APIUtils.showError('Vui lòng nhập tên khoản thu');
+                    return;
+                }
+                
+                const loaiPhi = $('#loaiPhiSelect').val();
+                if (!loaiPhi) {
+                    APIUtils.showError('Vui lòng chọn loại phí');
+                    return;
+                }
+                
+                // Parse donGia as number (not string)
+                let donGia = 0;
+                const donGiaStr = $('#donGia').val();
+                if (donGiaStr && donGiaStr.trim() !== '') {
+                    const parsed = parseFloat(donGiaStr);
+                    if (isNaN(parsed) || parsed < 0) {
+                        APIUtils.showError('Đơn giá phải là số hợp lệ và >= 0');
+                        return;
+                    }
+                    donGia = parsed;
+                }
+                
+                const khoanThu = {
+                    tenKhoanThu: tenKhoanThu,
+                    loaiPhi: loaiPhi,
+                    donGia: donGia, // Send as number, not string
+                    moTa: $('#moTa').val()?.trim() || ''
+                    // Note: hanNop is not sent as it's not in the model
+                };
+
+                try {
+                    if (editingId) {
+                        await KhoanThuAPI.update(editingId, khoanThu);
+                        APIUtils.showSuccess('Cập nhật khoản thu thành công');
+                    } else {
+                        await KhoanThuAPI.create(khoanThu);
+                        APIUtils.showSuccess('Tạo khoản thu thành công');
+                    }
+                    $('#addFeeModal').modal('hide');
+                    form[0].reset();
+                    editingId = null;
+                    await loadKhoanThu();
+                } catch (error) {
+                    APIUtils.showError(error.message);
+                }
+            });
+
+            // Reset form when modal is closed
+            $('#addFeeModal').on('hidden.bs.modal', function() {
+                $('#khoanThuForm')[0].reset();
+                editingId = null;
+                $('#donGiaArea').show();
+            });
         });
+
+        async function loadKhoanThu() {
+            try {
+                const data = await KhoanThuAPI.getAll();
+                const tbody = $('#khoanThuTableBody');
+                tbody.empty();
+
+                if (!data || data.length === 0) {
+                    tbody.html('<tr><td colspan="7" class="text-center">Chưa có khoản thu nào</td></tr>');
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    const row = `
+                        <tr>
+                            <td><strong>${item.tenKhoanThu || ''}</strong><br><small class="text-muted">${item.moTa || ''}</small></td>
+                            <td>${item.loaiPhi === 'BatBuoc' ? 'Bắt buộc' : 'Tự nguyện'}</td>
+                            <td>${item.donGia ? APIUtils.formatCurrency(item.donGia) + '/m²' : 'Tùy tâm'}</td>
+                            <td>Toàn bộ căn hộ</td>
+                            <td>
+                                <div class="progress progress-sm mb-2">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small>Đang tính toán...</small>
+                            </td>
+                            <td><span class="badge badge-success">${item.trangThai || 'Hoạt động'}</span></td>
+                            <td class="text-center">
+                                <button class="btn btn-warning btn-circle btn-sm" onclick="editKhoanThu(${item.maKhoanThu})" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-circle btn-sm" onclick="deleteKhoanThu(${item.maKhoanThu})" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+
+                // Initialize/reinitialize DataTable
+                if (dataTable) {
+                    dataTable.destroy();
+                }
+                dataTable = $('#dataTable').DataTable({
+                    "language": {
+                        "search": "Tìm kiếm:",
+                        "paginate": { "next": ">", "previous": "<" }
+                    }
+                });
+            } catch (error) {
+                $('#khoanThuTableBody').html(`<tr><td colspan="7" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
+                APIUtils.showError('Không thể tải danh sách khoản thu: ' + error.message);
+            }
+        }
+
+        async function editKhoanThu(id) {
+            try {
+                const data = await KhoanThuAPI.getAll();
+                const item = data.find(k => k.maKhoanThu === id);
+                if (!item) {
+                    APIUtils.showError('Không tìm thấy khoản thu');
+                    return;
+                }
+
+                editingId = id;
+                $('#khoanThuId').val(id);
+                $('#tenKhoanThu').val(item.tenKhoanThu);
+                $('#loaiPhiSelect').val(item.loaiPhi);
+                $('#donGia').val(item.donGia || '');
+                $('#moTa').val(item.moTa || '');
+                $('#hanNop').val(item.hanNop || '');
+                
+                if (item.loaiPhi === 'TuNguyen') {
+                    $('#donGiaArea').hide();
+                } else {
+                    $('#donGiaArea').show();
+                }
+
+                $('.modal-title').text('Sửa Khoản Thu');
+                $('#addFeeModal').modal('show');
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
+        async function deleteKhoanThu(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa khoản thu này?')) {
+                return;
+            }
+
+            try {
+                await KhoanThuAPI.delete(id);
+                APIUtils.showSuccess('Xóa khoản thu thành công');
+                await loadKhoanThu();
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
     </script>
 </body>
 </html>
