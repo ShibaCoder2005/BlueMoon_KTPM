@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Quản Lý - Căn Hộ</title>
+    <title>Bluemoon - Căn hộ</title>
 
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -24,20 +24,20 @@
     <div id="wrapper">
 
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="trang-chu.html">
                 <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-building"></i></div>
                 <div class="sidebar-brand-text mx-3">BlueMoon</div>
             </a>
             <hr class="sidebar-divider my-0">
 
             <li class="nav-item">
-                <a class="nav-link" href="index.html">
+                <a class="nav-link" href="trang-chu.html">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Trang chủ</span>
                 </a>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="can-ho.html">
                     <i class="fas fa-fw fa-door-open"></i>
                     <span>Căn hộ</span>
@@ -45,7 +45,7 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="danh-sach-dan-cu.html">
+                <a class="nav-link" href="cu-dan.html">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Cư dân</span>
                 </a>
@@ -138,32 +138,46 @@
                         <div class="card-body">
                             <div class="tab-content">
                                 <div class="tab-pane fade show active" id="tab-1">
-                                    <h6 class="m-0 font-weight-bold text-gray-800 mb-3">Đã thanh toán (205 căn)</h6>
+                                    <h6 class="m-0 font-weight-bold text-gray-800 mb-3">Đã thanh toán (0 căn)</h6>
                                     <div class="table-responsive mb-4">
                                         <table class="table table-bordered" id="dataTable1" width="100%" cellspacing="0">
                                             <thead class="bg-light text-gray-900">
                                                 <tr><th>STT</th><th>Căn hộ</th><th>Số tiền (VNĐ)</th><th>Ngày thanh toán</th></tr>
                                             </thead>
                                             <tbody>
-                                                <tr><td>1</td><td><strong>P101</strong></td><td>500.000</td><td>20/11/2025</td></tr>
+                                                <tr><td colspan="4" class="text-center">Đang tải dữ liệu...</td></tr>
                                             </tbody>
                                         </table>
                                     </div>
                                     <div class="card shadow-none border mb-4">
                                         <div class="card-header py-3 card-unpaid-header d-flex justify-content-between" data-toggle="collapse" data-target="#collapseUnpaid1">
-                                            <h6 class="m-0 font-weight-bold text-gray-800">Chưa thanh toán (45 căn)</h6>
+                                            <h6 class="m-0 font-weight-bold text-gray-800">Chưa thanh toán (0 căn)</h6>
                                             <i class="fas fa-chevron-down text-gray-500"></i>
                                         </div>
                                         <div id="collapseUnpaid1" class="collapse">
                                             <div class="card-body">
-                                                <table class="table table-bordered"><thead><tr><th>STT</th><th>Căn hộ</th><th>Số tiền</th></tr></thead><tbody><tr><td>1</td><td>P205</td><td>500.000</td></tr></tbody></table>
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr><th>STT</th><th>Căn hộ</th><th>Số tiền</th></tr>
+                                                    </thead>
+                                                    <tbody id="unpaidTableBody">
+                                                        <tr><td colspan="3" class="text-center">Đang tải dữ liệu...</td></tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="tab-pane fade" id="tab-2">
                                     <h6 class="mb-3 text-gray-800">Đã thanh toán vé xe</h6>
-                                    <table class="table table-bordered" id="dataTable2" width="100%"><thead><tr><th>STT</th><th>Căn hộ</th></tr></thead><tbody><tr><td>1</td><td>P101</td></tr></tbody></table>
+                                    <table class="table table-bordered" id="dataTable2" width="100%">
+                                        <thead>
+                                            <tr><th>STT</th><th>Căn hộ</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td colspan="2" class="text-center">Chưa có dữ liệu</td></tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -193,11 +207,95 @@
     <script src="js/sb-admin-2.min.js"></script>
     <script src="vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="js/api.js"></script>
     <script>
-        $(document).ready(function() {
-            $('#dataTable1').DataTable({ "language": { "search": "Tìm kiếm:", "paginate": { "next": ">", "previous": "<" } } });
-            $('#dataTable2').DataTable({ "language": { "search": "Tìm kiếm:", "paginate": { "next": ">", "previous": "<" } } });
+        let dataTable1, dataTable2;
+
+        $(document).ready(async function() {
+            await loadHouseholdData();
         });
+
+        async function loadHouseholdData() {
+            try {
+                const households = await HoGiaDinhAPI.getAll();
+                const tbody1 = $('#dataTable1 tbody');
+                const tbody2 = $('#dataTable2 tbody');
+                
+                tbody1.empty();
+                tbody2.empty();
+
+                if (!households || households.length === 0) {
+                    tbody1.html('<tr><td colspan="4" class="text-center">Chưa có dữ liệu</td></tr>');
+                    return;
+                }
+
+                // Load payment data for each household
+                let paidCount = 0;
+                let unpaidCount = 0;
+                const paidList = [];
+                const unpaidList = [];
+
+                for (const household of households) {
+                    try {
+                        const unpaid = await PhieuThuAPI.hasUnpaidFees(household.maHo);
+                        if (unpaid && unpaid.length > 0) {
+                            unpaidCount++;
+                            unpaidList.push({ household, unpaid });
+                        } else {
+                            paidCount++;
+                            paidList.push(household);
+                        }
+                    } catch (error) {
+                        console.error('Error checking unpaid fees:', error);
+                    }
+                }
+
+                // Display paid households
+                paidList.forEach((household, index) => {
+                    const row = `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${household.maCanHo || household.maHo}</strong></td>
+                            <td>${APIUtils.formatCurrency(household.tongTien || 0)}</td>
+                            <td>${household.ngayThanhToan ? APIUtils.formatDate(household.ngayThanhToan) : 'N/A'}</td>
+                        </tr>
+                    `;
+                    tbody1.append(row);
+                });
+
+                // Display unpaid households
+                const unpaidTbody = $('#unpaidTableBody');
+                unpaidTbody.empty();
+                unpaidList.forEach((item, index) => {
+                    const row = `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${item.household.maCanHo || item.household.maHo}</td>
+                            <td>${APIUtils.formatCurrency(item.unpaid.reduce((sum, fee) => sum + (fee.soTien || 0), 0))}</td>
+                        </tr>
+                    `;
+                    unpaidTbody.append(row);
+                });
+
+                // Update counts
+                $('#tab-1 h6').text(`Đã thanh toán (${paidCount} căn)`);
+                $('#collapseUnpaid1 h6').text(`Chưa thanh toán (${unpaidCount} căn)`);
+
+                // Initialize DataTables
+                if (dataTable1) dataTable1.destroy();
+                if (dataTable2) dataTable2.destroy();
+                
+                dataTable1 = $('#dataTable1').DataTable({ 
+                    "language": { "search": "Tìm kiếm:", "paginate": { "next": ">", "previous": "<" } } 
+                });
+                dataTable2 = $('#dataTable2').DataTable({ 
+                    "language": { "search": "Tìm kiếm:", "paginate": { "next": ">", "previous": "<" } } 
+                });
+            } catch (error) {
+                console.error('Error loading household data:', error);
+                APIUtils.showError('Không thể tải dữ liệu căn hộ: ' + error.message);
+            }
+        }
     </script>
 </body>
 </html>
