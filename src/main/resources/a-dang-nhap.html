@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Đăng nhập - BlueMoon</title>
+
+    <!-- Custom fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link href="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #4e73df;
+            background-image: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-login {
+            border: 0;
+            border-radius: 1.5rem; /* Bo tròn mềm mại hơn */
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+            overflow: hidden;
+            max-width: 500px; /* Giới hạn chiều rộng để tập trung */
+            width: 100%;
+        }
+
+        /* Không cần login-image nữa vì chỉ dùng 1 cột */
+
+        .role-selector {
+            display: flex;
+            background: #f8f9fc;
+            padding: 8px;
+            border-radius: 50px;
+            margin-bottom: 25px;
+            border: 1px solid #e3e6f0;
+        }
+
+        .role-selector input[type="radio"] {
+            display: none;
+        }
+
+        .role-selector label {
+            flex: 1;
+            text-align: center;
+            padding: 12px 20px;
+            margin-bottom: 0;
+            cursor: pointer;
+            z-index: 2;
+            border-radius: 50px;
+            font-weight: 800; /* Chữ đậm hơn */
+            font-size: 1.1rem; /* Chữ to hơn */
+            color: #858796;
+            transition: all 0.3s ease;
+        }
+
+        .role-selector input[type="radio"]:checked + label {
+            color: #fff;
+            background-color: #4e73df;
+            box-shadow: 0 4px 10px rgba(78, 115, 223, 0.4);
+            transform: scale(1.05); /* Hiệu ứng phóng to nhẹ khi chọn */
+        }
+
+        .form-control-user {
+            border-radius: 50px;
+            padding: 1.75rem 1.5rem; /* Padding lớn hơn */
+            font-size: 1.25rem; /* Chữ input to hơn (tăng từ 1.1rem lên 1.25rem) */
+            height: auto;
+        }
+
+        /* Tăng kích thước placeholder nếu cần */
+        ::placeholder { 
+            font-size: 1.2rem;
+        }
+
+        .btn-login {
+            border-radius: 50px;
+            padding: 1rem 1rem; /* Nút cao hơn */
+            font-weight: 800;
+            font-size: 1.2rem; /* Chữ nút to hơn */
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .custom-control-label {
+            font-size: 1rem; /* Chữ remember me to hơn */
+            padding-top: 3px;
+        }
+        
+        .text-gray-900 {
+            font-size: 1.75rem; /* Tiêu đề to hơn */
+        }
+        
+        .small {
+            font-size: 0.95rem; /* Link nhỏ to hơn chút */
+        }
+        
+        .p-5 {
+            padding: 3.5rem !important; /* Tăng khoảng cách lề trong */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+
+            <div class="col-lg-6 col-md-9">
+
+                <div class="card card-login o-hidden border-0 my-5">
+                    <div class="card-body p-0">
+                        <!-- Nested Row within Card Body -->
+                        <div class="row">
+                            <!-- Bỏ cột ảnh, chỉ giữ lại cột form và cho nó chiếm hết chiều ngang (col-lg-12) -->
+                            <div class="col-lg-12">
+                                <div class="p-5">
+                                    <div class="text-center mb-4">
+                                        <div class="sidebar-brand-icon rotate-n-15 mb-3">
+                                            <i class="fas fa-building fa-3x text-primary"></i>
+                                        </div>
+                                        <h1 class="h4 text-gray-900 font-weight-bold">BlueMoon xin chào!</h1>
+                                        <p class="text-muted mb-4" style="font-size: 1.1rem;">Vui lòng đăng nhập để tiếp tục</p>
+                                    </div>
+                                    
+                                    <form class="user" id="loginForm">
+                                        
+                                        <!-- 1. Trường chọn vai trò (Role Selector) -->
+                                        <div class="form-group mb-4">
+                                            <div class="role-selector">
+                                                <input type="radio" id="roleUser" name="role" value="user" checked>
+                                                <label for="roleUser"><i class="fas fa-user mr-2"></i>Cư Dân</label>
+                                                
+                                                <input type="radio" id="roleAdmin" name="role" value="admin">
+                                                <label for="roleAdmin"><i class="fas fa-user-shield mr-2"></i>Quản Lý</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <input type="email" class="form-control form-control-user"
+                                                id="inputEmail" aria-describedby="emailHelp"
+                                                placeholder="Nhập địa chỉ Email...">
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="password" class="form-control form-control-user"
+                                                id="inputPassword" placeholder="Mật khẩu">
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox small ml-2">
+                                                <input type="checkbox" class="custom-control-input" id="customCheck">
+                                                <label class="custom-control-label" for="customCheck">Ghi nhớ đăng nhập</label>
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary btn-user btn-block btn-login mt-4">
+                                            Đăng Nhập
+                                        </button>
+                                        
+                                    </form>
+                                    <hr class="my-4">
+                                    <div class="text-center mb-2">
+                                        <a class="small font-weight-bold" href="a-quen-mat-khau.html">Quên mật khẩu?</a>
+                                    </div>
+                                    <div class="text-center">
+                                        <a class="small font-weight-bold text-success" href="a-dang-ky.html">Chưa có tài khoản? Đăng ký ngay!</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#loginForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const email = $('#inputEmail').val().trim();
+                const password = $('#inputPassword').val().trim();
+                const role = $('input[name="role"]:checked').val();
+
+                if (!email || !password) {
+                    alert('Vui lòng nhập đầy đủ thông tin!');
+                    return;
+                }
+
+                // Lưu vai trò vào LocalStorage để các trang sau biết
+                localStorage.setItem('bm_user_role', role);
+                localStorage.setItem('bm_user_email', email);
+
+                // Giả lập chuyển hướng
+                if (role === 'admin') {
+                    // Chuyển đến Dashboard Quản trị
+                    window.location.href = 'trang-chu.html';
+                } else {
+                    // Chuyển đến trang Cư dân 
+                    window.location.href = '0-trang-chu.html'; 
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
