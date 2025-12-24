@@ -497,16 +497,50 @@
             btnSave.prop('disabled', true).text('Đang lưu...');
 
             try {
+                // Lấy giá trị form an toàn - kiểm tra element tồn tại
+                const maHoEl = $('#residentMaHo');
+                const hoTenEl = $('#residentHoTen');
+                const ngaySinhEl = $('#residentNgaySinh');
+                const gioiTinhEl = $('#residentGioiTinh');
+                const soCCCDEl = $('#residentSoCCCD');
+                const ngheNghiepEl = $('#residentNgheNghiep');
+                const quanHeVoiChuHoEl = $('#residentQuanHeChuHo');
+                const tinhTrangEl = $('#residentTinhTrang');
+
+                const maHoVal = maHoEl.length > 0 ? maHoEl.val() : '';
+                const maHo = maHoVal ? parseInt(maHoVal) : null;
+                if (!maHo || isNaN(maHo)) {
+                    APIUtils.showError('Vui lòng chọn hộ gia đình');
+                    return;
+                }
+
                 const residentData = {
-                    maHo: parseInt($('#residentMaHo').val()),
-                    hoTen: $('#residentHoTen').val().trim(),
-                    ngaySinh: $('#residentNgaySinh').val(),
-                    gioiTinh: $('#residentGioiTinh').val(),
-                    soCCCD: $('#residentSoCCCD').val().trim() || null,
-                    ngheNghiep: $('#residentNgheNghiep').val().trim() || null,
-                    quanHeVoiChuHo: $('#residentQuanHeChuHo').val(),
-                    tinhTrang: $('#residentTinhTrang').val()
+                    maHo: maHo,
+                    hoTen: hoTenEl.length > 0 ? (hoTenEl.val() || '').trim() : '',
+                    ngaySinh: ngaySinhEl.length > 0 ? (ngaySinhEl.val() || '') : '',
+                    gioiTinh: gioiTinhEl.length > 0 ? (gioiTinhEl.val() || '') : '',
+                    soCCCD: soCCCDEl.length > 0 ? (soCCCDEl.val() || '').trim() || null : null,
+                    ngheNghiep: ngheNghiepEl.length > 0 ? (ngheNghiepEl.val() || '').trim() || null : null,
+                    quanHeVoiChuHo: quanHeVoiChuHoEl.length > 0 ? (quanHeVoiChuHoEl.val() || '') : '',
+                    tinhTrang: tinhTrangEl.length > 0 ? (tinhTrangEl.val() || 'CuTru') : 'CuTru'
                 };
+
+                // Validate dữ liệu bắt buộc
+                if (!residentData.hoTen || residentData.hoTen.length === 0) {
+                    APIUtils.showError('Vui lòng nhập họ tên');
+                    return;
+                }
+                if (!residentData.ngaySinh || residentData.ngaySinh.length === 0) {
+                    APIUtils.showError('Vui lòng nhập ngày sinh');
+                    return;
+                }
+                if (!residentData.gioiTinh || residentData.gioiTinh.length === 0) {
+                    APIUtils.showError('Vui lòng chọn giới tính');
+                    return;
+                }
+
+                // Log payload để debug
+                console.log('[saveResident] Payload gửi lên backend:', JSON.stringify(residentData, null, 2));
 
                 if (editingResidentId) {
                     // Update

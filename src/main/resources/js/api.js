@@ -1,5 +1,11 @@
 const API_BASE = '/api';
 
+/**
+ * Chuẩn hóa API request handler
+ * - Luôn trả về JSON
+ * - Xử lý lỗi rõ ràng
+ * - Log payload để debug
+ */
 async function apiRequest(endpoint, method = 'GET', data = null) {
     const options = {
         method: method,
@@ -10,20 +16,82 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
 
     if (data !== null && (method === 'POST' || method === 'PUT')) {
         options.body = JSON.stringify(data);
+        // Log payload để debug
+        console.log(`[apiRequest] ${method} ${endpoint}:`, data);
     }
 
-    const response = await fetch(`${API_BASE}${endpoint}`, options);
-    const result = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, options);
+        
+        // Đọc response text trước để kiểm tra content-type
+        const contentType = response.headers.get('content-type') || '';
+        const isJson = contentType.includes('application/json');
+        
+        let result;
+        const text = await response.text();
+        
+        // Kiểm tra HTTP status TRƯỚC khi parse
+        if (!response.ok) {
+            // Response không ok - xử lý lỗi
+            if (isJson && text) {
+                try {
+                    result = JSON.parse(text);
+                    const errorMsg = result.message || result.details || result.errorCode || `HTTP ${response.status}`;
+                    console.error(`[apiRequest] HTTP ${response.status} from ${endpoint}:`, errorMsg);
+                    throw new Error(errorMsg);
+                } catch (parseError) {
+                    // Không parse được JSON từ error response
+                    console.error(`[apiRequest] Error response not JSON from ${endpoint}:`, text.substring(0, 200));
+                    throw new Error(`Server error (${response.status}): ${text.substring(0, 100)}`);
+                }
+            } else {
+                // Response không phải JSON
+                console.error(`[apiRequest] HTTP ${response.status} non-JSON error from ${endpoint}:`, text.substring(0, 200));
+                throw new Error(`Server error (${response.status}): ${text.substring(0, 100) || 'Unknown error'}`);
+            }
+        }
+        
+        // Response OK - parse JSON
+        if (isJson && text) {
+            try {
+                result = JSON.parse(text);
+            } catch (parseError) {
+                console.error(`[apiRequest] JSON parse error for ${endpoint}:`, parseError);
+                console.error(`[apiRequest] Response text:`, text.substring(0, 200));
+                throw new Error(`Invalid JSON response from server: ${text.substring(0, 100)}`);
+            }
+        } else if (text) {
+            // Response OK nhưng không phải JSON - không nên xảy ra với API
+            console.warn(`[apiRequest] Non-JSON response from ${endpoint}:`, text.substring(0, 200));
+            result = {
+                success: true,
+                data: text
+            };
+        } else {
+            // Empty response - có thể là DELETE thành công
+            result = {
+                success: true,
+                data: null
+            };
+        }
 
-    if (!response.ok) {
-        throw new Error(result.message || result.details || `HTTP error! status: ${response.status}`);
+        // Kiểm tra success flag trong response (nếu có)
+        if (result.success === false) {
+            const errorMsg = result.message || result.details || 'Request failed';
+            console.error(`[apiRequest] Request failed for ${endpoint}:`, errorMsg);
+            throw new Error(errorMsg);
+        }
+
+        return result;
+    } catch (error) {
+        // Re-throw nếu đã là Error object
+        if (error instanceof Error) {
+            throw error;
+        }
+        // Wrap các lỗi khác
+        console.error(`[apiRequest] Unexpected error for ${endpoint}:`, error);
+        throw new Error(error.message || String(error));
     }
-
-    if (result.success === false) {
-        throw new Error(result.message || result.details || 'Request failed');
-    }
-
-    return result;
 }
 
 function showSuccess(message) {
@@ -41,21 +109,30 @@ const AuthAPI = {
 };
 
 const TaiKhoanAPI = {
-    getAll: () => apiRequest('/tai-khoan', 'GET'),
+    getAll: async () => {
+        const response = await apiRequest('/tai-khoan', 'GET');
+        return Array.isArray(response) ? response : (response.data || []);
+    },
     create: (data) => apiRequest('/tai-khoan', 'POST', data),
     update: (id, data) => apiRequest(`/tai-khoan/${id}`, 'PUT', data),
     updateStatus: (id, status) => apiRequest(`/tai-khoan/${id}/status`, 'PUT', { trangThai: status })
 };
 
 const KhoanThuAPI = {
-    getAll: () => apiRequest('/khoan-thu', 'GET'),
+    getAll: async () => {
+        const response = await apiRequest('/khoan-thu', 'GET');
+        return Array.isArray(response) ? response : (response.data || []);
+    },
     create: (data) => apiRequest('/khoan-thu', 'POST', data),
     update: (id, data) => apiRequest(`/khoan-thu/${id}`, 'PUT', data),
     delete: (id) => apiRequest(`/khoan-thu/${id}`, 'DELETE')
 };
 
 const HoGiaDinhAPI = {
-    getAll: () => apiRequest('/ho-gia-dinh', 'GET'),
+    getAll: async () => {
+        const response = await apiRequest('/ho-gia-dinh', 'GET');
+        return Array.isArray(response) ? response : (response.data || []);
+    },
     create: (data) => apiRequest('/ho-gia-dinh', 'POST', data),
     update: (id, data) => apiRequest(`/ho-gia-dinh/${id}`, 'PUT', data),
     delete: (id) => apiRequest(`/ho-gia-dinh/${id}`, 'DELETE')
@@ -74,7 +151,10 @@ const NhanKhauAPI = {
 };
 
 const PhieuThuAPI = {
-    getAll: () => apiRequest('/phieu-thu', 'GET'),
+    getAll: async () => {
+        const response = await apiRequest('/phieu-thu', 'GET');
+        return Array.isArray(response) ? response : (response.data || []);
+    },
     create: (data) => apiRequest('/phieu-thu', 'POST', data),
     update: (id, data) => apiRequest(`/phieu-thu/${id}`, 'PUT', data),
     delete: (id) => apiRequest(`/phieu-thu/${id}`, 'DELETE'),
@@ -82,7 +162,10 @@ const PhieuThuAPI = {
 };
 
 const LichSuNopTienAPI = {
-    getAll: () => apiRequest('/lich-su-nop-tien', 'GET'),
+    getAll: async () => {
+        const response = await apiRequest('/lich-su-nop-tien', 'GET');
+        return Array.isArray(response) ? response : (response.data || []);
+    },
     create: (data) => apiRequest('/lich-su-nop-tien', 'POST', data)
 };
 
@@ -95,7 +178,49 @@ const ThongKeAPI = {
         if (params.toDate) queryParams.append('toDate', params.toDate);
         const queryString = queryParams.toString();
         return apiRequest(`/thong-ke/revenue${queryString ? '?' + queryString : ''}`, 'GET');
-    }
+    },
+    revenueTotal: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params.fromDate) queryParams.append('fromDate', params.fromDate);
+        if (params.toDate) queryParams.append('toDate', params.toDate);
+        const queryString = queryParams.toString();
+        return apiRequest(`/thong-ke/revenue/total${queryString ? '?' + queryString : ''}`, 'GET');
+    },
+    revenueDetails: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params.fromDate) queryParams.append('fromDate', params.fromDate);
+        if (params.toDate) queryParams.append('toDate', params.toDate);
+        const queryString = queryParams.toString();
+        return apiRequest(`/thong-ke/revenue/details${queryString ? '?' + queryString : ''}`, 'GET');
+    },
+    debt: () => apiRequest('/thong-ke/debt', 'GET'),
+    debtTotal: () => apiRequest('/thong-ke/debt/total', 'GET'),
+    debtDetails: () => apiRequest('/thong-ke/debt/details', 'GET'),
+    report: (maDotThu) => apiRequest(`/thong-ke/report/${maDotThu}`, 'GET')
+};
+
+const ThongBaoAPI = {
+    getAll: async () => {
+        try {
+            const response = await apiRequest('/thong-bao', 'GET');
+            if (Array.isArray(response)) {
+                return response;
+            }
+            if (response.data && Array.isArray(response.data)) {
+                return response.data;
+            }
+            return [];
+        } catch (error) {
+            if (error.message.includes('404') || error.message.includes('Not Found') || error.message.includes('API_ENDPOINT_NOT_FOUND')) {
+                console.warn('[ThongBaoAPI] API /api/thong-bao chưa được triển khai. Backend cần thêm endpoint này.');
+                return [];
+            }
+            console.error('[ThongBaoAPI.getAll] Lỗi:', error);
+            throw error;
+        }
+    },
+    create: (data) => apiRequest('/thong-bao', 'POST', data),
+    delete: (id) => apiRequest(`/thong-bao/${id}`, 'DELETE')
 };
 
 const APIUtils = {
@@ -177,5 +302,20 @@ const APIUtils = {
     formatCurrency: (amount) => {
         if (!amount) return '0';
         return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
+    },
+    /**
+     * Lấy giá trị từ form element an toàn
+     * @param {string} selector - jQuery selector
+     * @param {string} defaultValue - Giá trị mặc định nếu không tìm thấy
+     * @returns {string}
+     */
+    getFormValue: (selector, defaultValue = '') => {
+        const el = $(selector);
+        if (el.length === 0) {
+            console.warn(`[APIUtils.getFormValue] Element not found: ${selector}`);
+            return defaultValue;
+        }
+        const value = el.val();
+        return value !== null && value !== undefined ? String(value).trim() : defaultValue;
     }
 };

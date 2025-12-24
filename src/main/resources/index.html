@@ -137,7 +137,7 @@
 
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Tổng quan tòa nhà</h1>
-                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                        <a href="#" id="btnExportMonthlyReport" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                             <i class="fas fa-download fa-sm text-white-50"></i> Xuất báo cáo tháng
                         </a>
                     </div>
@@ -241,13 +241,13 @@
                                     <h6 class="m-0 font-weight-bold text-primary">Tác vụ nhanh</h6>
                                 </div>
                                 <div class="card-body">
-                                    <a href="#" class="btn btn-primary btn-block text-left mb-3">
+                                    <a href="#" id="btnQuickCreateFee" class="btn btn-primary btn-block text-left mb-3">
                                         <i class="fas fa-plus-circle mr-2"></i> Tạo khoản thu mới
                                     </a>
-                                    <a href="#" class="btn btn-success btn-block text-left mb-3">
+                                    <a href="#" id="btnQuickRecordPayment" class="btn btn-success btn-block text-left mb-3">
                                         <i class="fas fa-hand-holding-usd mr-2"></i> Ghi nhận đóng phí
                                     </a>
-                                    <a href="#" class="btn btn-info btn-block text-left">
+                                    <a href="#" id="btnQuickExportResidents" class="btn btn-info btn-block text-left">
                                         <i class="fas fa-file-export mr-2"></i> Xuất danh sách cư dân
                                     </a>
                                 </div>
@@ -303,15 +303,161 @@
     <script src="vendor/chart.js/Chart.min.js"></script>
 
     <script>
+        // Xử lý Tác vụ nhanh - đảm bảo chạy sau DOM ready
+        $(document).ready(function() {
+            // Nút "Tạo khoản thu mới" - chuyển đến trang khoản thu
+            $('#btnQuickCreateFee').on('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'khoan-thu.html';
+            });
+
+            // Nút "Ghi nhận đóng phí" - chuyển đến trang thanh toán
+            $('#btnQuickRecordPayment').on('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'thanh-toan.html';
+            });
+
+            // Nút "Xuất danh sách cư dân" - chuyển đến trang danh sách cư dân
+            $('#btnQuickExportResidents').on('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'danh-sach-dan-cu.html';
+            });
+
+            // Nút "Xuất báo cáo tháng" - xuất báo cáo doanh thu tháng hiện tại
+            $('#btnExportMonthlyReport').on('click', async function(e) {
+                e.preventDefault();
+                await exportMonthlyReport();
+            });
+
+            console.log('[index.html] Đã gắn event cho các nút tác vụ nhanh');
+        });
+
+        /**
+         * Xuất báo cáo doanh thu tháng hiện tại
+         */
+        async function exportMonthlyReport() {
+            try {
+                // Lấy tháng/năm hiện tại
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth() + 1; // 0-11 -> 1-12
+                
+                // Tính fromDate (ngày đầu tháng) và toDate (ngày cuối tháng)
+                const fromDate = `${year}-${String(month).padStart(2, '0')}-01`;
+                const lastDay = new Date(year, month, 0).getDate();
+                const toDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+                console.log('[exportMonthlyReport] Đang tải báo cáo:', { fromDate, toDate });
+
+                // Disable nút và hiển thị loading
+                const btn = $('#btnExportMonthlyReport');
+                const originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin fa-sm text-white-50"></i> Đang tải...');
+
+                // Gọi API lấy dữ liệu báo cáo
+                const response = await fetch(`/api/thong-ke/revenue?fromDate=${fromDate}&toDate=${toDate}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorMessage = 'Không thể tải báo cáo';
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMessage = errorJson.message || errorJson.detail || errorMessage;
+                    } catch (e) {
+                        errorMessage = errorText || errorMessage;
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const data = await response.json();
+                console.log('[exportMonthlyReport] Dữ liệu nhận được:', data);
+
+                // Tạo file CSV từ dữ liệu
+                const csvContent = convertToCSV(data, month, year);
+                
+                // Tạo blob và download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `BaoCaoDoanhThu_Thang${month}_${year}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                // Hiển thị thông báo thành công
+                alert(`Đã xuất báo cáo tháng ${month}/${year} thành công!`);
+
+            } catch (error) {
+                console.error('[exportMonthlyReport] Lỗi:', error);
+                alert('Lỗi khi xuất báo cáo: ' + error.message);
+            } finally {
+                // Khôi phục nút
+                const btn = $('#btnExportMonthlyReport');
+                btn.prop('disabled', false).html('<i class="fas fa-download fa-sm text-white-50"></i> Xuất báo cáo tháng');
+            }
+        }
+
+        /**
+         * Chuyển đổi dữ liệu JSON thành CSV
+         */
+        function convertToCSV(data, month, year) {
+            let csv = `BÁO CÁO DOANH THU THÁNG ${month}/${year}\n`;
+            csv += `Ngày xuất: ${new Date().toLocaleString('vi-VN')}\n\n`;
+
+            // Xử lý dữ liệu từ API
+            // API có thể trả về dạng: { success: true, data: {...} } hoặc trực tiếp Map
+            let revenueData = data;
+            if (data.data) {
+                revenueData = data.data;
+            }
+            if (data.success && data.data) {
+                revenueData = data.data;
+            }
+
+            // Nếu là object, chuyển thành array
+            if (typeof revenueData === 'object' && !Array.isArray(revenueData)) {
+                csv += 'Khoản thu,Tổng thu (VNĐ)\n';
+                for (const [key, value] of Object.entries(revenueData)) {
+                    const amount = typeof value === 'number' ? value.toLocaleString('vi-VN') : value;
+                    csv += `"${key}","${amount}"\n`;
+                }
+            } else if (Array.isArray(revenueData)) {
+                // Nếu là array, lấy header từ object đầu tiên
+                if (revenueData.length > 0) {
+                    const headers = Object.keys(revenueData[0]);
+                    csv += headers.join(',') + '\n';
+                    revenueData.forEach(row => {
+                        const values = headers.map(h => {
+                            const val = row[h];
+                            return typeof val === 'string' ? `"${val}"` : val;
+                        });
+                        csv += values.join(',') + '\n';
+                    });
+                }
+            } else {
+                csv += 'Không có dữ liệu\n';
+            }
+
+            return csv;
+        }
+
         // Cấu hình Font chữ cho biểu đồ
         Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
         Chart.defaults.global.defaultFontColor = '#858796';
 
-        // Lấy thẻ Canvas
-        var ctx = document.getElementById("myBarChart");
-        
-        // Khởi tạo biểu đồ
-        var myBarChart = new Chart(ctx, {
+        // Lấy thẻ Canvas - đảm bảo chạy sau DOM ready
+        $(document).ready(function() {
+            var ctx = document.getElementById("myBarChart");
+            if (!ctx) {
+                console.error('[index.html] Không tìm thấy canvas #myBarChart');
+                return;
+            }
+            
+            // Khởi tạo biểu đồ
+            var myBarChart = new Chart(ctx, {
             type: 'bar', // Loại biểu đồ: Cột
             data: {
                 labels: ["Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11"], // Trục ngang
@@ -364,6 +510,7 @@
                     }
                 },
             }
+            });
         });
     </script>
 

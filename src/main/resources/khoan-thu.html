@@ -213,14 +213,19 @@
                     return;
                 }
 
-                // Validate and prepare payload
-                const tenKhoanThu = $('#tenKhoanThu').val()?.trim();
+                // Validate and prepare payload - lấy giá trị an toàn
+                const tenKhoanThuEl = $('#tenKhoanThu');
+                const loaiPhiEl = $('#loaiPhiSelect');
+                const donGiaEl = $('#donGia');
+                const moTaEl = $('#moTa');
+
+                const tenKhoanThu = tenKhoanThuEl.length > 0 ? (tenKhoanThuEl.val() || '').trim() : '';
                 if (!tenKhoanThu) {
                     APIUtils.showError('Vui lòng nhập tên khoản thu');
                     return;
                 }
                 
-                const loaiPhi = $('#loaiPhiSelect').val();
+                const loaiPhi = loaiPhiEl.length > 0 ? (loaiPhiEl.val() || '') : '';
                 if (!loaiPhi) {
                     APIUtils.showError('Vui lòng chọn loại phí');
                     return;
@@ -228,7 +233,7 @@
                 
                 // Parse donGia as number (not string)
                 let donGia = 0;
-                const donGiaStr = $('#donGia').val();
+                const donGiaStr = donGiaEl.length > 0 ? (donGiaEl.val() || '') : '';
                 if (donGiaStr && donGiaStr.trim() !== '') {
                     const parsed = parseFloat(donGiaStr);
                     if (isNaN(parsed) || parsed < 0) {
@@ -238,13 +243,18 @@
                     donGia = parsed;
                 }
                 
+                const moTa = moTaEl.length > 0 ? (moTaEl.val() || '').trim() : '';
+                
                 const khoanThu = {
                     tenKhoanThu: tenKhoanThu,
                     loaiPhi: loaiPhi,
                     donGia: donGia, // Send as number, not string
-                    moTa: $('#moTa').val()?.trim() || ''
+                    moTa: moTa
                     // Note: hanNop is not sent as it's not in the model
                 };
+
+                // Log payload để debug
+                console.log('[saveKhoanThu] Payload gửi lên backend:', JSON.stringify(khoanThu, null, 2));
 
                 try {
                     if (editingId) {
