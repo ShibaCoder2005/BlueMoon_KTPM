@@ -260,10 +260,11 @@
                         
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="residentNgaySinh">Ngày sinh <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="residentNgaySinh" name="ngaySinh" required>
-                                </div>
+                        <div class="form-group">
+                            <label for="residentNgaySinh">Ngày sinh <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="residentNgaySinh" name="ngaySinh" required>
+                            <small class="form-text text-danger" id="residentNgaySinhError" style="display: none;"></small>
+                        </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -301,6 +302,7 @@
                                         <option value="Anh/Chị/Em">Anh/Chị/Em</option>
                                         <option value="Khác">Khác</option>
                                     </select>
+                                    <small class="form-text text-danger" id="residentQuanHeChuHoError" style="display: none;"></small>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -423,10 +425,26 @@
                 await saveResident();
             });
             
+            // Real-time validation
+            $('#residentNgaySinh').on('change blur', validateNgaySinh);
+            $('#residentQuanHeChuHo').on('change', validateQuanHeChuHo);
+            $('#residentTinhTrang').on('change', function() {
+                validateTinhTrang();
+                validateQuanHeChuHo(); // Re-validate quan hệ khi tình trạng thay đổi
+            });
+            $('#residentMaHo').on('change', function() {
+                validateQuanHeChuHo(); // Re-validate quan hệ khi hộ gia đình thay đổi
+            });
+            
+            // Validate on input change
+            $('#residentForm input, #residentForm select').on('input change', updateSaveButtonState);
+            
             // Reset modal on close
             $('#residentModal').on('hidden.bs.modal', function() {
                 editingResidentId = null;
                 $('#residentForm')[0].reset();
+                clearValidationErrors();
+                updateSaveButtonState();
             });
             
             // Event delegation for DataTables buttons
@@ -602,10 +620,198 @@
             await reloadResidentsTable();
         }
 
+        /**
+         * Validate ngày sinh
+         */
+        function validateNgaySinh() {
+            const ngaySinhEl = $('#residentNgaySinh');
+            const errorEl = $('#residentNgaySinhError');
+            const ngaySinh = ngaySinhEl.val();
+            
+            if (!ngaySinh) {
+                hideError(errorEl);
+                return true;
+            }
+            
+            const ngaySinhDate = new Date(ngaySinh);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (isNaN(ngaySinhDate.getTime())) {
+                showError(errorEl, 'Ngày sinh không hợp lệ');
+                return false;
+            }
+            
+            if (ngaySinhDate > today) {
+                showError(errorEl, 'Ngày sinh không được lớn hơn ngày hiện tại');
+                return false;
+            }
+            
+            // Tính tuổi
+            const age = today.getFullYear() - ngaySinhDate.getFullYear();
+            const monthDiff = today.getMonth() - ngaySinhDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < ngaySinhDate.getDate())) {
+                const actualAge = age - 1;
+                if (actualAge < 0) {
+                    showError(errorEl, 'Ngày sinh không hợp lệ (tuổi phải >= 0)');
+                    return false;
+                }
+            }
+            
+            hideError(errorEl);
+            return true;
+        }
+        
+        /**
+         * Validate quan hệ với chủ hộ
+         */
+        async function validateQuanHeChuHo() {
+            const quanHeEl = $('#residentQuanHeChuHo');
+            const errorEl = $('#residentQuanHeChuHoError');
+            const maHoEl = $('#residentMaHo');
+            const tinhTrangEl = $('#residentTinhTrang');
+            
+            const quanHe = quanHeEl.val();
+            const maHo = maHoEl.val();
+            const tinhTrang = tinhTrangEl.val();
+            
+            if (!quanHe) {
+                hideError(errorEl);
+                return true;
+            }
+            
+            // Logic cư trú: Tạm trú không được chọn "Chủ hộ"
+            if (tinhTrang === 'TamTru' && quanHe === 'Chủ hộ') {
+                showError(errorEl, 'Người tạm trú không thể là chủ hộ');
+                return false;
+            }
+            
+            if (!maHo) {
+                hideError(errorEl);
+                return true; // Chưa chọn hộ, không validate
+            }
+            
+            try {
+                // Load danh sách cư dân trong hộ
+                const allResidents = await NhanKhauAPI.getAll();
+                const residentsInHousehold = allResidents.filter(r => {
+                    const residentMaHo = r.maHo || r.id; // Fallback
+                    return residentMaHo === parseInt(maHo);
+                });
+                
+                // Tìm chủ hộ hiện tại (loại trừ cư dân đang edit)
+                const currentChuHo = residentsInHousehold.find(r => {
+                    if (editingResidentId) {
+                        const residentId = r.id || r.maNhanKhau;
+                        const editingId = typeof editingResidentId === 'number' ? editingResidentId : parseInt(editingResidentId, 10);
+                        if (residentId === editingId) {
+                            return false; // Loại trừ cư dân đang edit
+                        }
+                    }
+                    return r.quanHeVoiChuHo === 'Chủ hộ';
+                });
+                
+                if (quanHe === 'Chủ hộ') {
+                    // Kiểm tra hộ chưa có chủ hộ
+                    if (currentChuHo) {
+                        showError(errorEl, `Hộ gia đình này đã có chủ hộ: ${currentChuHo.hoTen || 'N/A'}`);
+                        return false;
+                    }
+                } else if (quanHe === 'Vợ/Chồng' || quanHe === 'Con') {
+                    // Kiểm tra hộ đã có chủ hộ
+                    if (!currentChuHo) {
+                        showError(errorEl, 'Hộ gia đình này chưa có chủ hộ. Vui lòng thêm chủ hộ trước.');
+                        return false;
+                    }
+                }
+                
+                hideError(errorEl);
+                return true;
+            } catch (error) {
+                console.error('Error validating quan hệ chủ hộ:', error);
+                // Không chặn submit nếu lỗi API, chỉ log
+                hideError(errorEl);
+                return true;
+            }
+        }
+        
+        /**
+         * Validate tình trạng cư trú
+         */
+        function validateTinhTrang() {
+            const tinhTrangEl = $('#residentTinhTrang');
+            const quanHeEl = $('#residentQuanHeChuHo');
+            const tinhTrang = tinhTrangEl.val();
+            const quanHe = quanHeEl.val();
+            
+            // Nếu tạm trú và đã chọn "Chủ hộ", reset quan hệ
+            if (tinhTrang === 'TamTru' && quanHe === 'Chủ hộ') {
+                quanHeEl.val('');
+                validateQuanHeChuHo();
+            }
+        }
+        
+        /**
+         * Show error message
+         */
+        function showError(errorEl, message) {
+            errorEl.text(message).show();
+            errorEl.closest('.form-group').addClass('has-error');
+        }
+        
+        /**
+         * Hide error message
+         */
+        function hideError(errorEl) {
+            errorEl.hide();
+            errorEl.closest('.form-group').removeClass('has-error');
+        }
+        
+        /**
+         * Clear all validation errors
+         */
+        function clearValidationErrors() {
+            $('#residentNgaySinhError, #residentQuanHeChuHoError').hide();
+            $('.form-group').removeClass('has-error');
+        }
+        
+        /**
+         * Update save button state based on validation
+         */
+        async function updateSaveButtonState() {
+            const btnSave = $('#btnSaveResident');
+            const form = $('#residentForm')[0];
+            
+            // Basic HTML5 validation
+            if (!form.checkValidity()) {
+                btnSave.prop('disabled', true);
+                return;
+            }
+            
+            // Custom validation
+            const ngaySinhValid = validateNgaySinh();
+            const quanHeValid = await validateQuanHeChuHo();
+            
+            btnSave.prop('disabled', !(ngaySinhValid && quanHeValid));
+        }
+
         async function saveResident() {
             const form = $('#residentForm')[0];
             if (!form.checkValidity()) {
                 form.reportValidity();
+                return;
+            }
+
+            // Run custom validations
+            const ngaySinhValid = validateNgaySinh();
+            if (!ngaySinhValid) {
+                APIUtils.showError('Vui lòng kiểm tra lại ngày sinh');
+                return;
+            }
+            
+            const quanHeValid = await validateQuanHeChuHo();
+            if (!quanHeValid) {
+                APIUtils.showError('Vui lòng kiểm tra lại quan hệ với chủ hộ');
                 return;
             }
 
@@ -669,6 +875,7 @@
                 }
 
                 $('#residentModal').modal('hide');
+                clearValidationErrors();
                 await reloadResidentsTable();
                 
                 // Refresh lịch sử nhân khẩu nếu card đang hiển thị
@@ -679,6 +886,7 @@
                 APIUtils.showError(error.message);
             } finally {
                 btnSave.prop('disabled', false).text('Lưu');
+                updateSaveButtonState(); // Re-validate after error
             }
         }
 
