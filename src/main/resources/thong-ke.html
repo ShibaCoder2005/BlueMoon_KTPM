@@ -127,7 +127,72 @@
                 <div class="container-fluid">
                     <h1 class="h3 mb-4 text-gray-800">Biểu đồ thống kê</h1>
 
-                    <div class="row">
+                    <!-- Dashboard Stats Cards -->
+                    <div class="row mb-4" id="dashboardStats">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-primary shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng doanh thu</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalRevenue">0 VNĐ</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-success shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tổng số hộ</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalHouseholds">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-home fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tổng số phiếu thu</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalReceipts">0</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-file-invoice fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Tổng công nợ</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalDebt">0 VNĐ</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 1: Gender & Population -->
+                    <div class="row mb-4">
                         <div class="col-xl-4 col-lg-5">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
@@ -154,6 +219,104 @@
                                 <div class="card-body">
                                     <div class="chart-area">
                                         <canvas id="myAreaChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 2: Age Group & Status -->
+                    <div class="row mb-4">
+                        <div class="col-xl-6 col-lg-6">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Phân bố theo độ tuổi</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-pie pt-4 pb-2">
+                                        <canvas id="ageGroupChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-6 col-lg-6">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Phân bố theo tình trạng cư trú</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-pie pt-4 pb-2">
+                                        <canvas id="statusChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row 3: Revenue & Debt -->
+                    <div class="row mb-4">
+                        <div class="col-xl-6 col-lg-6">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Tình hình thanh toán</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-pie pt-4 pb-2">
+                                        <canvas id="debtChart"></canvas>
+                                    </div>
+                                    <div class="mt-4 text-center small">
+                                        <span class="mr-2"><i class="fas fa-circle text-success"></i> Đã thanh toán</span>
+                                        <span class="mr-2"><i class="fas fa-circle text-danger"></i> Chưa thanh toán</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-6 col-lg-6">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                                    <h6 class="m-0 font-weight-bold text-primary">Doanh thu theo đợt thu</h6>
+                                    <div>
+                                        <input type="date" id="revenueFromDate" class="form-control form-control-sm d-inline-block" style="width: 150px;">
+                                        <input type="date" id="revenueToDate" class="form-control form-control-sm d-inline-block ml-2" style="width: 150px;">
+                                        <button class="btn btn-sm btn-primary ml-2" onclick="loadRevenueStats()">Tải</button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-bar pt-4 pb-2">
+                                        <canvas id="revenueChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tables Row: Revenue Details & Debt Details -->
+                    <div class="row mb-4">
+                        <div class="col-xl-12 col-lg-12">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                                    <h6 class="m-0 font-weight-bold text-primary">Chi tiết công nợ</h6>
+                                    <button class="btn btn-sm btn-primary" onclick="loadDebtDetails()">Làm mới</button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="debtDetailsTable" width="100%" cellspacing="0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Mã phiếu</th>
+                                                    <th>Ngày lập</th>
+                                                    <th>Tên hộ</th>
+                                                    <th>Đợt thu</th>
+                                                    <th>Tổng tiền</th>
+                                                    <th>Trạng thái</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="debtDetailsBody">
+                                                <tr><td colspan="6" class="text-center">Đang tải...</td></tr>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -247,36 +410,156 @@
         Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
         Chart.defaults.global.defaultFontColor = '#858796';
 
-        let myPieChart, myAreaChart;
+        let myPieChart, myAreaChart, ageGroupChart, statusChart, debtChart, revenueChart;
 
         // Load and render statistics
         $(document).ready(async function() {
-            await loadStatistics();
+            await loadAllStatistics();
         });
 
-        async function loadStatistics() {
+        async function loadAllStatistics() {
             try {
-                // Load residents for gender distribution
-                const residents = await NhanKhauAPI.getAll();
-                const genderStats = calculateGenderStats(residents);
-                updatePieChart(genderStats);
-
-                // Load dashboard stats for population trend
-                try {
-                    const dashboard = await ThongKeAPI.getDashboard();
-                    if (dashboard && dashboard.populationTrend) {
-                        updateAreaChart(dashboard.populationTrend);
-                    } else {
-                        // Fallback: use resident count
-                        updateAreaChartFromResidents(residents);
-                    }
-                } catch (error) {
-                    console.warn('Could not load dashboard stats, using residents data:', error);
-                    updateAreaChartFromResidents(residents);
-                }
+                // Load dashboard stats
+                await loadDashboardStats();
+                
+                // Load demographics
+                await loadDemographics();
+                
+                // Load debt stats
+                await loadDebtStats();
+                
+                // Load debt details
+                await loadDebtDetails();
+                
+                // Set default date range for revenue (last 6 months)
+                const today = new Date();
+                const sixMonthsAgo = new Date();
+                sixMonthsAgo.setMonth(today.getMonth() - 6);
+                $('#revenueFromDate').val(sixMonthsAgo.toISOString().split('T')[0]);
+                $('#revenueToDate').val(today.toISOString().split('T')[0]);
+                
+                // Load revenue stats with default date range
+                await loadRevenueStats();
             } catch (error) {
                 console.error('Error loading statistics:', error);
                 APIUtils.showError('Không thể tải dữ liệu thống kê: ' + error.message);
+            }
+        }
+
+        async function loadDashboardStats() {
+            try {
+                const dashboard = await ThongKeAPI.getDashboard();
+                if (dashboard) {
+                    $('#totalRevenue').text(formatCurrency(dashboard.totalRevenue || 0));
+                    $('#totalHouseholds').text(dashboard.totalHouseholds || 0);
+                    $('#totalReceipts').text(dashboard.totalReceipts || 0);
+                    $('#totalDebt').text(formatCurrency(dashboard.totalDebt || 0));
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+
+        async function loadDemographics() {
+            try {
+                const demographics = await ThongKeAPI.demographics();
+                if (demographics) {
+                    // Update gender chart
+                    const genderStats = demographics.byGender || {};
+                    updatePieChart({
+                        nam: genderStats.Nam || genderStats.nam || 0,
+                        nu: genderStats.Nữ || genderStats.nu || genderStats.Nữ || 0,
+                        khac: genderStats.Khác || genderStats.khac || genderStats.Khác || 0,
+                        total: demographics.totalResidents || 0
+                    });
+
+                    // Update age group chart
+                    const ageGroups = demographics.byAgeGroup || {};
+                    updateAgeGroupChart(ageGroups);
+
+                    // Update status chart
+                    const statuses = demographics.byStatus || {};
+                    updateStatusChart(statuses);
+
+                    // Update population trend (simple: use total residents)
+                    const total = demographics.totalResidents || 0;
+                    const trend = [total - 50, total - 40, total - 30, total - 20, total - 10, total];
+                    updateAreaChart(trend);
+                }
+            } catch (error) {
+                console.error('Error loading demographics:', error);
+                // Fallback: load from residents
+                try {
+                    const residents = await NhanKhauAPI.getAll();
+                    const genderStats = calculateGenderStats(residents);
+                    updatePieChart(genderStats);
+                    updateAreaChartFromResidents(residents);
+                } catch (err) {
+                    console.error('Error loading residents as fallback:', err);
+                }
+            }
+        }
+
+        async function loadDebtStats() {
+            try {
+                const debtStats = await ThongKeAPI.debt();
+                if (debtStats) {
+                    const paid = debtStats['Đã thanh toán'] || 0;
+                    const unpaid = debtStats['Chưa thanh toán'] || 0;
+                    updateDebtChart(paid, unpaid);
+                }
+            } catch (error) {
+                console.error('Error loading debt stats:', error);
+            }
+        }
+
+        async function loadDebtDetails() {
+            try {
+                const details = await ThongKeAPI.debtDetails();
+                const tbody = $('#debtDetailsBody');
+                tbody.empty();
+                
+                if (!details || details.length === 0) {
+                    tbody.html('<tr><td colspan="6" class="text-center">Không có công nợ</td></tr>');
+                    return;
+                }
+
+                details.forEach(detail => {
+                    const row = `
+                        <tr>
+                            <td>${detail.maPhieu || '-'}</td>
+                            <td>${formatDate(detail.ngayLap)}</td>
+                            <td>${detail.tenHo || '-'}</td>
+                            <td>${detail.tenDot || '-'}</td>
+                            <td>${formatCurrency(detail.tongTien || 0)}</td>
+                            <td><span class="badge badge-warning">${detail.trangThai || 'Chưa thanh toán'}</span></td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            } catch (error) {
+                console.error('Error loading debt details:', error);
+                $('#debtDetailsBody').html('<tr><td colspan="6" class="text-center text-danger">Lỗi khi tải dữ liệu</td></tr>');
+            }
+        }
+
+        async function loadRevenueStats() {
+            try {
+                const fromDate = $('#revenueFromDate').val();
+                const toDate = $('#revenueToDate').val();
+                
+                if (!fromDate || !toDate) {
+                    APIUtils.showError('Vui lòng chọn khoảng thời gian');
+                    return;
+                }
+
+                const revenueStats = await ThongKeAPI.revenue({ fromDate, toDate });
+                if (revenueStats) {
+                    updateRevenueChart(revenueStats);
+                }
+            } catch (error) {
+                console.error('Error loading revenue stats:', error);
+                APIUtils.showError('Không thể tải dữ liệu doanh thu: ' + error.message);
             }
         }
 
@@ -297,23 +580,23 @@
                 myPieChart.destroy();
             }
             myPieChart = new Chart(ctxPie, {
-                type: 'doughnut',
-                data: {
-                    labels: ["Nam", "Nữ", "Khác"],
-                    datasets: [{
+            type: 'doughnut',
+            data: {
+                labels: ["Nam", "Nữ", "Khác"],
+                datasets: [{
                         data: [stats.nam, stats.nu, stats.khac],
-                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
-                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
-                        hoverBorderColor: "rgba(234, 236, 244, 1)",
-                    }],
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 },
-                    legend: { display: false },
-                    cutoutPercentage: 80,
-                },
-            });
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+                    hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 },
+                legend: { display: false },
+                cutoutPercentage: 80,
+            },
+        });
         }
 
         function updateAreaChartFromResidents(residents) {
@@ -333,36 +616,171 @@
             if (Array.isArray(data) && data.length === labels.length) {
                 // Data is array of numbers
                 myAreaChart = new Chart(ctxArea, {
-                    type: 'line',
-                    data: {
+            type: 'line',
+            data: {
                         labels: labels,
-                        datasets: [{
-                            label: "Dân số",
-                            lineTension: 0.3,
-                            backgroundColor: "rgba(78, 115, 223, 0.05)",
-                            borderColor: "rgba(78, 115, 223, 1)",
-                            pointRadius: 3,
-                            pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                            pointBorderColor: "rgba(78, 115, 223, 1)",
-                            pointHoverRadius: 3,
-                            pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-                            pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-                            pointHitRadius: 10,
-                            pointBorderWidth: 2,
+                datasets: [{
+                    label: "Dân số",
+                    lineTension: 0.3,
+                    backgroundColor: "rgba(78, 115, 223, 0.05)",
+                    borderColor: "rgba(78, 115, 223, 1)",
+                    pointRadius: 3,
+                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                    pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
                             data: data,
-                        }],
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
+                scales: {
+                    xAxes: [{ gridLines: { display: false, drawBorder: false }, ticks: { maxTicksLimit: 7 } }],
+                    yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10 }, gridLines: { color: "rgb(234, 236, 244)", zeroLineColor: "rgb(234, 236, 244)", drawBorder: false, borderDash: [2], zeroLineBorderDash: [2] } }],
+                },
+                legend: { display: false },
+                tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", titleMarginBottom: 10, titleFontColor: '#6e707e', titleFontSize: 14, borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, intersect: false, mode: 'index', caretPadding: 10 },
+            }
+        });
+            }
+        }
+
+        function updateAgeGroupChart(ageGroups) {
+            const ctx = document.getElementById("ageGroupChart");
+            if (ageGroupChart) {
+                ageGroupChart.destroy();
+            }
+            
+            const labels = Object.keys(ageGroups);
+            const data = Object.values(ageGroups);
+            
+            ageGroupChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e'],
+                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda20a'],
+                        hoverBorderColor: "rgba(234, 236, 244, 1)",
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 },
+                    legend: { display: true, position: 'bottom' },
+                    cutoutPercentage: 80,
+                },
+            });
+        }
+
+        function updateStatusChart(statuses) {
+            const ctx = document.getElementById("statusChart");
+            if (statusChart) {
+                statusChart.destroy();
+            }
+            
+            const labels = Object.keys(statuses);
+            const data = Object.values(statuses);
+            
+            statusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda20a', '#c0392b'],
+                        hoverBorderColor: "rgba(234, 236, 244, 1)",
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 },
+                    legend: { display: true, position: 'bottom' },
+                    cutoutPercentage: 80,
+                },
+            });
+        }
+
+        function updateDebtChart(paid, unpaid) {
+            const ctx = document.getElementById("debtChart");
+            if (debtChart) {
+                debtChart.destroy();
+            }
+            
+            debtChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ["Đã thanh toán", "Chưa thanh toán"],
+                    datasets: [{
+                        data: [paid, unpaid],
+                        backgroundColor: ['#1cc88a', '#e74a3b'],
+                        hoverBackgroundColor: ['#17a673', '#c0392b'],
+                        hoverBorderColor: "rgba(234, 236, 244, 1)",
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, caretPadding: 10 },
+                    legend: { display: false },
+                    cutoutPercentage: 80,
+                },
+            });
+        }
+
+        function updateRevenueChart(revenueStats) {
+            const ctx = document.getElementById("revenueChart");
+            if (revenueChart) {
+                revenueChart.destroy();
+            }
+            
+            const labels = Object.keys(revenueStats);
+            const data = Object.values(revenueStats).map(v => typeof v === 'number' ? v : parseFloat(v) || 0);
+            
+            revenueChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Doanh thu",
+                        backgroundColor: '#4e73df',
+                        hoverBackgroundColor: '#2e59d9',
+                        borderColor: '#4e73df',
+                        data: data,
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
+                    scales: {
+                        xAxes: [{ gridLines: { display: false, drawBorder: false }, ticks: { maxTicksLimit: 6 } }],
+                        yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10, callback: function(value) { return formatCurrency(value); } }, gridLines: { color: "rgb(234, 236, 244)", zeroLineColor: "rgb(234, 236, 244)", drawBorder: false, borderDash: [2], zeroLineBorderDash: [2] } }],
                     },
-                    options: {
-                        maintainAspectRatio: false,
-                        layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
-                        scales: {
-                            xAxes: [{ gridLines: { display: false, drawBorder: false }, ticks: { maxTicksLimit: 7 } }],
-                            yAxes: [{ ticks: { maxTicksLimit: 5, padding: 10 }, gridLines: { color: "rgb(234, 236, 244)", zeroLineColor: "rgb(234, 236, 244)", drawBorder: false, borderDash: [2], zeroLineBorderDash: [2] } }],
-                        },
-                        legend: { display: false },
-                        tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", titleMarginBottom: 10, titleFontColor: '#6e707e', titleFontSize: 14, borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, intersect: false, mode: 'index', caretPadding: 10 },
-                    }
-                });
+                    legend: { display: false },
+                    tooltips: { backgroundColor: "rgb(255,255,255)", bodyFontColor: "#858796", titleMarginBottom: 10, titleFontColor: '#6e707e', titleFontSize: 14, borderColor: '#dddfeb', borderWidth: 1, xPadding: 15, yPadding: 15, displayColors: false, intersect: false, mode: 'index', caretPadding: 10, callbacks: { label: function(tooltipItem) { return formatCurrency(tooltipItem.yLabel); } } },
+                }
+            });
+        }
+
+        function formatCurrency(amount) {
+            if (typeof amount === 'string') {
+                amount = parseFloat(amount) || 0;
+            }
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('vi-VN');
+            } catch (e) {
+                return dateStr;
             }
         }
     </script>

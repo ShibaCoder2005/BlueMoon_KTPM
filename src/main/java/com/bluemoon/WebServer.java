@@ -1021,7 +1021,7 @@ public class WebServer {
         });
         app.get("/api/thong-ke/debt/details", ctx -> {
             try {
-                ctx.json(thongKeService.getDebtStats());
+                ctx.json(thongKeService.getDebtDetails());
             } catch (Exception e) {
                 handleException(ctx, e);
             }
@@ -1031,6 +1031,13 @@ public class WebServer {
                 Integer maDotThu = parseIntSafe(ctx, "maDotThu");
                 if (maDotThu == null) return;
                 ctx.json(thongKeService.generateCollectionReport(maDotThu));
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+        app.get("/api/thong-ke/demographics", ctx -> {
+            try {
+                ctx.json(thongKeService.getResidentDemographics());
             } catch (Exception e) {
                 handleException(ctx, e);
             }

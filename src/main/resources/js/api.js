@@ -214,7 +214,8 @@ const ThongKeAPI = {
     debt: () => apiRequest('/thong-ke/debt', 'GET'),
     debtTotal: () => apiRequest('/thong-ke/debt/total', 'GET'),
     debtDetails: () => apiRequest('/thong-ke/debt/details', 'GET'),
-    report: (maDotThu) => apiRequest(`/thong-ke/report/${maDotThu}`, 'GET')
+    report: (maDotThu) => apiRequest(`/thong-ke/report/${maDotThu}`, 'GET'),
+    demographics: () => apiRequest('/thong-ke/demographics', 'GET')
 };
 
 const ThongBaoAPI = {
