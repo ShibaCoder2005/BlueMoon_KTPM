@@ -105,7 +105,8 @@ function showError(message) {
 const AuthAPI = {
     login: (data) => apiRequest('/login', 'POST', data),
     register: (data) => apiRequest('/register', 'POST', data),
-    checkUsername: (username) => apiRequest(`/check-username/${encodeURIComponent(username)}`, 'GET')
+    checkUsername: (username) => apiRequest(`/check-username/${encodeURIComponent(username)}`, 'GET'),
+    changePassword: (data) => apiRequest('/change-password', 'POST', data)
 };
 
 const TaiKhoanAPI = {
@@ -381,4 +382,87 @@ function logout() {
 // Export logout function globally
 if (typeof window !== 'undefined') {
     window.logout = logout;
+}
+
+/**
+ * Utility functions for user management
+ */
+const UserUtils = {
+    /**
+     * Get current user from sessionStorage
+     * @returns {Object|null} User object or null if not logged in
+     */
+    getCurrentUser: () => {
+        try {
+            const userStr = sessionStorage.getItem('currentUser');
+            if (!userStr) return null;
+            return JSON.parse(userStr);
+        } catch (error) {
+            console.error('[UserUtils] Error parsing currentUser:', error);
+            return null;
+        }
+    },
+    
+    /**
+     * Get user display name (hoTen or tenDangNhap)
+     * @returns {string} Display name or 'Người dùng' if not available
+     */
+    getUserDisplayName: () => {
+        const user = UserUtils.getCurrentUser();
+        if (!user) return 'Người dùng';
+        
+        // Try hoTen first, then tenDangNhap, then fallback
+        if (user.hoTen && user.hoTen.trim()) {
+            return user.hoTen.trim();
+        }
+        if (user.tenDangNhap && user.tenDangNhap.trim()) {
+            return user.tenDangNhap.trim();
+        }
+        return 'Người dùng';
+    },
+    
+    /**
+     * Check if user is logged in
+     * @returns {boolean}
+     */
+    isLoggedIn: () => {
+        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+        return isLoggedIn === 'true' && UserUtils.getCurrentUser() !== null;
+    },
+    
+    /**
+     * Update user display name in navbar
+     * Call this on page load to update the user name display
+     */
+    updateUserDisplay: () => {
+        const displayName = UserUtils.getUserDisplayName();
+        const userDisplayElements = $('.text-gray-600.small, [id*="userDisplay"], [class*="user-name"]');
+        
+        // Update all elements that might display user name
+        if (userDisplayElements.length > 0) {
+            userDisplayElements.each(function() {
+                const $el = $(this);
+                // Only update if it looks like a hardcoded admin name
+                const text = $el.text().trim();
+                if (text === 'Admin Quản Lý' || text === 'Ban Quản Lý' || text === 'Trưởng Ban Quản Lý' || 
+                    text === 'Nguyễn Văn A' || text === 'Douglas McGee' || text.startsWith('Admin')) {
+                    $el.text(displayName);
+                }
+            });
+        }
+        
+        // Also update specific selector if exists
+        const $userDropdown = $('#userDropdown');
+        if ($userDropdown.length > 0) {
+            const $nameSpan = $userDropdown.find('.text-gray-600.small');
+            if ($nameSpan.length > 0) {
+                $nameSpan.text(displayName);
+            }
+        }
+    }
+};
+
+// Export UserUtils globally
+if (typeof window !== 'undefined') {
+    window.UserUtils = UserUtils;
 }

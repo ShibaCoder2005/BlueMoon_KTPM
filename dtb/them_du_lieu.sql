@@ -95,3 +95,6 @@ VALUES
 ('2025-01-01 00:00:00', 'Tổng hộ dân', 'Thống kê số hộ dân cư hiện tại', '5'),
 ('2025-01-02 00:00:00', 'Tổng thu tháng 1', 'Số tiền đã thu trong tháng 1', '110000'),
 ('2025-03-01 00:00:00', 'Tổng nhân khẩu', 'Số nhân khẩu hiện có', '8');
+
+
+

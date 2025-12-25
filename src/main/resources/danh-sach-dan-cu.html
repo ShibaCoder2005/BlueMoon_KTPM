@@ -119,12 +119,12 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Quản Lý</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
                                 <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="ho-so.html">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ
                                 </a>
                                 <div class="dropdown-divider"></div>
@@ -408,6 +408,9 @@
         let editingResidentId = null;
 
         $(document).ready(async function() {
+            // Load và hiển thị thông tin user
+            loadUserDisplay();
+            
             await loadHouseholds();
             await loadResidents();
             
@@ -1075,6 +1078,25 @@
             } catch (error) {
                 console.error('[deleteResident] Error:', error);
                 APIUtils.showError('Không thể xóa cư dân: ' + error.message);
+            }
+        }
+        
+        /**
+         * Load và hiển thị thông tin user từ sessionStorage
+         */
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                    $('#userDisplayName').text(displayName);
+                } else {
+                    $('#userDisplayName').text('Người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                $('#userDisplayName').text('Người dùng');
             }
         }
     </script>

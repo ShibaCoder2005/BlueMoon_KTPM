@@ -119,13 +119,13 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Quản Lý</span>
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
                                 <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
                             </a>
                             
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="#">
+                                <a class="dropdown-item" href="ho-so.html">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Hồ sơ
                                 </a>
@@ -455,6 +455,37 @@
         Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
         Chart.defaults.global.defaultFontColor = '#858796';
 
+        // Load và hiển thị thông tin user
+        $(document).ready(function() {
+            // Update user display name
+            if (typeof UserUtils !== 'undefined') {
+                UserUtils.updateUserDisplay();
+            } else {
+                // Fallback: load user from sessionStorage
+                try {
+                    const userStr = sessionStorage.getItem('currentUser');
+                    if (userStr) {
+                        const user = JSON.parse(userStr);
+                        const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                        $('#userDisplayName').text(displayName);
+                    } else {
+                        $('#userDisplayName').text('Người dùng');
+                    }
+                } catch (error) {
+                    console.error('Error loading user:', error);
+                    $('#userDisplayName').text('Người dùng');
+                }
+            }
+            
+            // Check auth and redirect if needed
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                // Not logged in, redirect to login
+                window.location.href = 'login.html';
+                return;
+            }
+        });
+        
         // Lấy thẻ Canvas - đảm bảo chạy sau DOM ready
         $(document).ready(function() {
             var ctx = document.getElementById("myBarChart");
