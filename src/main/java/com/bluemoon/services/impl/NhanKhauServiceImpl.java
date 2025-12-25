@@ -7,11 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.bluemoon.models.LichSuNhanKhau;
 import com.bluemoon.models.NhanKhau;
@@ -25,7 +23,7 @@ import com.bluemoon.utils.DatabaseConnector;
 public class NhanKhauServiceImpl implements NhanKhauService {
 
     private static final Logger logger = Logger.getLogger(NhanKhauServiceImpl.class.getName());
-
+    
     // SQL Queries for NhanKhau
     private static final String SELECT_ALL = 
             "SELECT id, maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang FROM NhanKhau ORDER BY id";
@@ -150,28 +148,68 @@ public class NhanKhauServiceImpl implements NhanKhauService {
             }
         }
 
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(INSERT)) {
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            // Insert new resident
+            int newResidentId = -1;
+            try (PreparedStatement pstmt = conn.prepareStatement(INSERT, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
-            pstmt.setInt(1, nhanKhau.getMaHo());
-            pstmt.setString(2, nhanKhau.getHoTen().trim());
-            pstmt.setDate(3, convertToSqlDate(nhanKhau.getNgaySinh()));
-            pstmt.setString(4, nhanKhau.getGioiTinh());
-            pstmt.setString(5, nhanKhau.getSoCCCD());
-            pstmt.setString(6, nhanKhau.getNgheNghiep());
-            pstmt.setString(7, nhanKhau.getQuanHeVoiChuHo());
-            pstmt.setString(8, nhanKhau.getTinhTrang() != null ? nhanKhau.getTinhTrang() : "CuTru");
+                pstmt.setInt(1, nhanKhau.getMaHo());
+                pstmt.setString(2, nhanKhau.getHoTen().trim());
+                pstmt.setDate(3, convertToSqlDate(nhanKhau.getNgaySinh()));
+                pstmt.setString(4, nhanKhau.getGioiTinh());
+                pstmt.setString(5, nhanKhau.getSoCCCD());
+                pstmt.setString(6, nhanKhau.getNgheNghiep());
+                pstmt.setString(7, nhanKhau.getQuanHeVoiChuHo());
+                pstmt.setString(8, nhanKhau.getTinhTrang() != null ? nhanKhau.getTinhTrang() : "CuTru");
 
-            int rowsAffected = pstmt.executeUpdate();
-            boolean success = rowsAffected > 0;
+                int rowsAffected = pstmt.executeUpdate();
+                boolean success = rowsAffected > 0;
 
-            if (success) {
-                logger.log(Level.INFO, "Successfully added resident: " + nhanKhau.getHoTen() + " (rows affected: " + rowsAffected + ")");
-            } else {
-                logger.log(Level.WARNING, "Failed to add resident: " + nhanKhau.getHoTen() + " (rows affected: " + rowsAffected + ")");
+                if (success) {
+                    // Get generated ID
+                    try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            newResidentId = generatedKeys.getInt(1);
+                        } else {
+                            // Fallback: query by unique fields to get ID
+                            try (PreparedStatement findStmt = conn.prepareStatement(
+                                    "SELECT id FROM NhanKhau WHERE maHo = ? AND hoTen = ? AND soCCCD = ? ORDER BY id DESC LIMIT 1")) {
+                                findStmt.setInt(1, nhanKhau.getMaHo());
+                                findStmt.setString(2, nhanKhau.getHoTen().trim());
+                                findStmt.setString(3, nhanKhau.getSoCCCD() != null ? nhanKhau.getSoCCCD() : "");
+                                try (ResultSet rs = findStmt.executeQuery()) {
+                                    if (rs.next()) {
+                                        newResidentId = rs.getInt("id");
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Automatically create history record for new resident
+                    if (newResidentId > 0) {
+                        LichSuNhanKhau history = new LichSuNhanKhau();
+                        history.setMaNhanKhau(newResidentId);
+                        history.setLoaiBienDong("Đăng ký cư trú");
+                        history.setNgayBatDau(LocalDate.now());
+                        history.setNgayKetThuc(null); // Chưa kết thúc
+                        history.setNguoiGhi(1); // Default admin ID, có thể lấy từ session sau
+
+                        boolean historySuccess = addLichSuNhanKhau(history);
+                        if (historySuccess) {
+                            logger.log(Level.INFO, "Successfully created history record for new resident ID: " + newResidentId);
+                        } else {
+                            logger.log(Level.WARNING, "Resident added but failed to create history record for ID: " + newResidentId);
+                        }
+                    }
+
+                    logger.log(Level.INFO, "Successfully added resident: " + nhanKhau.getHoTen() + " (ID: " + newResidentId + ", rows affected: " + rowsAffected + ")");
+                } else {
+                    logger.log(Level.WARNING, "Failed to add resident: " + nhanKhau.getHoTen() + " (rows affected: " + rowsAffected + ")");
+                }
+
+                return success;
             }
-
-            return success;
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error adding resident: " + nhanKhau.getHoTen(), e);
@@ -324,9 +362,9 @@ public class NhanKhauServiceImpl implements NhanKhauService {
             // Get old status
             NhanKhau existing = findById(nhanKhauId);
             if (existing == null) {
-                logger.log(Level.WARNING, "Resident not found with id: " + nhanKhauId);
-                return false;
-            }
+            logger.log(Level.WARNING, "Resident not found with id: " + nhanKhauId);
+            return false;
+        }
             String oldStatus = existing.getTinhTrang();
 
             // Update status
@@ -369,25 +407,44 @@ public class NhanKhauServiceImpl implements NhanKhauService {
 
     @Override
     public boolean deleteNhanKhau(int id) {
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
-
-            pstmt.setInt(1, id);
-
-            int rowsAffected = pstmt.executeUpdate();
-            boolean success = rowsAffected > 0;
-
-            if (success) {
-                logger.log(Level.INFO, "Successfully deleted resident with id: " + id + " (rows affected: " + rowsAffected + ")");
-            } else {
-                logger.log(Level.WARNING, "Failed to delete resident with id: " + id + " (rows affected: " + rowsAffected + ")");
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            // First, delete all history records for this resident (CASCADE handling)
+            try (PreparedStatement deleteHistoryStmt = conn.prepareStatement(
+                    "DELETE FROM LichSuNhanKhau WHERE maNhanKhau = ?")) {
+                deleteHistoryStmt.setInt(1, id);
+                int historyRowsDeleted = deleteHistoryStmt.executeUpdate();
+                logger.log(Level.INFO, "Deleted " + historyRowsDeleted + " history records for resident id: " + id);
+            } catch (SQLException historyError) {
+                logger.log(Level.WARNING, "Error deleting history records for resident id: " + id + ", continuing with resident deletion", historyError);
+                // Continue with resident deletion even if history deletion fails
             }
 
-            return success;
+            // Then delete the resident
+            try (PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
+                pstmt.setInt(1, id);
+
+                int rowsAffected = pstmt.executeUpdate();
+                boolean success = rowsAffected > 0;
+
+                if (success) {
+                    logger.log(Level.INFO, "Successfully deleted resident with id: " + id + " (rows affected: " + rowsAffected + ")");
+                } else {
+                    logger.log(Level.WARNING, "Failed to delete resident with id: " + id + " (rows affected: " + rowsAffected + ") - resident may not exist");
+                }
+
+                return success;
+            }
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error deleting resident with id: " + id, e);
             e.printStackTrace();
+            
+            // Check if it's a foreign key constraint violation
+            String errorMessage = e.getMessage();
+            if (errorMessage != null && (errorMessage.contains("foreign key") || errorMessage.contains("violates foreign key constraint"))) {
+                logger.log(Level.WARNING, "Cannot delete resident id: " + id + " due to foreign key constraint - resident may be referenced by other records");
+            }
+            
             return false;
         }
     }

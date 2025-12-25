@@ -442,7 +442,20 @@
             
             $(document).on('click', '.btn-delete-resident', async function() {
                 const id = $(this).data('id');
-                if (id) await deleteResident(id);
+                console.log('[deleteResident] Clicked delete button, ID from data-id:', id, 'Type:', typeof id);
+                if (id) {
+                    // Đảm bảo ID là number
+                    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+                    if (isNaN(numericId) || numericId <= 0) {
+                        console.error('[deleteResident] Invalid ID:', id);
+                        APIUtils.showError('ID cư dân không hợp lệ');
+                        return;
+                    }
+                    await deleteResident(numericId);
+                } else {
+                    console.error('[deleteResident] No ID found in data-id attribute');
+                    APIUtils.showError('Không tìm thấy ID cư dân');
+                }
             });
             
             $(document).on('click', '.btn-return-resident', async function() {
@@ -657,6 +670,11 @@
 
                 $('#residentModal').modal('hide');
                 await reloadResidentsTable();
+                
+                // Refresh lịch sử nhân khẩu nếu card đang hiển thị
+                if ($('#residentHistoryCard').is(':visible')) {
+                    await loadAllResidentHistory();
+                }
             } catch (error) {
                 APIUtils.showError(error.message);
             } finally {
@@ -814,16 +832,41 @@
         }
 
         async function deleteResident(id) {
+            console.log('[deleteResident] Called with ID:', id, 'Type:', typeof id);
+            
             if (!confirm('Bạn có chắc chắn muốn xóa cư dân này?')) {
                 return;
             }
+            
             try {
-                if (!APIUtils.validateId(id, 'cư dân')) return;
-                await NhanKhauAPI.delete(id);
+                // Validate ID
+                if (!id || id === null || id === undefined) {
+                    console.error('[deleteResident] ID is null/undefined');
+                    APIUtils.showError('ID cư dân không hợp lệ');
+                    return;
+                }
+                
+                const numericId = typeof id === 'string' ? parseInt(id, 10) : Number(id);
+                if (isNaN(numericId) || numericId <= 0) {
+                    console.error('[deleteResident] Invalid ID format:', id);
+                    APIUtils.showError('ID cư dân không hợp lệ');
+                    return;
+                }
+                
+                console.log('[deleteResident] Calling API with ID:', numericId);
+                await NhanKhauAPI.delete(numericId);
+                console.log('[deleteResident] Delete successful');
+                
                 APIUtils.showSuccess('Xóa cư dân thành công');
                 await reloadResidentsTable();
+                
+                // Refresh lịch sử nhân khẩu nếu card đang hiển thị
+                if ($('#residentHistoryCard').is(':visible')) {
+                    await loadAllResidentHistory();
+                }
             } catch (error) {
-                APIUtils.showError(error.message);
+                console.error('[deleteResident] Error:', error);
+                APIUtils.showError('Không thể xóa cư dân: ' + error.message);
             }
         }
     </script>

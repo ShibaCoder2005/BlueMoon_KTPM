@@ -146,7 +146,12 @@ const NhanKhauAPI = {
     getById: (id) => apiRequest(`/nhan-khau/${id}`, 'GET'),
     create: (data) => apiRequest('/nhan-khau', 'POST', data),
     update: (id, data) => apiRequest(`/nhan-khau/${id}`, 'PUT', data),
-    delete: (id) => apiRequest(`/nhan-khau/${id}`, 'DELETE'),
+    delete: async (id) => {
+        console.log('[NhanKhauAPI.delete] Calling DELETE /api/nhan-khau/' + id);
+        const response = await apiRequest(`/nhan-khau/${id}`, 'DELETE');
+        console.log('[NhanKhauAPI.delete] Response:', response);
+        return response;
+    },
     updateStatus: (id, newStatus, historyRecord) => apiRequest(`/nhan-khau/${id}/status`, 'PUT', { newStatus, historyRecord })
 };
 
