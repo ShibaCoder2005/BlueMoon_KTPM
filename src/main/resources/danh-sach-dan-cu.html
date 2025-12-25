@@ -120,7 +120,7 @@
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
-                                <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="https://source.unsplash.com/QAB-WJcbgJk/60x60" style="object-fit: cover;">
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
@@ -1091,6 +1091,18 @@
                     const user = JSON.parse(userStr);
                     const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
                     $('#userDisplayName').text(displayName);
+                    
+                    // Load avatar
+                    if (user && user.id) {
+                        const imageKey = `profileImage_${user.id}`;
+                        let imageData = sessionStorage.getItem(imageKey);
+                        if (!imageData) {
+                            imageData = localStorage.getItem(imageKey);
+                        }
+                        if (imageData) {
+                            $('#navbarAvatar').attr('src', imageData);
+                        }
+                    }
                 } else {
                     $('#userDisplayName').text('Người dùng');
                 }

@@ -112,7 +112,7 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
-                                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
                                 <a class="dropdown-item" href="ho-so.html"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ</a>
@@ -206,6 +206,53 @@
     <script>
         let paymentHistoryTable;
 
+        // Load user info and avatar
+        $(document).ready(function() {
+            // Load user display name
+            loadUserDisplay();
+            
+            // Load profile image for navbar avatar
+            if (typeof updateNavbarAvatar !== 'undefined') {
+                updateNavbarAvatar();
+            } else {
+                // Fallback: load avatar manually
+                try {
+                    const userStr = sessionStorage.getItem('currentUser');
+                    if (userStr) {
+                        const user = JSON.parse(userStr);
+                        if (user && user.id) {
+                            const imageKey = `profileImage_${user.id}`;
+                            let imageData = sessionStorage.getItem(imageKey);
+                            if (!imageData) {
+                                imageData = localStorage.getItem(imageKey);
+                            }
+                            if (imageData) {
+                                $('#navbarAvatar').attr('src', imageData);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('[lich-su-thanh-toan] Error loading avatar:', error);
+                }
+            }
+        });
+        
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                    $('#userDisplayName').text(displayName);
+                } else {
+                    $('#userDisplayName').text('Người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                $('#userDisplayName').text('Người dùng');
+            }
+        }
+        
         $(document).ready(async function() {
             await loadPaymentHistory();
         });

@@ -120,7 +120,7 @@
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
-                                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
                             </a>
                             
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -474,6 +474,31 @@
                 } catch (error) {
                     console.error('Error loading user:', error);
                     $('#userDisplayName').text('Người dùng');
+                }
+            }
+            
+            // Load profile image for navbar avatar
+            if (typeof updateNavbarAvatar !== 'undefined') {
+                updateNavbarAvatar();
+            } else {
+                // Fallback: load avatar manually
+                try {
+                    const userStr = sessionStorage.getItem('currentUser');
+                    if (userStr) {
+                        const user = JSON.parse(userStr);
+                        if (user && user.id) {
+                            const imageKey = `profileImage_${user.id}`;
+                            let imageData = sessionStorage.getItem(imageKey);
+                            if (!imageData) {
+                                imageData = localStorage.getItem(imageKey);
+                            }
+                            if (imageData) {
+                                $('#navbarAvatar').attr('src', imageData);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('[index] Error loading avatar:', error);
                 }
             }
             

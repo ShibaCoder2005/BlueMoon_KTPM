@@ -466,3 +466,35 @@ const UserUtils = {
 if (typeof window !== 'undefined') {
     window.UserUtils = UserUtils;
 }
+
+/**
+ * Utility function to update navbar avatar across all pages
+ * Call this after changing profile image
+ */
+function updateNavbarAvatar() {
+    try {
+        const userStr = sessionStorage.getItem('currentUser');
+        if (userStr) {
+            const user = JSON.parse(userStr);
+            if (user && user.id) {
+                const imageKey = `profileImage_${user.id}`;
+                let imageData = sessionStorage.getItem(imageKey);
+                if (!imageData) {
+                    imageData = localStorage.getItem(imageKey);
+                }
+                if (imageData) {
+                    // Update all navbar avatars on the page (except profile image)
+                    $('.img-profile.rounded-circle').not('#profileImage').attr('src', imageData);
+                    $('#navbarAvatar').attr('src', imageData);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('[updateNavbarAvatar] Error:', error);
+    }
+}
+
+// Export globally
+if (typeof window !== 'undefined') {
+    window.updateNavbarAvatar = updateNavbarAvatar;
+}
