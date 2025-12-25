@@ -336,3 +336,49 @@ const APIUtils = {
         return value !== null && value !== undefined ? String(value).trim() : defaultValue;
     }
 };
+
+/**
+ * Hàm logout - Xóa tất cả dữ liệu authentication và redirect về login
+ */
+function logout() {
+    console.log('[logout] Starting logout process...');
+    
+    try {
+        // Clear sessionStorage
+        sessionStorage.removeItem('currentUser');
+        sessionStorage.removeItem('isLoggedIn');
+        sessionStorage.removeItem('userInfo');
+        sessionStorage.removeItem('accessToken');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('role');
+        sessionStorage.clear();
+        
+        // Clear localStorage (nếu có)
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userInfo');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        
+        // Clear cookies (nếu có)
+        document.cookie.split(";").forEach(function(c) {
+            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+        
+        console.log('[logout] All authentication data cleared');
+        
+        // Redirect to login page
+        window.location.href = 'login.html';
+        
+    } catch (error) {
+        console.error('[logout] Error during logout:', error);
+        // Vẫn redirect về login dù có lỗi
+        window.location.href = 'login.html';
+    }
+}
+
+// Export logout function globally
+if (typeof window !== 'undefined') {
+    window.logout = logout;
+}

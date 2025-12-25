@@ -275,7 +275,7 @@
             <div class="modal-content">
                 <div class="modal-header"><h5 class="modal-title">Đăng xuất?</h5><button class="close" type="button" data-dismiss="modal"><span>×</span></button></div>
                 <div class="modal-body">Chọn "Đăng xuất" để kết thúc phiên làm việc.</div>
-                <div class="modal-footer"><button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button><a class="btn btn-primary" href="#">Đăng xuất</a></div>
+                <div class="modal-footer"><button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button><button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button></div>
             </div>
         </div>
     </div>
@@ -304,5 +304,7 @@
             alert('Đang lọc theo trạng thái: ' + status);
         }
     </script>
+
+    <script src="js/api.js"></script>
 </body>
 </html>

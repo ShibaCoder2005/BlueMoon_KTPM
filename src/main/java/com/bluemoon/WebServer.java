@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * WebServer: Headless REST API server using Javalin.
@@ -25,6 +26,7 @@ public class WebServer {
 
     private static final int PORT = 7070;
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger logger = Logger.getLogger(WebServer.class.getName());
 
     // Service instances
     private final AuthService authService;
@@ -1146,11 +1148,34 @@ public class WebServer {
     // ========== AUTH HANDLERS ==========
     private void handleLogin(Context ctx) {
         try {
-            Map<String, String> body = ctx.bodyAsClass(Map.class);
-            String username = body.get("username");
-            String password = body.get("password");
+            // Parse body as Map<String, Object> to handle JSON deserialization safely
+            Map<String, Object> body;
+            try {
+                body = ctx.bodyAsClass(Map.class);
+            } catch (Exception parseError) {
+                // Fallback: read body as string and parse manually
+                String bodyText = ctx.body();
+                if (bodyText == null || bodyText.trim().isEmpty()) {
+                    ctx.status(400).json(createErrorResponse("Request body is required"));
+                    return;
+                }
+                try {
+                    body = objectMapper.readValue(bodyText, Map.class);
+                } catch (Exception e) {
+                    logger.severe("Failed to parse login request body: " + bodyText);
+                    ctx.status(400).json(createErrorResponse("Invalid request format"));
+                    return;
+                }
+            }
 
-            if (username == null || password == null) {
+            // Extract username and password safely
+            Object usernameObj = body.get("username");
+            Object passwordObj = body.get("password");
+
+            String username = usernameObj != null ? usernameObj.toString().trim() : null;
+            String password = passwordObj != null ? passwordObj.toString() : null;
+
+            if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
                 ctx.status(400).json(createErrorResponse("Username and password are required"));
                 return;
             }
@@ -1164,6 +1189,8 @@ public class WebServer {
                 ctx.status(401).json(createErrorResponse("Invalid credentials or account is locked"));
             }
         } catch (Exception e) {
+            logger.severe("Error in handleLogin: " + e.getMessage());
+            e.printStackTrace();
             handleException(ctx, e);
         }
     }
