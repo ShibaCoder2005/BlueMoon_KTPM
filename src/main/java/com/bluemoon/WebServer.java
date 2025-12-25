@@ -645,6 +645,13 @@ public class WebServer {
                 handleException(ctx, e);
             }
         });
+        app.get("/api/nhan-khau/lich-su/all", ctx -> {
+            try {
+                ctx.json(nhanKhauService.getAllLichSuNhanKhau());
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
         app.post("/api/nhan-khau", ctx -> {
             try {
                 NhanKhau nhanKhau = ctx.bodyAsClass(NhanKhau.class);

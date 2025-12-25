@@ -64,6 +64,13 @@
             </li>
 
             <li class="nav-item">
+                <a class="nav-link" href="lich-su-thanh-toan.html">
+                    <i class="fas fa-fw fa-history"></i>
+                    <span>Lịch sử thanh toán</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link" href="thong-bao.html">
                     <i class="fas fa-fw fa-bullhorn"></i>
                     <span>Thông báo</span>
@@ -137,9 +144,14 @@
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-primary">Dữ liệu tổng hợp</h6>
-                            <button type="button" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id="btnAddResident" data-toggle="modal" data-target="#residentModal">
+                            <div>
+                                <button type="button" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mr-2" id="btnViewResidentHistory">
+                                    <i class="fas fa-history fa-sm text-white-50"></i> Lịch sử nhân khẩu
+                                </button>
+                                <button type="button" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id="btnAddResident" data-toggle="modal" data-target="#residentModal">
                                 <i class="fas fa-user-plus fa-sm text-white-50"></i> Thêm Cư dân
-                            </button>
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -160,6 +172,44 @@
                                         <tr><td colspan="8" class="text-center">Đang tải dữ liệu...</td></tr>
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Lịch sử nhân khẩu tổng hợp -->
+                    <div class="card shadow mb-4" id="residentHistoryCard" style="display: none;">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Lịch sử nhân khẩu tổng hợp</h6>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="$('#residentHistoryCard').hide();">
+                                <i class="fas fa-times"></i> Đóng
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="allResidentHistoryLoading" class="text-center py-4">
+                                <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                                <p class="mt-2">Đang tải lịch sử...</p>
+                            </div>
+                            <div id="allResidentHistoryContent" style="display: none;">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" id="allResidentHistoryTable">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th>STT</th>
+                                                <th>Cư dân</th>
+                                                <th>Loại biến động</th>
+                                                <th>Ngày bắt đầu</th>
+                                                <th>Ngày kết thúc</th>
+                                                <th>Người ghi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="allResidentHistoryTableBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="allResidentHistoryEmpty" class="text-center py-4" style="display: none;">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Chưa có lịch sử biến động</p>
                             </div>
                         </div>
                     </div>
@@ -275,6 +325,54 @@
         </div>
     </div>
 
+    <!-- Modal Lịch sử nhân khẩu -->
+    <div class="modal fade" id="residentHistoryModal" tabindex="-1" role="dialog" aria-labelledby="residentHistoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="residentHistoryModalLabel">Lịch sử nhân khẩu</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6 id="residentHistoryName" class="text-primary"></h6>
+                        <p class="text-muted small mb-0" id="residentHistoryInfo"></p>
+                    </div>
+                    <div id="residentHistoryLoading" class="text-center py-4">
+                        <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                        <p class="mt-2">Đang tải lịch sử...</p>
+                    </div>
+                    <div id="residentHistoryContent" style="display: none;">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="residentHistoryTable">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>STT</th>
+                                        <th>Loại biến động</th>
+                                        <th>Ngày bắt đầu</th>
+                                        <th>Ngày kết thúc</th>
+                                        <th>Người ghi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="residentHistoryTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="residentHistoryEmpty" class="text-center py-4" style="display: none;">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Chưa có lịch sử biến động</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -288,7 +386,7 @@
                 <div class="modal-body">Chọn "Đăng xuất" bên dưới nếu bạn muốn kết thúc phiên làm việc.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
-                    <a class="btn btn-primary" href="login.html">Đăng xuất</a>
+                    <button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button>
                 </div>
             </div>
         </div>
@@ -350,6 +448,11 @@
             $(document).on('click', '.btn-return-resident', async function() {
                 const id = $(this).data('id');
                 if (id) await returnResident(id);
+            });
+            
+            // Nút xem lịch sử nhân khẩu tổng hợp
+            $('#btnViewResidentHistory').on('click', async function() {
+                await loadAllResidentHistory();
             });
         });
 
@@ -454,24 +557,24 @@
                     // Initialize DataTable with data
                     dataTable = $('#dataTable').DataTable({
                         "data": rows,
-                        "language": {
-                            "sProcessing":   "Đang xử lý...",
-                            "sLengthMenu":   "Xem _MENU_ mục",
-                            "sZeroRecords":  "Không tìm thấy dòng nào phù hợp",
-                            "sInfo":         "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
-                            "sInfoEmpty":    "Đang xem 0 đến 0 trong tổng số 0 mục",
-                            "sInfoFiltered": "(được lọc từ _MAX_ mục)",
-                            "sInfoPostFix":  "",
-                            "sSearch":       "Tìm kiếm (Tên/Phòng/Hộ khẩu):",
-                            "sUrl":          "",
-                            "oPaginate": {
-                                "sFirst":    "Đầu",
-                                "sPrevious": "Trước",
-                                "sNext":     "Tiếp",
-                                "sLast":     "Cuối"
-                            }
-                        }
-                    });
+                "language": {
+                    "sProcessing":   "Đang xử lý...",
+                    "sLengthMenu":   "Xem _MENU_ mục",
+                    "sZeroRecords":  "Không tìm thấy dòng nào phù hợp",
+                    "sInfo":         "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
+                    "sInfoEmpty":    "Đang xem 0 đến 0 trong tổng số 0 mục",
+                    "sInfoFiltered": "(được lọc từ _MAX_ mục)",
+                    "sInfoPostFix":  "",
+                    "sSearch":       "Tìm kiếm (Tên/Phòng/Hộ khẩu):",
+                    "sUrl":          "",
+                    "oPaginate": {
+                        "sFirst":    "Đầu",
+                        "sPrevious": "Trước",
+                        "sNext":     "Tiếp",
+                        "sLast":     "Cuối"
+                    }
+                }
+            });
                 }
             } catch (error) {
                 console.error('Error reloading residents table:', error);
@@ -570,7 +673,7 @@
                 else if (resident.tinhTrang === 'TamVang') loaiCuTru = 'Tạm vắng';
                 else if (resident.tinhTrang === 'ChuyenDi') loaiCuTru = 'Chuyển đi';
                 
-                const ngaySinhDisplay = resident.ngaySinh ? APIUtils.formatDate(resident.ngaySinh) : 'N/A';
+                const ngaySinhDisplay = resident.ngaySinh ? (typeof resident.ngaySinh === 'string' ? resident.ngaySinh.split('T')[0] : resident.ngaySinh) : 'N/A';
                 alert(`Thông tin cư dân:\n\nHọ tên: ${resident.hoTen || 'N/A'}\nSố CCCD: ${resident.soCCCD || 'N/A'}\nNgày sinh: ${ngaySinhDisplay}\nGiới tính: ${resident.gioiTinh || 'N/A'}\nNghề nghiệp: ${resident.ngheNghiep || 'N/A'}\nQuan hệ chủ hộ: ${resident.quanHeVoiChuHo || 'N/A'}\nTình trạng: ${loaiCuTru}`);
             } catch (error) {
                 APIUtils.showError(error.message);
@@ -602,6 +705,94 @@
                 $('#residentModal').modal('show');
             } catch (error) {
                 APIUtils.showError(error.message);
+            }
+        }
+
+        /**
+         * Load tất cả lịch sử nhân khẩu tổng hợp
+         */
+        async function loadAllResidentHistory() {
+            try {
+                // Hiển thị card
+                $('#residentHistoryCard').show();
+                
+                // Hiển thị loading
+                $('#allResidentHistoryLoading').show();
+                $('#allResidentHistoryContent').hide();
+                $('#allResidentHistoryEmpty').hide();
+                
+                // Load tất cả lịch sử nhân khẩu từ API (một lần duy nhất)
+                const allHistoryData = await LichSuNhanKhauAPI.getAll();
+                
+                // Load tất cả cư dân để map tên
+                const residents = await NhanKhauAPI.getAll();
+                const residentMap = {}; // Map ID -> thông tin cư dân
+                residents.forEach(resident => {
+                    const residentId = resident.id || resident.maNhanKhau;
+                    if (residentId) {
+                        residentMap[residentId] = {
+                            name: resident.hoTen || 'N/A',
+                            id: residentId
+                        };
+                    }
+                });
+                
+                // Gộp thông tin cư dân vào lịch sử
+                let allHistory = [];
+                if (allHistoryData && allHistoryData.length > 0) {
+                    allHistoryData.forEach(item => {
+                        const residentId = item.maNhanKhau;
+                        const residentInfo = residentMap[residentId] || { name: 'N/A', id: residentId };
+                        allHistory.push({
+                            ...item,
+                            residentName: residentInfo.name,
+                            residentId: residentInfo.id
+                        });
+                    });
+                }
+                
+                // Sắp xếp theo ngày bắt đầu (mới nhất trước)
+                allHistory.sort((a, b) => {
+                    const dateA = new Date(a.ngayBatDau || 0);
+                    const dateB = new Date(b.ngayBatDau || 0);
+                    return dateB - dateA;
+                });
+                
+                // Hiển thị lịch sử
+                const tbody = $('#allResidentHistoryTableBody');
+                tbody.empty();
+                
+                if (allHistory.length > 0) {
+                    allHistory.forEach((item, index) => {
+                        const ngayBatDau = item.ngayBatDau ? (typeof item.ngayBatDau === 'string' ? item.ngayBatDau.split('T')[0] : item.ngayBatDau) : 'N/A';
+                        const ngayKetThuc = item.ngayKetThuc ? (typeof item.ngayKetThuc === 'string' ? item.ngayKetThuc.split('T')[0] : item.ngayKetThuc) : 'N/A';
+                        
+                        const row = `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td><strong>${item.residentName}</strong><br><small class="text-muted">ID: ${item.residentId}</small></td>
+                                <td><span class="badge badge-info">${item.loaiBienDong || 'N/A'}</span></td>
+                                <td>${ngayBatDau}</td>
+                                <td>${ngayKetThuc || 'Đang diễn ra'}</td>
+                                <td>ID: ${item.nguoiGhi || 'N/A'}</td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+                    
+                    $('#allResidentHistoryContent').show();
+                    $('#allResidentHistoryEmpty').hide();
+                } else {
+                    $('#allResidentHistoryContent').hide();
+                    $('#allResidentHistoryEmpty').show();
+                }
+                
+                $('#allResidentHistoryLoading').hide();
+                
+            } catch (error) {
+                console.error('Error loading all resident history:', error);
+                $('#allResidentHistoryLoading').hide();
+                APIUtils.showError('Không thể tải lịch sử nhân khẩu: ' + error.message);
             }
         }
 

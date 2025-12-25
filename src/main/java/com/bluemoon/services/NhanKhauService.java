@@ -66,6 +66,13 @@ public interface NhanKhauService {
     List<LichSuNhanKhau> getLichSuNhanKhau(int maNhanKhau);
 
     /**
+     * Lấy tất cả lịch sử nhân khẩu (tất cả cư dân).
+     *
+     * @return danh sách lịch sử của tất cả cư dân
+     */
+    List<LichSuNhanKhau> getAllLichSuNhanKhau();
+
+    /**
      * Xóa nhân khẩu theo ID.
      *
      * @param id ID nhân khẩu cần xóa

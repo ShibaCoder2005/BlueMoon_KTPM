@@ -166,7 +166,19 @@ const LichSuNopTienAPI = {
         const response = await apiRequest('/lich-su-nop-tien', 'GET');
         return Array.isArray(response) ? response : (response.data || []);
     },
-    create: (data) => apiRequest('/lich-su-nop-tien', 'POST', data)
+    create: (data) => apiRequest('/lich-su-nop-tien', 'POST', data),
+    getByPhieuThu: (maPhieu) => apiRequest(`/lich-su-nop-tien/phieu-thu/${maPhieu}`, 'GET'),
+    getByHoGiaDinh: (maHo) => apiRequest(`/lich-su-nop-tien/ho-gia-dinh/${maHo}`, 'GET'),
+    createWithStatusUpdate: (paymentRecord, updateStatusTo) => apiRequest('/lich-su-nop-tien/with-status-update', 'POST', { paymentRecord, updateStatusTo })
+};
+
+const LichSuNhanKhauAPI = {
+    getAll: async () => {
+        const response = await apiRequest('/nhan-khau/lich-su/all', 'GET');
+        return Array.isArray(response) ? response : (response.data || []);
+    },
+    getByNhanKhau: (id) => apiRequest(`/nhan-khau/${id}/lich-su`, 'GET'),
+    create: (data) => apiRequest('/nhan-khau/lich-su', 'POST', data)
 };
 
 const ThongKeAPI = {

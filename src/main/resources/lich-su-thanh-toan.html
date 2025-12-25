@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Lịch Sử Thanh Toán - BlueMoon</title>
+
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+
+    <div id="wrapper">
+
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-building"></i></div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
+            </a>
+            <hr class="sidebar-divider my-0">
+
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="can-ho.html">
+                    <i class="fas fa-fw fa-door-open"></i>
+                    <span>Căn hộ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Cư dân</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="khoan-thu.html">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Khoản thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="thong-ke.html">
+                    <i class="fas fa-fw fa-chart-bar"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="lich-su-thanh-toan.html">
+                    <i class="fas fa-fw fa-history"></i>
+                    <span>Lịch sử thanh toán</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="thong-bao.html">
+                    <i class="fas fa-fw fa-bullhorn"></i>
+                    <span>Thông báo</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phan-anh.html">
+                    <i class="fas fa-fw fa-comments"></i>
+                    <span>Phản ánh</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="tai-khoan.html">
+                    <i class="fas fa-fw fa-user-cog"></i>
+                    <span>Tài khoản</span>
+                </a>
+            </li>
+
+            <hr class="sidebar-divider">
+
+            <li class="nav-item">
+                <a class="nav-link" href="cai-dat.html">
+                    <i class="fas fa-fw fa-cog"></i>
+                    <span>Cài đặt</span>
+                </a>
+            </li>
+
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <ul class="navbar-nav ml-auto">
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Quản Lý</span>
+                                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
+                                <a class="dropdown-item" href="ho-so.html"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="container-fluid">
+                    <h1 class="h3 mb-4 text-gray-800">Lịch Sử Thanh Toán</h1>
+                    <p class="mb-4">Danh sách tất cả các giao dịch thanh toán đã được ghi nhận.</p>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách giao dịch</h6>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="loadPaymentHistory()">
+                                <i class="fas fa-sync-alt"></i> Làm mới
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="paymentHistoryLoading" class="text-center py-4">
+                                <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                                <p class="mt-2">Đang tải dữ liệu...</p>
+                            </div>
+                            <div id="paymentHistoryContent" style="display: none;">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="paymentHistoryTable" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>STT</th>
+                                                <th>Ngày nộp</th>
+                                                <th>Số tiền</th>
+                                                <th>Phương thức</th>
+                                                <th>Mã phiếu</th>
+                                                <th>Mã hộ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="paymentHistoryTableBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="paymentHistoryEmpty" class="text-center py-4" style="display: none;">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">Chưa có lịch sử thanh toán</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; BlueMoon 2025</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Bạn muốn đăng xuất?</h5>
+                    <button class="close" data-dismiss="modal">
+                        <span>×</span>
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+    <script src="js/api.js"></script>
+
+    <script>
+        let paymentHistoryTable;
+
+        $(document).ready(async function() {
+            await loadPaymentHistory();
+        });
+
+        async function loadPaymentHistory() {
+            try {
+                $('#paymentHistoryLoading').show();
+                $('#paymentHistoryContent').hide();
+                $('#paymentHistoryEmpty').hide();
+
+                // Load tất cả lịch sử nộp tiền
+                const history = await LichSuNopTienAPI.getAll();
+
+                const tbody = $('#paymentHistoryTableBody');
+                tbody.empty();
+
+                if (history && history.length > 0) {
+                    // Sắp xếp theo ngày nộp (mới nhất trước)
+                    history.sort((a, b) => {
+                        const dateA = new Date(a.ngayNop || 0);
+                        const dateB = new Date(b.ngayNop || 0);
+                        return dateB - dateA;
+                    });
+
+                    history.forEach((item, index) => {
+                        // Format ngày nộp
+                        let ngayNopDisplay = 'N/A';
+                        if (item.ngayNop) {
+                            try {
+                                const date = new Date(item.ngayNop);
+                                ngayNopDisplay = date.toLocaleString('vi-VN', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                            } catch (e) {
+                                ngayNopDisplay = typeof item.ngayNop === 'string' ? item.ngayNop : 'N/A';
+                            }
+                        }
+
+                        // Format số tiền
+                        const soTien = item.soTien || 0;
+                        const soTienDisplay = APIUtils.formatCurrency ? APIUtils.formatCurrency(soTien) : new Intl.NumberFormat('vi-VN').format(soTien) + ' đ';
+
+                        // Format phương thức
+                        const phuongThuc = item.phuongThuc || 'N/A';
+                        let phuongThucBadge = 'badge-secondary';
+                        if (phuongThuc.toLowerCase().includes('vnpay')) phuongThucBadge = 'badge-primary';
+                        else if (phuongThuc.toLowerCase().includes('card')) phuongThucBadge = 'badge-warning';
+                        else if (phuongThuc.toLowerCase().includes('momo')) phuongThucBadge = 'badge-danger';
+                        else if (phuongThuc.toLowerCase().includes('bank')) phuongThucBadge = 'badge-success';
+
+                        const row = `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${ngayNopDisplay}</td>
+                                <td class="text-right font-weight-bold text-success">${soTienDisplay}</td>
+                                <td><span class="badge ${phuongThucBadge}">${phuongThuc}</span></td>
+                                <td>#${item.maPhieu || item.maPhieuThu || 'N/A'}</td>
+                                <td>${item.maHo || 'N/A'}</td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    });
+
+                    // Initialize DataTable if not already initialized
+                    if (!paymentHistoryTable) {
+                        paymentHistoryTable = $('#paymentHistoryTable').DataTable({
+                            "language": {
+                                "sProcessing": "Đang xử lý...",
+                                "sLengthMenu": "Xem _MENU_ mục",
+                                "sZeroRecords": "Không tìm thấy dòng nào phù hợp",
+                                "sInfo": "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ mục",
+                                "sInfoEmpty": "Đang xem 0 đến 0 trong tổng số 0 mục",
+                                "sInfoFiltered": "(được lọc từ _MAX_ mục)",
+                                "sSearch": "Tìm kiếm:",
+                                "oPaginate": {
+                                    "sFirst": "Đầu",
+                                    "sPrevious": "Trước",
+                                    "sNext": "Tiếp",
+                                    "sLast": "Cuối"
+                                }
+                            },
+                            "order": [[1, "desc"]] // Sort by date descending
+                        });
+                    } else {
+                        paymentHistoryTable.draw();
+                    }
+
+                    $('#paymentHistoryContent').show();
+                    $('#paymentHistoryEmpty').hide();
+                } else {
+                    $('#paymentHistoryContent').hide();
+                    $('#paymentHistoryEmpty').show();
+                }
+
+                $('#paymentHistoryLoading').hide();
+            } catch (error) {
+                console.error('Error loading payment history:', error);
+                $('#paymentHistoryLoading').hide();
+                $('#paymentHistoryContent').hide();
+                $('#paymentHistoryEmpty').show();
+                APIUtils.showError('Không thể tải lịch sử thanh toán: ' + error.message);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
+

@@ -55,6 +55,9 @@ public class NhanKhauServiceImpl implements NhanKhauService {
     private static final String SELECT_LICHSU_BY_NHAN_KHAU = 
             "SELECT id, maNhanKhau, loaiBienDong, ngayBatDau, ngayKetThuc, nguoiGhi FROM LichSuNhanKhau WHERE maNhanKhau = ? ORDER BY ngayBatDau DESC";
 
+    private static final String SELECT_ALL_LICHSU = 
+            "SELECT id, maNhanKhau, loaiBienDong, ngayBatDau, ngayKetThuc, nguoiGhi FROM LichSuNhanKhau ORDER BY ngayBatDau DESC";
+
     private static final String INSERT_LICHSU = 
             "INSERT INTO LichSuNhanKhau (maNhanKhau, loaiBienDong, ngayBatDau, ngayKetThuc, nguoiGhi) VALUES (?, ?, ?, ?, ?)";
 
@@ -283,6 +286,28 @@ public class NhanKhauServiceImpl implements NhanKhauService {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error retrieving history for resident: " + maNhanKhau, e);
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<LichSuNhanKhau> getAllLichSuNhanKhau() {
+        List<LichSuNhanKhau> result = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(SELECT_ALL_LICHSU);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                result.add(buildLichSuFromResultSet(rs));
+            }
+
+            logger.log(Level.INFO, "Retrieved " + result.size() + " total history records for all residents");
+            return result;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error retrieving all resident history", e);
             e.printStackTrace();
             return new ArrayList<>();
         }
