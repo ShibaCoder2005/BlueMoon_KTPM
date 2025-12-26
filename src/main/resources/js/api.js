@@ -161,9 +161,11 @@ const PhieuThuAPI = {
         const response = await apiRequest('/phieu-thu', 'GET');
         return Array.isArray(response) ? response : (response.data || []);
     },
+    getById: (id) => apiRequest(`/phieu-thu/${id}`, 'GET'),
     create: (data) => apiRequest('/phieu-thu', 'POST', data),
     update: (id, data) => apiRequest(`/phieu-thu/${id}`, 'PUT', data),
     delete: (id) => apiRequest(`/phieu-thu/${id}`, 'DELETE'),
+    getByHoGiaDinh: (maHo) => apiRequest(`/phieu-thu/ho-gia-dinh/${maHo}`, 'GET'),
     hasUnpaidFees: (maHo) => apiRequest(`/phieu-thu/ho-gia-dinh/${maHo}/unpaid`, 'GET')
 };
 

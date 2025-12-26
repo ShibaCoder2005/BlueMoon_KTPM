@@ -26,8 +26,8 @@
 
             <li class="nav-item">
                 <a class="nav-link" href="can-ho.html">
-                    <i class="fas fa-fw fa-door-open"></i>
-                    <span>Căn hộ</span>
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
                 </a>
             </li>
 
@@ -118,7 +118,7 @@
                             </div>
                         </li>
                     </ul>
-                </nav>
+                    </nav>
 
                 <div class="container-fluid">
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -340,8 +340,18 @@
                         await KhoanThuAPI.update(editingId, khoanThu);
                         APIUtils.showSuccess('Cập nhật khoản thu thành công');
                     } else {
-                        await KhoanThuAPI.create(khoanThu);
+                        const result = await KhoanThuAPI.create(khoanThu);
                         APIUtils.showSuccess('Tạo khoản thu thành công');
+                        
+                        // Lưu timestamp khi tạo khoản thu
+                        const feeId = result.maKhoanThu || result.id;
+                        if (feeId) {
+                            localStorage.setItem(`fee_${feeId}_created`, Date.now().toString());
+                        }
+                        
+                        // Trigger event để trang chủ cập nhật danh sách
+                        window.dispatchEvent(new Event('khoanThuCreated'));
+                        localStorage.setItem('khoanThuUpdated', Date.now().toString());
                     }
                     $('#addFeeModal').modal('hide');
                     form[0].reset();

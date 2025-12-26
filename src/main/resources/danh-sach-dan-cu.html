@@ -37,8 +37,8 @@
 
             <li class="nav-item">
                 <a class="nav-link" href="can-ho.html">
-                    <i class="fas fa-fw fa-door-open"></i>
-                    <span>Căn hộ</span>
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
                 </a>
             </li>
 
@@ -873,8 +873,14 @@
                     APIUtils.showSuccess('Cập nhật cư dân thành công');
                 } else {
                     // Create
-                    await NhanKhauAPI.create(residentData);
+                    const result = await NhanKhauAPI.create(residentData);
                     APIUtils.showSuccess('Thêm cư dân thành công');
+                    
+                    // Lưu timestamp khi tạo cư dân mới (để tính biến động tháng)
+                    const residentId = result.id || result.maNhanKhau;
+                    if (residentId) {
+                        localStorage.setItem(`resident_${residentId}_created`, Date.now().toString());
+                    }
                 }
 
                 $('#residentModal').modal('hide');
