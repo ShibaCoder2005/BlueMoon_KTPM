@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Quên mật khẩu - BlueMoon</title>
+
+    <!-- Custom fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link href="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #4e73df;
+            background-image: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .card-recovery {
+            border: 0;
+            border-radius: 1.5rem; /* Bo tròn mềm mại giống login */
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+            overflow: hidden;
+            max-width: 500px; /* Chiều rộng tương đương login */
+            width: 100%;
+        }
+
+        .form-control-user {
+            border-radius: 50px;
+            padding: 1.75rem 1.5rem; /* Padding lớn giống login */
+            font-size: 1.25rem; /* Cỡ chữ to */
+            height: auto;
+        }
+
+        ::placeholder {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .btn-recovery {
+            border-radius: 50px;
+            padding: 1rem 1rem;
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s;
+        }
+        
+        .btn-recovery:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .text-gray-900 {
+            font-size: 1.75rem;
+        }
+
+        .p-5 {
+            padding: 3.5rem !important;
+        }
+
+        .small {
+            font-size: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="row justify-content-center">
+
+            <div class="col-lg-6 col-md-9">
+
+                <div class="card card-recovery o-hidden border-0 my-5 mx-auto">
+                    <div class="card-body p-0">
+                        <!-- Nested Row within Card Body -->
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="p-5">
+                                    <div class="text-center mb-4">
+                                        <div class="sidebar-brand-icon rotate-n-15 mb-3">
+                                            <!-- Đã thay đổi icon từ fa-key thành fa-building -->
+                                            <i class="fas fa-building fa-3x text-primary"></i>
+                                        </div>
+                                        <h1 class="h4 text-gray-900 font-weight-bold">Quên Mật Khẩu?</h1>
+                                        <p class="text-muted mb-4" style="font-size: 1.1rem;">Nhập email để khôi phục tài khoản.</p>
+                                    </div>
+                                    
+                                    <form class="user">
+                                        
+                                        <div class="form-group">
+                                            <input type="email" class="form-control form-control-user"
+                                                id="inputEmail" aria-describedby="emailHelp"
+                                                placeholder="Nhập địa chỉ Email...">
+                                        </div>
+
+                                        <a href="a-dang-nhap.html" class="btn btn-primary btn-user btn-block btn-recovery mt-4">
+                                            Khôi Phục Mật Khẩu
+                                        </a>
+                                        
+                                    </form>
+                                    
+                                    <hr class="my-4">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
+
+</body>
+
+</html>
