@@ -104,7 +104,6 @@ function showError(message) {
 
 const AuthAPI = {
     login: (data) => apiRequest('/login', 'POST', data),
-    register: (data) => apiRequest('/register', 'POST', data),
     checkUsername: (username) => apiRequest(`/check-username/${encodeURIComponent(username)}`, 'GET'),
     changePassword: (data) => apiRequest('/change-password', 'POST', data)
 };
@@ -208,16 +207,6 @@ const PhuongTienAPI = {
     search: (keyword) => apiRequest(`/phuong-tien/search/${encodeURIComponent(keyword)}`, 'GET')
 };
 
-const LichSuNopTienAPI = {
-    getAll: async () => {
-        const response = await apiRequest('/lich-su-nop-tien', 'GET');
-        return Array.isArray(response) ? response : (response.data || []);
-    },
-    create: (data) => apiRequest('/lich-su-nop-tien', 'POST', data),
-    getByPhieuThu: (maPhieu) => apiRequest(`/lich-su-nop-tien/phieu-thu/${maPhieu}`, 'GET'),
-    getByHoGiaDinh: (maHo) => apiRequest(`/lich-su-nop-tien/ho-gia-dinh/${maHo}`, 'GET'),
-    createWithStatusUpdate: (paymentRecord, updateStatusTo) => apiRequest('/lich-su-nop-tien/with-status-update', 'POST', { paymentRecord, updateStatusTo })
-};
 
 const LichSuNhanKhauAPI = {
     getAll: async () => {

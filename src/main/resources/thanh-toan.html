@@ -100,12 +100,6 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="lich-su-thanh-toan.html">
-                    <i class="fas fa-fw fa-history"></i>
-                    <span>Lịch sử thanh toán</span></a>
-            </li>
-
-            <li class="nav-item">
 
             <li class="nav-item">
 
@@ -542,21 +536,8 @@
             btn.html('<i class="fas fa-circle-notch fa-spin"></i> Đang xử lý...');
 
             try {
-                // Tạo lịch sử nộp tiền cho từng phiếu thu
+                // Cập nhật trạng thái phiếu thu thành "Đã thanh toán"
                 for (const invoice of unpaidInvoices) {
-                    const paymentRecord = {
-                        maPhieuThu: invoice.maPhieuThu || invoice.id,
-                        maHo: currentHouseholdId,
-                        soTien: invoice.soTien || invoice.tongTien || 0,
-                        ngayNop: new Date().toISOString().split('T')[0],
-                        phuongThuc: paymentMethod,
-                        ghiChu: `Thanh toán qua ${paymentMethod}`
-                    };
-
-                    // Ghi nhận thanh toán và cập nhật trạng thái phiếu thu
-                    await LichSuNopTienAPI.create(paymentRecord);
-                    
-                    // Cập nhật trạng thái phiếu thu thành "Đã thanh toán"
                     try {
                         await PhieuThuAPI.update(invoice.maPhieuThu || invoice.id, {
                             trangThai: 'DaThanhToan'

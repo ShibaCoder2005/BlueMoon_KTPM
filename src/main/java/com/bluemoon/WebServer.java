@@ -36,7 +36,6 @@ public class WebServer {
     private final HoGiaDinhService hoGiaDinhService;
     private final NhanKhauService nhanKhauService;
     private final PhieuThuService phieuThuService;
-    private final LichSuNopTienService lichSuNopTienService;
     private final ThongKeService thongKeService;
     private final PhuongTienService phuongTienService;
 
@@ -49,7 +48,6 @@ public class WebServer {
         this.hoGiaDinhService = new HoGiaDinhServiceImpl();
         this.nhanKhauService = new NhanKhauServiceImpl();
         this.phieuThuService = new PhieuThuServiceImpl();
-        this.lichSuNopTienService = new LichSuNopTienServiceImpl();
         this.thongKeService = new ThongKeServiceImpl();
         this.phuongTienService = new PhuongTienServiceImpl();
     }
@@ -129,14 +127,13 @@ public class WebServer {
                 apiInfo.put("version", "1.0.0");
                 apiInfo.put("endpoints", Map.of(
                     "health", "/api/health",
-                    "auth", "/api/login, /api/register",
+                    "auth", "/api/login",
                     "accounts", "/api/tai-khoan",
                     "fees", "/api/khoan-thu",
                     "collection_drives", "/api/dot-thu",
                     "households", "/api/ho-gia-dinh",
                     "residents", "/api/nhan-khau",
                     "receipts", "/api/phieu-thu",
-                    "payment_history", "/api/lich-su-nop-tien",
                     "statistics", "/api/thong-ke"
                 ));
                 ctx.json(apiInfo);
@@ -147,7 +144,6 @@ public class WebServer {
 
         // ========== AUTH ENDPOINTS ==========
         app.post("/api/login", this::handleLogin);
-        app.post("/api/register", this::handleRegister);
         app.post("/api/change-password", this::handleChangePassword);
         app.get("/api/check-username/{username}", this::handleCheckUsername);
 
@@ -1346,60 +1342,6 @@ public class WebServer {
             }
         });
 
-        // ========== LICH SU NOP TIEN (Payment History) ENDPOINTS ==========
-        app.get("/api/lich-su-nop-tien", ctx -> {
-            try {
-                ctx.json(lichSuNopTienService.getAllLichSuNopTien());
-            } catch (Exception e) {
-                handleException(ctx, e);
-            }
-        });
-        app.get("/api/lich-su-nop-tien/phieu-thu/{maPhieu}", ctx -> {
-            try {
-                Integer maPhieu = parseIntSafe(ctx, "maPhieu");
-                if (maPhieu == null) return;
-                ctx.json(lichSuNopTienService.getLichSuNopTienByPhieuThu(maPhieu));
-            } catch (Exception e) {
-                handleException(ctx, e);
-            }
-        });
-        app.get("/api/lich-su-nop-tien/ho-gia-dinh/{maHo}", ctx -> {
-            try {
-                Integer maHo = parseIntSafe(ctx, "maHo");
-                if (maHo == null) return;
-                ctx.json(lichSuNopTienService.getLichSuNopTienByHoGiaDinh(maHo));
-            } catch (Exception e) {
-                handleException(ctx, e);
-            }
-        });
-        app.post("/api/lich-su-nop-tien", ctx -> {
-            try {
-                LichSuNopTien payment = ctx.bodyAsClass(LichSuNopTien.class);
-                boolean success = lichSuNopTienService.addLichSuNopTien(payment);
-                if (success) {
-                    ctx.status(201).json(createSuccessResponse("Payment record created successfully", payment));
-                } else {
-                    ctx.status(400).json(createErrorResponse("Failed to create payment record"));
-                }
-            } catch (Exception e) {
-                handleException(ctx, e);
-            }
-        });
-        app.post("/api/lich-su-nop-tien/with-status-update", ctx -> {
-            try {
-                Map<String, Object> body = ctx.bodyAsClass(Map.class);
-                LichSuNopTien payment = objectMapper.convertValue(body.get("paymentRecord"), LichSuNopTien.class);
-                String updateStatusTo = (String) body.get("updateStatusTo");
-                boolean success = lichSuNopTienService.recordPaymentWithStatusUpdate(payment, updateStatusTo);
-                if (success) {
-                    ctx.status(201).json(createSuccessResponse("Payment recorded and status updated successfully", payment));
-                } else {
-                    ctx.status(400).json(createErrorResponse("Failed to record payment"));
-                }
-            } catch (Exception e) {
-                handleException(ctx, e);
-            }
-        });
 
         // ========== THONG KE (Statistics) ENDPOINTS ==========
         app.get("/api/thong-ke/dashboard", ctx -> {
@@ -1513,14 +1455,13 @@ public class WebServer {
                 routes.put("baseUrl", "/api");
                 routes.put("endpoints", Map.of(
                     "health", "GET /api/health",
-                    "auth", "POST /api/login, POST /api/register, POST /api/change-password, GET /api/check-username/{username}",
+                    "auth", "POST /api/login, POST /api/change-password, GET /api/check-username/{username}",
                     "accounts", "GET /api/tai-khoan, GET /api/tai-khoan/{id}, POST /api/tai-khoan, PUT /api/tai-khoan/{id}, PUT /api/tai-khoan/{id}/status",
                     "fees", "GET /api/khoan-thu, POST /api/khoan-thu, PUT /api/khoan-thu/{id}, DELETE /api/khoan-thu/{id}",
                     "collection_drives", "GET /api/dot-thu, GET /api/dot-thu/{id}, POST /api/dot-thu, PUT /api/dot-thu/{id}, DELETE /api/dot-thu/{id}",
                     "households", "GET /api/ho-gia-dinh, GET /api/ho-gia-dinh/{id}, POST /api/ho-gia-dinh, PUT /api/ho-gia-dinh/{id}, DELETE /api/ho-gia-dinh/{id}",
                     "residents", "GET /api/nhan-khau, GET /api/nhan-khau/{id}, POST /api/nhan-khau, PUT /api/nhan-khau/{id}, DELETE /api/nhan-khau/{id}, PUT /api/nhan-khau/{id}/status",
                     "receipts", "GET /api/phieu-thu, GET /api/phieu-thu/{id}, POST /api/phieu-thu, PUT /api/phieu-thu/{id}, DELETE /api/phieu-thu/{id}",
-                    "payment_history", "GET /api/lich-su-nop-tien, POST /api/lich-su-nop-tien",
                     "statistics", "GET /api/thong-ke/dashboard, GET /api/thong-ke/revenue, GET /api/thong-ke/debt"
                 ));
                 ctx.json(createSuccessResponse("Routes listed", routes));
@@ -1651,20 +1592,6 @@ public class WebServer {
         }
     }
 
-    private void handleRegister(Context ctx) {
-        try {
-            TaiKhoan account = ctx.bodyAsClass(TaiKhoan.class);
-            boolean success = authService.register(account);
-            if (success) {
-                account.setMatKhau(null); // Don't send password back
-                ctx.status(201).json(createSuccessResponse("Account registered successfully", account));
-            } else {
-                ctx.status(400).json(createErrorResponse("Failed to register account (username may already exist)"));
-            }
-        } catch (Exception e) {
-            handleException(ctx, e);
-        }
-    }
 
     private void handleChangePassword(Context ctx) {
         try {
