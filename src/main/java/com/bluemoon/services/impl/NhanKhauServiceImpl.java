@@ -149,23 +149,30 @@ public class NhanKhauServiceImpl implements NhanKhauService {
         }
 
         try (Connection conn = DatabaseConnector.getConnection()) {
-            // Insert new resident
-            int newResidentId = -1;
-            try (PreparedStatement pstmt = conn.prepareStatement(INSERT, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            // Disable auto-commit for transaction
+            conn.setAutoCommit(false);
 
-                pstmt.setInt(1, nhanKhau.getMaHo());
-                pstmt.setString(2, nhanKhau.getHoTen().trim());
-                pstmt.setDate(3, convertToSqlDate(nhanKhau.getNgaySinh()));
-                pstmt.setString(4, nhanKhau.getGioiTinh());
-                pstmt.setString(5, nhanKhau.getSoCCCD());
-                pstmt.setString(6, nhanKhau.getNgheNghiep());
-                pstmt.setString(7, nhanKhau.getQuanHeVoiChuHo());
-                pstmt.setString(8, nhanKhau.getTinhTrang() != null ? nhanKhau.getTinhTrang() : "CuTru");
+            try {
+                // Step 1: Insert new resident
+                int newResidentId = -1;
+                try (PreparedStatement pstmt = conn.prepareStatement(INSERT, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
-                int rowsAffected = pstmt.executeUpdate();
-                boolean success = rowsAffected > 0;
+                    pstmt.setInt(1, nhanKhau.getMaHo());
+                    pstmt.setString(2, nhanKhau.getHoTen().trim());
+                    pstmt.setDate(3, convertToSqlDate(nhanKhau.getNgaySinh()));
+                    pstmt.setString(4, nhanKhau.getGioiTinh());
+                    pstmt.setString(5, nhanKhau.getSoCCCD());
+                    pstmt.setString(6, nhanKhau.getNgheNghiep());
+                    pstmt.setString(7, nhanKhau.getQuanHeVoiChuHo());
+                    pstmt.setString(8, nhanKhau.getTinhTrang() != null ? nhanKhau.getTinhTrang() : "CuTru");
 
-                if (success) {
+                    int rowsAffected = pstmt.executeUpdate();
+                    if (rowsAffected <= 0) {
+                        conn.rollback();
+                        logger.log(Level.WARNING, "Failed to add resident: " + nhanKhau.getHoTen() + " (rows affected: " + rowsAffected + ")");
+                        return false;
+                    }
+
                     // Get generated ID
                     try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
@@ -185,30 +192,40 @@ public class NhanKhauServiceImpl implements NhanKhauService {
                             }
                         }
                     }
-
-                    // Automatically create history record for new resident
-                    if (newResidentId > 0) {
-                        LichSuNhanKhau history = new LichSuNhanKhau();
-                        history.setMaNhanKhau(newResidentId);
-                        history.setLoaiBienDong("Đăng ký cư trú");
-                        history.setNgayBatDau(LocalDate.now());
-                        history.setNgayKetThuc(null); // Chưa kết thúc
-                        history.setNguoiGhi(1); // Default admin ID, có thể lấy từ session sau
-
-                        boolean historySuccess = addLichSuNhanKhau(history);
-                        if (historySuccess) {
-                            logger.log(Level.INFO, "Successfully created history record for new resident ID: " + newResidentId);
-                        } else {
-                            logger.log(Level.WARNING, "Resident added but failed to create history record for ID: " + newResidentId);
-                        }
-                    }
-
-                    logger.log(Level.INFO, "Successfully added resident: " + nhanKhau.getHoTen() + " (ID: " + newResidentId + ", rows affected: " + rowsAffected + ")");
-                } else {
-                    logger.log(Level.WARNING, "Failed to add resident: " + nhanKhau.getHoTen() + " (rows affected: " + rowsAffected + ")");
                 }
 
-                return success;
+                // Step 2: Automatically create history record for new resident (inline to use same connection)
+                if (newResidentId > 0) {
+                    try (PreparedStatement historyStmt = conn.prepareStatement(INSERT_LICHSU)) {
+                        historyStmt.setInt(1, newResidentId);
+                        historyStmt.setString(2, "Đăng ký cư trú");
+                        historyStmt.setDate(3, convertToSqlDate(LocalDate.now()));
+                        historyStmt.setDate(4, null); // ngayKetThuc
+                        historyStmt.setInt(5, 1); // Default admin ID, có thể lấy từ session sau
+
+                        int historyRowsAffected = historyStmt.executeUpdate();
+                        if (historyRowsAffected <= 0) {
+                            conn.rollback();
+                            logger.log(Level.WARNING, "Resident added but failed to create history record for ID: " + newResidentId + ", transaction rolled back");
+                            return false;
+                        }
+                    }
+                } else {
+                    conn.rollback();
+                    logger.log(Level.WARNING, "Failed to get generated ID for resident, transaction rolled back");
+                    return false;
+                }
+
+                // Commit transaction
+                conn.commit();
+                logger.log(Level.INFO, "Successfully added resident: " + nhanKhau.getHoTen() + " (ID: " + newResidentId + ") with history record");
+                return true;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
             }
 
         } catch (SQLException e) {
@@ -408,6 +425,26 @@ public class NhanKhauServiceImpl implements NhanKhauService {
     @Override
     public boolean deleteNhanKhau(int id) {
         try (Connection conn = DatabaseConnector.getConnection()) {
+            // Check if this resident is a household head (maChuHo) in any household
+            int householdCount = 0;
+            try (PreparedStatement checkChuHoStmt = conn.prepareStatement(
+                    "SELECT COUNT(*) FROM HoGiaDinh WHERE maChuHo = ?")) {
+                checkChuHoStmt.setInt(1, id);
+                try (ResultSet rs = checkChuHoStmt.executeQuery()) {
+                    if (rs.next()) {
+                        householdCount = rs.getInt(1);
+                    }
+                }
+            }
+
+            if (householdCount > 0) {
+                logger.log(Level.WARNING, 
+                        "Cannot delete resident with id: " + id + 
+                        ". Resident is a household head (maChuHo) in " + householdCount + " household(s). " +
+                        "Please reassign or delete the household(s) first.");
+                return false;
+            }
+
             // First, delete all history records for this resident (CASCADE handling)
             try (PreparedStatement deleteHistoryStmt = conn.prepareStatement(
                     "DELETE FROM LichSuNhanKhau WHERE maNhanKhau = ?")) {

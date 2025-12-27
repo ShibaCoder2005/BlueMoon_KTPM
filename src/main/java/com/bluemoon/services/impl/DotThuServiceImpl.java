@@ -102,6 +102,13 @@ public class DotThuServiceImpl implements DotThuService {
     @Override
     public boolean addDotThu(DotThu dotThu) {
         if (dotThu == null) {
+            logger.log(Level.WARNING, "Cannot add collection drive: dotThu is null");
+            return false;
+        }
+
+        // Validate required fields
+        if (dotThu.getTenDot() == null || dotThu.getTenDot().trim().isEmpty()) {
+            logger.log(Level.WARNING, "Cannot add collection drive: tenDot is null or empty");
             return false;
         }
 
@@ -120,7 +127,7 @@ public class DotThuServiceImpl implements DotThuService {
             conn = DatabaseConnector.getConnection();
             pstmt = conn.prepareStatement(INSERT);
 
-            pstmt.setString(1, dotThu.getTenDot());
+            pstmt.setString(1, dotThu.getTenDot().trim());
             pstmt.setDate(2, convertToSqlDate(dotThu.getNgayBatDau()));
             pstmt.setDate(3, convertToSqlDate(dotThu.getNgayKetThuc()));
             pstmt.setString(4, dotThu.getTrangThai());

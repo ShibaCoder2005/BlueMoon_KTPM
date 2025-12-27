@@ -8,11 +8,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import com.bluemoon.models.LichSuNopTien;
 import com.bluemoon.services.LichSuNopTienService;
@@ -44,6 +42,12 @@ public class LichSuNopTienServiceImpl implements LichSuNopTienService {
 
     private static final String INSERT = 
             "INSERT INTO LichSuNopTien (maPhieu, ngayNop, soTien, phuongThuc, nguoiThu, ghiChu) VALUES (?, ?, ?, ?, ?, ?)";
+
+    private static final String CHECK_PHIEU_STATUS = 
+            "SELECT trangThai FROM PhieuThu WHERE id = ?";
+    
+    private static final String UPDATE_PHIEU_STATUS = 
+            "UPDATE PhieuThu SET trangThai = ? WHERE id = ?";
 
     public LichSuNopTienServiceImpl() {
         this.phieuThuService = new PhieuThuServiceImpl();
@@ -80,6 +84,18 @@ public class LichSuNopTienServiceImpl implements LichSuNopTienService {
 
     @Override
     public boolean addLichSuNopTien(LichSuNopTien paymentRecord) {
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            return addLichSuNopTien(paymentRecord, conn);
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error creating connection for addLichSuNopTien", e);
+            return false;
+        }
+    }
+
+    /**
+     * Internal method to add payment record with provided connection (for transaction support).
+     */
+    private boolean addLichSuNopTien(LichSuNopTien paymentRecord, Connection conn) {
         if (paymentRecord == null) {
             logger.log(Level.WARNING, "Cannot add payment record: paymentRecord is null");
             return false;
@@ -96,26 +112,55 @@ public class LichSuNopTienServiceImpl implements LichSuNopTienService {
             return false;
         }
 
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(INSERT)) {
-
-            pstmt.setInt(1, paymentRecord.getMaPhieu());
-            pstmt.setTimestamp(2, convertToSqlTimestamp(paymentRecord.getNgayNop()));
-            pstmt.setBigDecimal(3, paymentRecord.getSoTien());
-            pstmt.setString(4, paymentRecord.getPhuongThuc());
-            pstmt.setInt(5, paymentRecord.getNguoiThu());
-            pstmt.setString(6, null); // ghiChu field not in model, set to null
-
-            int rowsAffected = pstmt.executeUpdate();
-            boolean success = rowsAffected > 0;
-
-            if (success) {
-                logger.log(Level.INFO, "Successfully added payment record for maPhieu: " + paymentRecord.getMaPhieu() + " (rows affected: " + rowsAffected + ")");
-            } else {
-                logger.log(Level.WARNING, "Failed to add payment record for maPhieu: " + paymentRecord.getMaPhieu() + " (rows affected: " + rowsAffected + ")");
+        try {
+            // Check if PhieuThu is already paid
+            String currentStatus = null;
+            try (PreparedStatement checkStmt = conn.prepareStatement(CHECK_PHIEU_STATUS)) {
+                checkStmt.setInt(1, paymentRecord.getMaPhieu());
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        currentStatus = rs.getString("trangThai");
+                    } else {
+                        logger.log(Level.WARNING, "Cannot add payment record: PhieuThu with id " + paymentRecord.getMaPhieu() + " not found");
+                        return false;
+                    }
+                }
             }
 
-            return success;
+            // Check if already paid
+            if (currentStatus != null) {
+                String statusLower = currentStatus.toLowerCase();
+                if (statusLower.contains("đã thu") || 
+                    statusLower.contains("đã thanh toán") || 
+                    statusLower.contains("hoàn thành") ||
+                    statusLower.equalsIgnoreCase("dathanhtoan")) {
+                    logger.log(Level.WARNING, 
+                            "Cannot add payment record: PhieuThu with id " + paymentRecord.getMaPhieu() + 
+                            " is already paid (status: " + currentStatus + ")");
+                    return false;
+                }
+            }
+
+            // Proceed with payment record insertion
+            try (PreparedStatement pstmt = conn.prepareStatement(INSERT)) {
+                pstmt.setInt(1, paymentRecord.getMaPhieu());
+                pstmt.setTimestamp(2, convertToSqlTimestamp(paymentRecord.getNgayNop()));
+                pstmt.setBigDecimal(3, paymentRecord.getSoTien());
+                pstmt.setString(4, paymentRecord.getPhuongThuc());
+                pstmt.setInt(5, paymentRecord.getNguoiThu());
+                pstmt.setString(6, null); // ghiChu field not in model, set to null
+
+                int rowsAffected = pstmt.executeUpdate();
+                boolean success = rowsAffected > 0;
+
+                if (success) {
+                    logger.log(Level.INFO, "Successfully added payment record for maPhieu: " + paymentRecord.getMaPhieu() + " (rows affected: " + rowsAffected + ")");
+                } else {
+                    logger.log(Level.WARNING, "Failed to add payment record for maPhieu: " + paymentRecord.getMaPhieu() + " (rows affected: " + rowsAffected + ")");
+                }
+
+                return success;
+            }
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error adding payment record for maPhieu: " + paymentRecord.getMaPhieu(), e);
@@ -191,16 +236,28 @@ public class LichSuNopTienServiceImpl implements LichSuNopTienService {
             conn.setAutoCommit(false);
 
             try {
-                // Step 1: Record the payment
-                boolean paymentSuccess = addLichSuNopTien(paymentRecord);
+                // Step 1: Record the payment (using same connection for transaction)
+                boolean paymentSuccess = addLichSuNopTien(paymentRecord, conn);
                 if (!paymentSuccess) {
                     conn.rollback();
                     logger.log(Level.WARNING, "Failed to record payment for maPhieu: " + paymentRecord.getMaPhieu());
                     return false;
                 }
 
-                // Step 2: Update receipt status
-                boolean statusSuccess = phieuThuService.updatePhieuThuStatus(paymentRecord.getMaPhieu(), updateStatusTo);
+                // Step 2: Update receipt status (using same connection for transaction)
+                boolean statusSuccess = false;
+                try (PreparedStatement updateStatusStmt = conn.prepareStatement(UPDATE_PHIEU_STATUS)) {
+                    updateStatusStmt.setString(1, updateStatusTo);
+                    updateStatusStmt.setInt(2, paymentRecord.getMaPhieu());
+                    int rowsAffected = updateStatusStmt.executeUpdate();
+                    statusSuccess = rowsAffected > 0;
+                } catch (SQLException e) {
+                    conn.rollback();
+                    logger.log(Level.SEVERE, 
+                            "Error updating receipt status for maPhieu: " + paymentRecord.getMaPhieu(), e);
+                    return false;
+                }
+                
                 if (!statusSuccess) {
                     conn.rollback();
                     logger.log(Level.WARNING, 

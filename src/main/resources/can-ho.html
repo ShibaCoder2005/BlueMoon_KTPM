@@ -59,6 +59,27 @@
             </li>
 
             <li class="nav-item">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link" href="thong-ke.html">
                     <i class="fas fa-fw fa-chart-bar"></i>
                     <span>Thống kê</span>
@@ -434,6 +455,8 @@
                 $('#addHouseholdModal').modal('hide');
                 form[0].reset();
                 editingHouseholdId = null;
+                
+                // Reload households list to show updated data
                 await loadHouseholds();
             } catch (error) {
                 if (typeof APIUtils !== 'undefined' && APIUtils.showError) {

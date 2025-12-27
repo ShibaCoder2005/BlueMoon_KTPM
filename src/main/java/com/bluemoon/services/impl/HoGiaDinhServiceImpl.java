@@ -53,18 +53,6 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
     private static final String CHECK_PHIEU_THU_DEPENDENCIES = 
             "SELECT COUNT(*) FROM PhieuThu WHERE maHo = ?";
 
-    private static final String CHECK_PHUONG_TIEN_DEPENDENCIES = 
-            "SELECT COUNT(*) FROM PhuongTien WHERE maHo = ?";
-
-    private static final String DELETE_NHAN_KHAU_BY_MAHO = 
-            "DELETE FROM NhanKhau WHERE maHo = ?";
-
-    private static final String DELETE_PHIEU_THU_BY_MAHO = 
-            "DELETE FROM PhieuThu WHERE maHo = ?";
-
-    private static final String DELETE_PHUONG_TIEN_BY_MAHO = 
-            "DELETE FROM PhuongTien WHERE maHo = ?";
-
     private static final String SEARCH = 
             "SELECT id, maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao FROM HoGiaDinh " +
             "WHERE maHo LIKE ? OR ghiChu LIKE ? ORDER BY id";
@@ -212,6 +200,20 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
                 return false;
             }
 
+            // Get current ngayTao from database to preserve it
+            LocalDate currentNgayTao = null;
+            try (PreparedStatement getCurrentStmt = conn.prepareStatement(SELECT_BY_ID)) {
+                getCurrentStmt.setInt(1, hoGiaDinh.getId());
+                try (ResultSet rs = getCurrentStmt.executeQuery()) {
+                    if (rs.next()) {
+                        Date ngayTaoDate = rs.getDate("ngayTao");
+                        if (ngayTaoDate != null) {
+                            currentNgayTao = ngayTaoDate.toLocalDate();
+                        }
+                    }
+                }
+            }
+
             // Proceed with update
             try (PreparedStatement pstmt = conn.prepareStatement(UPDATE)) {
                 pstmt.setString(1, hoGiaDinh.getMaHo().trim());
@@ -229,7 +231,9 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
                     pstmt.setNull(4, java.sql.Types.INTEGER);
                 }
                 pstmt.setString(5, hoGiaDinh.getGhiChu());
-                pstmt.setDate(6, convertToSqlDate(hoGiaDinh.getNgayTao()));
+                // Preserve existing ngayTao if not provided, otherwise use provided value
+                LocalDate ngayTaoToSet = hoGiaDinh.getNgayTao() != null ? hoGiaDinh.getNgayTao() : currentNgayTao;
+                pstmt.setDate(6, convertToSqlDate(ngayTaoToSet));
                 pstmt.setInt(7, hoGiaDinh.getId());
 
                 int rowsAffected = pstmt.executeUpdate();
@@ -254,124 +258,53 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
     @Override
     public boolean deleteHoGiaDinh(int id) {
         try (Connection conn = DatabaseConnector.getConnection()) {
-            // Disable auto-commit for transaction
-            conn.setAutoCommit(false);
+            // Constraint Check: Check for dependencies in NhanKhau table
+            int nhanKhauCount = 0;
+            try (PreparedStatement pstmt = conn.prepareStatement(CHECK_NHAN_KHAU_DEPENDENCIES)) {
+                pstmt.setInt(1, id);
 
-            try {
-                // Check for dependencies
-                int nhanKhauCount = 0;
-                try (PreparedStatement pstmt = conn.prepareStatement(CHECK_NHAN_KHAU_DEPENDENCIES)) {
-                    pstmt.setInt(1, id);
-                    try (ResultSet rs = pstmt.executeQuery()) {
-                        if (rs.next()) {
-                            nhanKhauCount = rs.getInt(1);
-                        }
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        nhanKhauCount = rs.getInt(1);
                     }
                 }
+            }
 
-                int phieuThuCount = 0;
-                try (PreparedStatement pstmt = conn.prepareStatement(CHECK_PHIEU_THU_DEPENDENCIES)) {
-                    pstmt.setInt(1, id);
-                    try (ResultSet rs = pstmt.executeQuery()) {
-                        if (rs.next()) {
-                            phieuThuCount = rs.getInt(1);
-                        }
+            // Constraint Check: Check for dependencies in PhieuThu table
+            int phieuThuCount = 0;
+            try (PreparedStatement pstmt = conn.prepareStatement(CHECK_PHIEU_THU_DEPENDENCIES)) {
+                pstmt.setInt(1, id);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        phieuThuCount = rs.getInt(1);
                     }
                 }
+            }
 
-                int phuongTienCount = 0;
-                try (PreparedStatement pstmt = conn.prepareStatement(CHECK_PHUONG_TIEN_DEPENDENCIES)) {
-                    pstmt.setInt(1, id);
-                    try (ResultSet rs = pstmt.executeQuery()) {
-                        if (rs.next()) {
-                            phuongTienCount = rs.getInt(1);
-                        }
-                    }
-                }
-
-                // Delete related records first (CASCADE delete)
-                // 1. Delete LichSuNhanKhau for residents in this household
-                if (nhanKhauCount > 0) {
-                    try (PreparedStatement pstmt = conn.prepareStatement(
-                            "DELETE FROM LichSuNhanKhau WHERE maNhanKhau IN (SELECT id FROM NhanKhau WHERE maHo = ?)")) {
-                        pstmt.setInt(1, id);
-                        int deleted = pstmt.executeUpdate();
-                        logger.log(Level.INFO, "Deleted " + deleted + " LichSuNhanKhau records for household id: " + id);
-                    }
-                }
-
-                // 2. Delete NhanKhau records
-                if (nhanKhauCount > 0) {
-                    try (PreparedStatement pstmt = conn.prepareStatement(DELETE_NHAN_KHAU_BY_MAHO)) {
-                        pstmt.setInt(1, id);
-                        int deleted = pstmt.executeUpdate();
-                        logger.log(Level.INFO, "Deleted " + deleted + " NhanKhau records for household id: " + id);
-                    }
-                }
-
-                // 3. Delete ChiTietThu for PhieuThu in this household
-                if (phieuThuCount > 0) {
-                    try (PreparedStatement pstmt = conn.prepareStatement(
-                            "DELETE FROM ChiTietThu WHERE maPhieu IN (SELECT id FROM PhieuThu WHERE maHo = ?)")) {
-                        pstmt.setInt(1, id);
-                        int deleted = pstmt.executeUpdate();
-                        logger.log(Level.INFO, "Deleted " + deleted + " ChiTietThu records for household id: " + id);
-                    }
-                }
-
-                // 4. Delete LichSuNopTien for PhieuThu in this household
-                if (phieuThuCount > 0) {
-                    try (PreparedStatement pstmt = conn.prepareStatement(
-                            "DELETE FROM LichSuNopTien WHERE maPhieu IN (SELECT id FROM PhieuThu WHERE maHo = ?)")) {
-                        pstmt.setInt(1, id);
-                        int deleted = pstmt.executeUpdate();
-                        logger.log(Level.INFO, "Deleted " + deleted + " LichSuNopTien records for household id: " + id);
-                    }
-                }
-
-                // 5. Delete PhieuThu records
-                if (phieuThuCount > 0) {
-                    try (PreparedStatement pstmt = conn.prepareStatement(DELETE_PHIEU_THU_BY_MAHO)) {
-                        pstmt.setInt(1, id);
-                        int deleted = pstmt.executeUpdate();
-                        logger.log(Level.INFO, "Deleted " + deleted + " PhieuThu records for household id: " + id);
-                    }
-                }
-
-                // 6. Delete PhuongTien records
-                if (phuongTienCount > 0) {
-                    try (PreparedStatement pstmt = conn.prepareStatement(DELETE_PHUONG_TIEN_BY_MAHO)) {
-                        pstmt.setInt(1, id);
-                        int deleted = pstmt.executeUpdate();
-                        logger.log(Level.INFO, "Deleted " + deleted + " PhuongTien records for household id: " + id);
-                    }
-                }
-
-                // 7. Finally, delete the household
-                try (PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
-                    pstmt.setInt(1, id);
-                    int rowsAffected = pstmt.executeUpdate();
-                    boolean success = rowsAffected > 0;
-
-                    if (success) {
-                        conn.commit();
-                        logger.log(Level.INFO, "Successfully deleted household with id: " + id + 
-                                " (and " + nhanKhauCount + " residents, " + phieuThuCount + " receipts, " + phuongTienCount + " vehicles)");
-                    } else {
-                        conn.rollback();
-                        logger.log(Level.WARNING, "Failed to delete household with id: " + id + " - household may not exist");
-                    }
-
-                    return success;
-                }
-
-            } catch (SQLException e) {
-                conn.rollback();
-                logger.log(Level.SEVERE, "Error deleting household with id: " + id + " - transaction rolled back", e);
-                e.printStackTrace();
+            // If either has dependencies, block deletion
+            if (nhanKhauCount > 0 || phieuThuCount > 0) {
+                logger.log(Level.WARNING, 
+                        "Cannot delete household with id: " + id + 
+                        ". Related records: NhanKhau=" + nhanKhauCount + 
+                        ", PhieuThu=" + phieuThuCount);
                 return false;
-            } finally {
-                conn.setAutoCommit(true);
+            }
+
+            // Proceed with deletion
+            try (PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
+                pstmt.setInt(1, id);
+
+                int rowsAffected = pstmt.executeUpdate();
+                boolean success = rowsAffected > 0;
+
+                if (success) {
+                    logger.log(Level.INFO, "Successfully deleted household with id: " + id);
+                } else {
+                    logger.log(Level.WARNING, "Failed to delete household with id: " + id);
+                }
+
+                return success;
             }
 
         } catch (SQLException e) {

@@ -156,17 +156,47 @@ const NhanKhauAPI = {
     updateStatus: (id, newStatus, historyRecord) => apiRequest(`/nhan-khau/${id}/status`, 'PUT', { newStatus, historyRecord })
 };
 
+const DotThuAPI = {
+    getAll: async () => {
+        const response = await apiRequest('/dot-thu', 'GET');
+        return Array.isArray(response) ? response : (response.data || []);
+    },
+    getById: (id) => apiRequest(`/dot-thu/${id}`, 'GET'),
+    create: (data) => apiRequest('/dot-thu', 'POST', data),
+    update: (id, data) => apiRequest(`/dot-thu/${id}`, 'PUT', data),
+    delete: (id) => apiRequest(`/dot-thu/${id}`, 'DELETE'),
+    search: (keyword) => apiRequest(`/dot-thu/search/${encodeURIComponent(keyword)}`, 'GET')
+};
+
 const PhieuThuAPI = {
     getAll: async () => {
         const response = await apiRequest('/phieu-thu', 'GET');
         return Array.isArray(response) ? response : (response.data || []);
     },
     getById: (id) => apiRequest(`/phieu-thu/${id}`, 'GET'),
+    getChiTiet: (id) => apiRequest(`/phieu-thu/${id}/chi-tiet`, 'GET'),
     create: (data) => apiRequest('/phieu-thu', 'POST', data),
+    createWithDetails: (phieuThu, chiTietList) => apiRequest('/phieu-thu/with-details', 'POST', { phieuThu, chiTietList }),
     update: (id, data) => apiRequest(`/phieu-thu/${id}`, 'PUT', data),
+    updateStatus: (id, newStatus) => apiRequest(`/phieu-thu/${id}/status`, 'PUT', { newStatus }),
     delete: (id) => apiRequest(`/phieu-thu/${id}`, 'DELETE'),
     getByHoGiaDinh: (maHo) => apiRequest(`/phieu-thu/ho-gia-dinh/${maHo}`, 'GET'),
-    hasUnpaidFees: (maHo) => apiRequest(`/phieu-thu/ho-gia-dinh/${maHo}/unpaid`, 'GET')
+    getByDotThu: (maDotThu) => apiRequest(`/phieu-thu/dot-thu/${maDotThu}`, 'GET'),
+    hasUnpaidFees: (maHo) => apiRequest(`/phieu-thu/ho-gia-dinh/${maHo}/unpaid`, 'GET'),
+    generateForDrive: (maDot) => apiRequest(`/phieu-thu/generate/${maDot}`, 'POST')
+};
+
+const PhuongTienAPI = {
+    getAll: async () => {
+        const response = await apiRequest('/phuong-tien', 'GET');
+        return Array.isArray(response) ? response : (response.data || []);
+    },
+    getById: (id) => apiRequest(`/phuong-tien/${id}`, 'GET'),
+    getByHoGiaDinh: (maHo) => apiRequest(`/phuong-tien/ho-gia-dinh/${maHo}`, 'GET'),
+    create: (data) => apiRequest('/phuong-tien', 'POST', data),
+    update: (id, data) => apiRequest(`/phuong-tien/${id}`, 'PUT', data),
+    delete: (id) => apiRequest(`/phuong-tien/${id}`, 'DELETE'),
+    search: (keyword) => apiRequest(`/phuong-tien/search/${encodeURIComponent(keyword)}`, 'GET')
 };
 
 const LichSuNopTienAPI = {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Quản Lý - Khoản Thu (v1.0)</title>
+    <title>Quản Lý - Phương Tiện</title>
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
@@ -59,7 +59,7 @@
                 </a>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="phuong-tien.html">
                     <i class="fas fa-fw fa-car"></i>
                     <span>Phương tiện</span>
@@ -143,32 +143,43 @@
 
                 <div class="container-fluid">
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Quản lý Thu Phí (v1.0)</h1>
-                        <a href="#" class="btn btn-primary btn-icon-split shadow-sm" data-toggle="modal" data-target="#addFeeModal">
+                        <h1 class="h3 mb-0 text-gray-800">Quản lý Phương Tiện</h1>
+                        <a href="#" class="btn btn-primary btn-icon-split shadow-sm" data-toggle="modal" data-target="#addPhuongTienModal">
                             <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
-                            <span class="text">Tạo khoản thu mới</span>
+                            <span class="text">Đăng ký phương tiện mới</span>
                         </a>
                     </div>
 
                     <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Danh sách các khoản thu hiện hành</h6>
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách phương tiện</h6>
+                            <div class="input-group" style="width: 300px;">
+                                <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm biển số, tên chủ xe, loại xe..." onkeyup="handleSearch(event)">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="performSearch()">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()" title="Xóa tìm kiếm">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead class="thead-light">
                                         <tr>
-                                            <th>Tên khoản thu</th>
-                                            <th>Loại phí</th>
-                                            <th>Đơn giá / Mức thu</th>
-                                            <th>Tính theo</th>
-                                            <th>Tiến độ</th>
-                                            <th>Trạng thái</th>
+                                            <th>STT</th>
+                                            <th>Biển số</th>
+                                            <th>Loại xe</th>
+                                            <th>Tên chủ xe</th>
+                                            <th>Mã hộ</th>
+                                            <th>Ngày đăng ký</th>
                                             <th>Hành động</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="khoanThuTableBody">
+                                    <tbody id="phuongTienTableBody">
                                         <tr><td colspan="7" class="text-center">Đang tải dữ liệu...</td></tr>
                                     </tbody>
                                 </table>
@@ -183,49 +194,48 @@
         </div>
     </div>
 
-    <div class="modal fade" id="addFeeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade" id="addPhuongTienModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Tạo Khoản Thu Mới</h5>
+                    <h5 class="modal-title">Đăng Ký Phương Tiện Mới</h5>
                     <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <form id="khoanThuForm">
-                        <input type="hidden" id="khoanThuId">
+                    <form id="phuongTienForm">
+                        <input type="hidden" id="phuongTienId">
                         <div class="form-group">
-                            <label>Tên khoản thu</label>
-                            <input type="text" class="form-control" id="tenKhoanThu" placeholder="VD: Phí dịch vụ T12/2025" required>
+                            <label>Mã hộ gia đình <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="maHo" required min="1" placeholder="Nhập mã hộ">
                         </div>
                         <div class="form-group">
-                            <label>Loại phí</label>
-                            <select class="form-control" id="loaiPhiSelect" required>
-                                <option value="">Chọn loại phí</option>
-                                <option value="BatBuoc">Bắt buộc</option>
-                                <option value="TuNguyen">Tự nguyện</option>
+                            <label>Biển số <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="bienSo" required placeholder="VD: 30A-12345" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label>Loại xe</label>
+                            <select class="form-control" id="loaiXe">
+                                <option value="">-- Chọn loại xe --</option>
+                                <option value="Xe máy">Xe máy</option>
+                                <option value="Xe ô tô">Xe ô tô</option>
+                                <option value="Xe đạp">Xe đạp</option>
+                                <option value="Xe tải">Xe tải</option>
+                                <option value="Khác">Khác</option>
                             </select>
                         </div>
-
-                        <div class="form-group" id="donGiaArea">
-                            <label>Đơn giá (VNĐ/m2)</label>
-                            <input type="number" class="form-control" id="donGia" value="7000" placeholder="Nhập số tiền trên 1m2" min="0">
-                            <small class="form-text text-muted">Hệ thống sẽ tự nhân với diện tích căn hộ.</small>
-                        </div>
-
                         <div class="form-group">
-                            <label>Mô tả</label>
-                            <textarea class="form-control" id="moTa" rows="3" placeholder="Mô tả khoản thu"></textarea>
+                            <label>Tên chủ xe</label>
+                            <input type="text" class="form-control" id="tenChuXe" placeholder="Tên người sở hữu phương tiện" maxlength="200">
                         </div>
-
                         <div class="form-group">
-                            <label>Hạn nộp</label>
-                            <input type="date" class="form-control" id="hanNop">
+                            <label>Ngày đăng ký</label>
+                            <input type="date" class="form-control" id="ngayDangKy">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary" id="saveKhoanThuBtn">Lưu</button>
+                    <button type="button" class="btn btn-primary" id="savePhuongTienBtn">Lưu</button>
                 </div>
             </div>
         </div>
@@ -242,14 +252,10 @@
     <script>
         // Load user info and avatar
         $(document).ready(function() {
-            // Load user display name
             loadUserDisplay();
-            
-            // Load profile image for navbar avatar
             if (typeof updateNavbarAvatar !== 'undefined') {
                 updateNavbarAvatar();
             } else {
-                // Fallback: load avatar manually
                 try {
                     const userStr = sessionStorage.getItem('currentUser');
                     if (userStr) {
@@ -266,7 +272,7 @@
                         }
                     }
                 } catch (error) {
-                    console.error('[khoan-thu] Error loading avatar:', error);
+                    console.error('[phuong-tien] Error loading avatar:', error);
                 }
             }
         });
@@ -291,121 +297,70 @@
     <script>
         let dataTable;
         let editingId = null;
+        let hoGiaDinhMap = {};
 
-        // Load data on page load
         $(document).ready(async function() {
-            await loadKhoanThu();
-            
-            $('#loaiPhiSelect').change(function() {
-                var selected = $(this).val();
-                if(selected === 'TuNguyen') {
-                    $('#donGiaArea').hide();
-                    $('#donGia').removeAttr('required');
-                } else {
-                    $('#donGiaArea').show();
-                    $('#donGia').attr('required', 'required');
-                }
-            });
+            await loadHoGiaDinh();
+            await loadPhuongTien();
 
             // Form submission
-            $('#saveKhoanThuBtn').on('click', async function() {
-                const form = $('#khoanThuForm');
+            $('#savePhuongTienBtn').on('click', async function() {
+                const form = $('#phuongTienForm');
                 if (!form[0].checkValidity()) {
                     form[0].reportValidity();
                     return;
                 }
 
-                // Validate and prepare payload - lấy giá trị an toàn
-                const tenKhoanThuEl = $('#tenKhoanThu');
-                const loaiPhiEl = $('#loaiPhiSelect');
-                const donGiaEl = $('#donGia');
-                const moTaEl = $('#moTa');
+                const maHo = parseInt($('#maHo').val());
+                const bienSo = $('#bienSo').val().trim();
+                const loaiXe = $('#loaiXe').val();
+                const tenChuXe = $('#tenChuXe').val().trim();
+                const ngayDangKy = $('#ngayDangKy').val();
 
-                const tenKhoanThu = tenKhoanThuEl.length > 0 ? (tenKhoanThuEl.val() || '').trim() : '';
-                if (!tenKhoanThu) {
-                    APIUtils.showError('Vui lòng nhập tên khoản thu');
+                if (!maHo || maHo <= 0) {
+                    APIUtils.showError('Vui lòng nhập mã hộ gia đình hợp lệ');
                     return;
                 }
-                
-                const loaiPhi = loaiPhiEl.length > 0 ? (loaiPhiEl.val() || '') : '';
-                if (!loaiPhi) {
-                    APIUtils.showError('Vui lòng chọn loại phí');
+
+                if (!bienSo) {
+                    APIUtils.showError('Vui lòng nhập biển số');
                     return;
                 }
-                
-                // Parse donGia as number (not string)
-                let donGia = 0;
-                const donGiaStr = donGiaEl.length > 0 ? (donGiaEl.val() || '') : '';
-                if (loaiPhi === 'BatBuoc') {
-                    // Bắt buộc phải có đơn giá
-                    if (!donGiaStr || donGiaStr.trim() === '') {
-                        APIUtils.showError('Vui lòng nhập đơn giá cho khoản thu bắt buộc');
-                        return;
-                    }
-                    const parsed = parseFloat(donGiaStr);
-                    if (isNaN(parsed) || parsed < 0) {
-                        APIUtils.showError('Đơn giá phải là số hợp lệ và >= 0');
-                        return;
-                    }
-                    donGia = parsed;
-                } else if (donGiaStr && donGiaStr.trim() !== '') {
-                    // Tự nguyện có thể có hoặc không có đơn giá
-                    const parsed = parseFloat(donGiaStr);
-                    if (isNaN(parsed) || parsed < 0) {
-                        APIUtils.showError('Đơn giá phải là số hợp lệ và >= 0');
-                        return;
-                    }
-                    donGia = parsed;
-                }
-                
-                const moTa = moTaEl.length > 0 ? (moTaEl.val() || '').trim() : '';
-                
-                const khoanThu = {
-                    tenKhoanThu: tenKhoanThu,
-                    loaiPhi: loaiPhi,
-                    donGia: donGia, // Send as number, not string
-                    moTa: moTa
-                    // Note: hanNop is not sent as it's not in the model
+
+                const phuongTien = {
+                    maHo: maHo,
+                    bienSo: bienSo,
+                    loaiXe: loaiXe || null,
+                    tenChuXe: tenChuXe || null,
+                    ngayDangKy: ngayDangKy || null
                 };
 
-                // Log payload để debug
-                console.log('[saveKhoanThu] Payload gửi lên backend:', JSON.stringify(khoanThu, null, 2));
-
-                const btn = $('#saveKhoanThuBtn');
+                const btn = $('#savePhuongTienBtn');
                 const originalHtml = btn.html();
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang lưu...');
 
                 try {
                     if (editingId) {
-                        await KhoanThuAPI.update(editingId, khoanThu);
-                        APIUtils.showSuccess('Cập nhật khoản thu thành công');
+                        phuongTien.id = editingId;
+                        await PhuongTienAPI.update(editingId, phuongTien);
+                        APIUtils.showSuccess('Cập nhật phương tiện thành công');
                     } else {
-                        const result = await KhoanThuAPI.create(khoanThu);
-                        APIUtils.showSuccess('Tạo khoản thu thành công');
-                        
-                        // Lưu timestamp khi tạo khoản thu
-                        // Backend có thể trả về data trong result hoặc result trực tiếp
-                        const responseData = result.data || result;
-                        const feeId = responseData?.id || responseData?.maKhoanThu || result.id || result.maKhoanThu;
-                        if (feeId) {
-                            localStorage.setItem(`fee_${feeId}_created`, Date.now().toString());
-                        }
-                        
-                        // Trigger event để trang chủ cập nhật danh sách
-                        window.dispatchEvent(new Event('khoanThuCreated'));
-                        localStorage.setItem('khoanThuUpdated', Date.now().toString());
+                        await PhuongTienAPI.create(phuongTien);
+                        APIUtils.showSuccess('Đăng ký phương tiện thành công');
                     }
-                    $('#addFeeModal').modal('hide');
+                    $('#addPhuongTienModal').modal('hide');
                     form[0].reset();
                     editingId = null;
-                    await loadKhoanThu();
+                    // Reload với từ khóa tìm kiếm hiện tại (nếu có)
+                    const currentSearch = $('#searchInput').val();
+                    await loadPhuongTien(currentSearch);
                 } catch (error) {
-                    // Xử lý lỗi chi tiết hơn
                     let errorMessage = error.message || 'Có lỗi xảy ra';
                     if (error.detail) {
                         errorMessage = error.detail;
-                    } else if (error.message && error.message.includes('Validation failed')) {
-                        errorMessage = 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.';
+                    }
+                    if (errorMessage.includes('duplicate') || errorMessage.includes('đã tồn tại') || errorMessage.includes('already exists')) {
+                        errorMessage = 'Biển số này đã được đăng ký. Vui lòng kiểm tra lại.';
                     }
                     APIUtils.showError(errorMessage);
                 } finally {
@@ -414,85 +369,72 @@
             });
 
             // Reset form when modal is closed
-            $('#addFeeModal').on('hidden.bs.modal', function() {
-                $('#khoanThuForm')[0].reset();
+            $('#addPhuongTienModal').on('hidden.bs.modal', function() {
+                $('#phuongTienForm')[0].reset();
                 editingId = null;
-                $('#donGiaArea').show();
-                $('#donGia').attr('required', 'required');
-                $('.modal-title').text('Tạo Khoản Thu Mới');
-            });
-            
-            // Set modal title when opening
-            $('#addFeeModal').on('show.bs.modal', function() {
-                if (!editingId) {
-                    $('.modal-title').text('Tạo Khoản Thu Mới');
-                }
+                $('.modal-title').text('Đăng Ký Phương Tiện Mới');
             });
         });
 
-        async function loadKhoanThu() {
+        async function loadHoGiaDinh() {
             try {
-                const data = await KhoanThuAPI.getAll();
-                const tbody = $('#khoanThuTableBody');
+                const data = await HoGiaDinhAPI.getAll();
+                hoGiaDinhMap = {};
+                data.forEach(ho => {
+                    const id = ho.id;
+                    hoGiaDinhMap[id] = ho.maHo || `Hộ ${id}`;
+                });
+            } catch (error) {
+                console.error('Error loading HoGiaDinh:', error);
+            }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        async function loadPhuongTien(searchKeyword = null) {
+            try {
+                let data;
+                if (searchKeyword && searchKeyword.trim()) {
+                    data = await PhuongTienAPI.search(searchKeyword.trim());
+                } else {
+                    data = await PhuongTienAPI.getAll();
+                }
+                
+                const tbody = $('#phuongTienTableBody');
                 tbody.empty();
 
                 if (!data || data.length === 0) {
-                    tbody.html('<tr><td colspan="7" class="text-center">Chưa có khoản thu nào</td></tr>');
+                    const emptyMessage = searchKeyword && searchKeyword.trim() 
+                        ? `Không tìm thấy phương tiện nào với từ khóa "${searchKeyword}"`
+                        : 'Chưa có phương tiện nào';
+                    tbody.html(`<tr><td colspan="7" class="text-center">${emptyMessage}</td></tr>`);
+                    if (dataTable) {
+                        dataTable.destroy();
+                    }
                     return;
                 }
 
                 data.forEach((item, index) => {
-                    // Map id/maKhoanThu - backend có thể trả về cả hai
-                    const itemId = item.id || item.maKhoanThu;
-                    const tenKhoan = item.tenKhoan || item.tenKhoanThu || '';
-                    
-                    // Map loại phí từ backend (loai, batBuoc, loaiKhoanThu)
-                    let loaiPhiText = 'Tự nguyện';
-                    let loaiPhiValue = 'TuNguyen';
-                    if (item.batBuoc === true || item.loaiKhoanThu === 0 || 
-                        (item.loai && (item.loai.includes('Bắt buộc') || item.loai === 'Bắt buộc'))) {
-                        loaiPhiText = 'Bắt buộc';
-                        loaiPhiValue = 'BatBuoc';
-                    } else if (item.loai) {
-                        loaiPhiText = item.loai;
-                        loaiPhiValue = item.loai.includes('Bắt buộc') ? 'BatBuoc' : 'TuNguyen';
-                    }
-                    
-                    // Format đơn giá với đơn vị tính
-                    let donGiaText = 'Tùy tâm';
-                    if (item.donGia && parseFloat(item.donGia) > 0) {
-                        const donViTinh = item.donViTinh || 'VNĐ/m²';
-                        donGiaText = APIUtils.formatCurrency(item.donGia) + '/' + donViTinh.replace('VNĐ/', '');
-                    }
-                    
-                    // Đối tượng tính theo
-                    const tinhTheo = item.tinhTheo || 'Diện tích';
+                    const itemId = item.id;
+                    const maHo = hoGiaDinhMap[item.maHo] || `Hộ ${item.maHo}`;
                     
                     const row = `
                         <tr>
-                            <td>
-                                <strong>${tenKhoan}</strong>
-                                ${item.moTa ? '<br><small class="text-muted">' + item.moTa + '</small>' : ''}
-                            </td>
-                            <td>
-                                <span class="badge ${loaiPhiValue === 'BatBuoc' ? 'badge-danger' : 'badge-info'}">
-                                    ${loaiPhiText}
-                                </span>
-                            </td>
-                            <td>${donGiaText}</td>
-                            <td>${tinhTheo}</td>
-                            <td>
-                                <div class="progress progress-sm mb-2">
-                                    <div class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
-                                </div>
-                                <small>Đang tính toán...</small>
-                            </td>
-                            <td><span class="badge badge-success">Hoạt động</span></td>
+                            <td>${index + 1}</td>
+                            <td><strong>${item.bienSo || ''}</strong></td>
+                            <td>${item.loaiXe || '-'}</td>
+                            <td>${item.tenChuXe || '-'}</td>
+                            <td>${maHo}</td>
+                            <td>${formatDate(item.ngayDangKy)}</td>
                             <td class="text-center">
-                                <button class="btn btn-warning btn-circle btn-sm" onclick="editKhoanThu(${itemId})" title="Sửa">
+                                <button class="btn btn-warning btn-circle btn-sm" onclick="editPhuongTien(${itemId})" title="Sửa">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-danger btn-circle btn-sm" onclick="deleteKhoanThu(${itemId})" title="Xóa">
+                                <button class="btn btn-danger btn-circle btn-sm" onclick="deletePhuongTien(${itemId})" title="Xóa">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -501,7 +443,6 @@
                     tbody.append(row);
                 });
 
-                // Initialize/reinitialize DataTable
                 if (dataTable) {
                     dataTable.destroy();
                 }
@@ -512,80 +453,66 @@
                     }
                 });
             } catch (error) {
-                $('#khoanThuTableBody').html(`<tr><td colspan="7" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
-                APIUtils.showError('Không thể tải danh sách khoản thu: ' + error.message);
+                $('#phuongTienTableBody').html(`<tr><td colspan="7" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
+                APIUtils.showError('Không thể tải danh sách phương tiện: ' + error.message);
             }
         }
 
-        async function editKhoanThu(id) {
+        function handleSearch(event) {
+            // Tìm kiếm khi nhấn Enter
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                performSearch();
+            }
+        }
+
+        async function performSearch() {
+            const keyword = $('#searchInput').val();
+            await loadPhuongTien(keyword);
+        }
+
+        async function clearSearch() {
+            $('#searchInput').val('');
+            await loadPhuongTien();
+        }
+
+        async function editPhuongTien(id) {
             try {
-                const data = await KhoanThuAPI.getAll();
-                // Tìm item theo id hoặc maKhoanThu
-                const item = data.find(k => (k.id === id || k.maKhoanThu === id));
+                const data = await PhuongTienAPI.getAll();
+                const item = data.find(d => d.id === id);
                 if (!item) {
-                    APIUtils.showError('Không tìm thấy khoản thu');
+                    APIUtils.showError('Không tìm thấy phương tiện');
                     return;
                 }
 
                 editingId = id;
-                $('#khoanThuId').val(id);
-                
-                // Map tenKhoan/tenKhoanThu
-                const tenKhoan = item.tenKhoan || item.tenKhoanThu || '';
-                $('#tenKhoanThu').val(tenKhoan);
-                
-                // Map loại phí từ backend (loai, batBuoc, loaiKhoanThu)
-                let loaiPhiValue = 'TuNguyen';
-                if (item.batBuoc === true || item.loaiKhoanThu === 0 || 
-                    (item.loai && (item.loai.includes('Bắt buộc') || item.loai === 'Bắt buộc'))) {
-                    loaiPhiValue = 'BatBuoc';
-                }
-                $('#loaiPhiSelect').val(loaiPhiValue);
-                
-                // Map donGia
-                $('#donGia').val(item.donGia || '');
-                
-                // Map moTa
-                $('#moTa').val(item.moTa || '');
-                
-                // hanNop không có trong model, để trống
-                $('#hanNop').val('');
-                
-                // Hiển thị/ẩn đơn giá dựa trên loại phí
-                if (loaiPhiValue === 'TuNguyen') {
-                    $('#donGiaArea').hide();
-                } else {
-                    $('#donGiaArea').show();
-                }
+                $('#phuongTienId').val(id);
+                $('#maHo').val(item.maHo);
+                $('#bienSo').val(item.bienSo || '');
+                $('#loaiXe').val(item.loaiXe || '');
+                $('#tenChuXe').val(item.tenChuXe || '');
+                $('#ngayDangKy').val(item.ngayDangKy || '');
 
-                $('.modal-title').text('Sửa Khoản Thu');
-                $('#addFeeModal').modal('show');
+                $('.modal-title').text('Sửa Phương Tiện');
+                $('#addPhuongTienModal').modal('show');
             } catch (error) {
                 APIUtils.showError(error.message);
             }
         }
 
-        async function deleteKhoanThu(id) {
-            if (!confirm('Bạn có chắc chắn muốn xóa khoản thu này?')) {
+        async function deletePhuongTien(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa phương tiện này?')) {
                 return;
             }
 
             try {
-                await KhoanThuAPI.delete(id);
-                APIUtils.showSuccess('Xóa khoản thu thành công');
-                await loadKhoanThu();
+                await PhuongTienAPI.delete(id);
+                APIUtils.showSuccess('Xóa phương tiện thành công');
+                // Reload với từ khóa tìm kiếm hiện tại (nếu có)
+                const currentSearch = $('#searchInput').val();
+                await loadPhuongTien(currentSearch);
             } catch (error) {
-                // Xử lý lỗi khi xóa khoản thu đang được sử dụng
-                let errorMessage = error.message;
-                if (errorMessage && (
-                    errorMessage.includes('đang được sử dụng') ||
-                    errorMessage.includes('is being used') ||
-                    errorMessage.includes('ChiTietThu') ||
-                    errorMessage.includes('receipt detail')
-                )) {
-                    errorMessage = 'Không thể xóa khoản thu này vì đang được sử dụng trong các phiếu thu. Vui lòng xóa các phiếu thu liên quan trước.';
-                }
-                APIUtils.showError(errorMessage);
+                APIUtils.showError(error.message);
             }
         }
     </script>
@@ -610,3 +537,4 @@
     </div>
 </body>
 </html>
+

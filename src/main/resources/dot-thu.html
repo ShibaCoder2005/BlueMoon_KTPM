@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Quản Lý - Khoản Thu (v1.0)</title>
+    <title>Quản Lý - Đợt Thu</title>
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
@@ -45,7 +45,7 @@
                 </a>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="dot-thu.html">
                     <i class="fas fa-fw fa-calendar-alt"></i>
                     <span>Đợt thu</span>
@@ -143,32 +143,32 @@
 
                 <div class="container-fluid">
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Quản lý Thu Phí (v1.0)</h1>
-                        <a href="#" class="btn btn-primary btn-icon-split shadow-sm" data-toggle="modal" data-target="#addFeeModal">
+                        <h1 class="h3 mb-0 text-gray-800">Quản lý Đợt Thu</h1>
+                        <a href="#" class="btn btn-primary btn-icon-split shadow-sm" data-toggle="modal" data-target="#addDotThuModal">
                             <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
-                            <span class="text">Tạo khoản thu mới</span>
+                            <span class="text">Tạo đợt thu mới</span>
                         </a>
                     </div>
 
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Danh sách các khoản thu hiện hành</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách đợt thu</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead class="thead-light">
                                         <tr>
-                                            <th>Tên khoản thu</th>
-                                            <th>Loại phí</th>
-                                            <th>Đơn giá / Mức thu</th>
-                                            <th>Tính theo</th>
-                                            <th>Tiến độ</th>
+                                            <th>STT</th>
+                                            <th>Tên đợt thu</th>
+                                            <th>Ngày bắt đầu</th>
+                                            <th>Ngày kết thúc</th>
                                             <th>Trạng thái</th>
+                                            <th>Mô tả</th>
                                             <th>Hành động</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="khoanThuTableBody">
+                                    <tbody id="dotThuTableBody">
                                         <tr><td colspan="7" class="text-center">Đang tải dữ liệu...</td></tr>
                                     </tbody>
                                 </table>
@@ -183,49 +183,45 @@
         </div>
     </div>
 
-    <div class="modal fade" id="addFeeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal fade" id="addDotThuModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Tạo Khoản Thu Mới</h5>
+                    <h5 class="modal-title">Tạo Đợt Thu Mới</h5>
                     <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <form id="khoanThuForm">
-                        <input type="hidden" id="khoanThuId">
+                    <form id="dotThuForm">
+                        <input type="hidden" id="dotThuId">
                         <div class="form-group">
-                            <label>Tên khoản thu</label>
-                            <input type="text" class="form-control" id="tenKhoanThu" placeholder="VD: Phí dịch vụ T12/2025" required>
+                            <label>Tên đợt thu <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="tenDot" placeholder="VD: Đợt thu tháng 12/2025" required>
                         </div>
                         <div class="form-group">
-                            <label>Loại phí</label>
-                            <select class="form-control" id="loaiPhiSelect" required>
-                                <option value="">Chọn loại phí</option>
-                                <option value="BatBuoc">Bắt buộc</option>
-                                <option value="TuNguyen">Tự nguyện</option>
+                            <label>Ngày bắt đầu <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="ngayBatDau" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Ngày kết thúc <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="ngayKetThuc" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Trạng thái</label>
+                            <select class="form-control" id="trangThai">
+                                <option value="Mo">Mở</option>
+                                <option value="Dong">Đóng</option>
+                                <option value="HoanThanh">Hoàn thành</option>
                             </select>
                         </div>
-
-                        <div class="form-group" id="donGiaArea">
-                            <label>Đơn giá (VNĐ/m2)</label>
-                            <input type="number" class="form-control" id="donGia" value="7000" placeholder="Nhập số tiền trên 1m2" min="0">
-                            <small class="form-text text-muted">Hệ thống sẽ tự nhân với diện tích căn hộ.</small>
-                        </div>
-
                         <div class="form-group">
                             <label>Mô tả</label>
-                            <textarea class="form-control" id="moTa" rows="3" placeholder="Mô tả khoản thu"></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Hạn nộp</label>
-                            <input type="date" class="form-control" id="hanNop">
+                            <textarea class="form-control" id="moTa" rows="3" placeholder="Mô tả đợt thu"></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-primary" id="saveKhoanThuBtn">Lưu</button>
+                    <button type="button" class="btn btn-primary" id="saveDotThuBtn">Lưu</button>
                 </div>
             </div>
         </div>
@@ -242,14 +238,10 @@
     <script>
         // Load user info and avatar
         $(document).ready(function() {
-            // Load user display name
             loadUserDisplay();
-            
-            // Load profile image for navbar avatar
             if (typeof updateNavbarAvatar !== 'undefined') {
                 updateNavbarAvatar();
             } else {
-                // Fallback: load avatar manually
                 try {
                     const userStr = sessionStorage.getItem('currentUser');
                     if (userStr) {
@@ -266,7 +258,7 @@
                         }
                     }
                 } catch (error) {
-                    console.error('[khoan-thu] Error loading avatar:', error);
+                    console.error('[dot-thu] Error loading avatar:', error);
                 }
             }
         });
@@ -292,120 +284,66 @@
         let dataTable;
         let editingId = null;
 
-        // Load data on page load
         $(document).ready(async function() {
-            await loadKhoanThu();
-            
-            $('#loaiPhiSelect').change(function() {
-                var selected = $(this).val();
-                if(selected === 'TuNguyen') {
-                    $('#donGiaArea').hide();
-                    $('#donGia').removeAttr('required');
-                } else {
-                    $('#donGiaArea').show();
-                    $('#donGia').attr('required', 'required');
-                }
+            await loadDotThu();
+
+            // Validate date range
+            $('#ngayBatDau, #ngayKetThuc').on('change', function() {
+                validateDateRange();
             });
 
             // Form submission
-            $('#saveKhoanThuBtn').on('click', async function() {
-                const form = $('#khoanThuForm');
+            $('#saveDotThuBtn').on('click', async function() {
+                const form = $('#dotThuForm');
                 if (!form[0].checkValidity()) {
                     form[0].reportValidity();
                     return;
                 }
 
-                // Validate and prepare payload - lấy giá trị an toàn
-                const tenKhoanThuEl = $('#tenKhoanThu');
-                const loaiPhiEl = $('#loaiPhiSelect');
-                const donGiaEl = $('#donGia');
-                const moTaEl = $('#moTa');
+                if (!validateDateRange()) {
+                    return;
+                }
 
-                const tenKhoanThu = tenKhoanThuEl.length > 0 ? (tenKhoanThuEl.val() || '').trim() : '';
-                if (!tenKhoanThu) {
-                    APIUtils.showError('Vui lòng nhập tên khoản thu');
+                const tenDot = $('#tenDot').val().trim();
+                const ngayBatDau = $('#ngayBatDau').val();
+                const ngayKetThuc = $('#ngayKetThuc').val();
+                const trangThai = $('#trangThai').val();
+                const moTa = $('#moTa').val().trim();
+
+                if (!tenDot) {
+                    APIUtils.showError('Vui lòng nhập tên đợt thu');
                     return;
                 }
-                
-                const loaiPhi = loaiPhiEl.length > 0 ? (loaiPhiEl.val() || '') : '';
-                if (!loaiPhi) {
-                    APIUtils.showError('Vui lòng chọn loại phí');
-                    return;
-                }
-                
-                // Parse donGia as number (not string)
-                let donGia = 0;
-                const donGiaStr = donGiaEl.length > 0 ? (donGiaEl.val() || '') : '';
-                if (loaiPhi === 'BatBuoc') {
-                    // Bắt buộc phải có đơn giá
-                    if (!donGiaStr || donGiaStr.trim() === '') {
-                        APIUtils.showError('Vui lòng nhập đơn giá cho khoản thu bắt buộc');
-                        return;
-                    }
-                    const parsed = parseFloat(donGiaStr);
-                    if (isNaN(parsed) || parsed < 0) {
-                        APIUtils.showError('Đơn giá phải là số hợp lệ và >= 0');
-                        return;
-                    }
-                    donGia = parsed;
-                } else if (donGiaStr && donGiaStr.trim() !== '') {
-                    // Tự nguyện có thể có hoặc không có đơn giá
-                    const parsed = parseFloat(donGiaStr);
-                    if (isNaN(parsed) || parsed < 0) {
-                        APIUtils.showError('Đơn giá phải là số hợp lệ và >= 0');
-                        return;
-                    }
-                    donGia = parsed;
-                }
-                
-                const moTa = moTaEl.length > 0 ? (moTaEl.val() || '').trim() : '';
-                
-                const khoanThu = {
-                    tenKhoanThu: tenKhoanThu,
-                    loaiPhi: loaiPhi,
-                    donGia: donGia, // Send as number, not string
-                    moTa: moTa
-                    // Note: hanNop is not sent as it's not in the model
+
+                const dotThu = {
+                    tenDot: tenDot,
+                    ngayBatDau: ngayBatDau,
+                    ngayKetThuc: ngayKetThuc,
+                    trangThai: trangThai || 'Mo',
+                    moTa: moTa || null
                 };
 
-                // Log payload để debug
-                console.log('[saveKhoanThu] Payload gửi lên backend:', JSON.stringify(khoanThu, null, 2));
-
-                const btn = $('#saveKhoanThuBtn');
+                const btn = $('#saveDotThuBtn');
                 const originalHtml = btn.html();
                 btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang lưu...');
 
                 try {
                     if (editingId) {
-                        await KhoanThuAPI.update(editingId, khoanThu);
-                        APIUtils.showSuccess('Cập nhật khoản thu thành công');
+                        dotThu.id = editingId;
+                        await DotThuAPI.update(editingId, dotThu);
+                        APIUtils.showSuccess('Cập nhật đợt thu thành công');
                     } else {
-                        const result = await KhoanThuAPI.create(khoanThu);
-                        APIUtils.showSuccess('Tạo khoản thu thành công');
-                        
-                        // Lưu timestamp khi tạo khoản thu
-                        // Backend có thể trả về data trong result hoặc result trực tiếp
-                        const responseData = result.data || result;
-                        const feeId = responseData?.id || responseData?.maKhoanThu || result.id || result.maKhoanThu;
-                        if (feeId) {
-                            localStorage.setItem(`fee_${feeId}_created`, Date.now().toString());
-                        }
-                        
-                        // Trigger event để trang chủ cập nhật danh sách
-                        window.dispatchEvent(new Event('khoanThuCreated'));
-                        localStorage.setItem('khoanThuUpdated', Date.now().toString());
+                        await DotThuAPI.create(dotThu);
+                        APIUtils.showSuccess('Tạo đợt thu thành công');
                     }
-                    $('#addFeeModal').modal('hide');
+                    $('#addDotThuModal').modal('hide');
                     form[0].reset();
                     editingId = null;
-                    await loadKhoanThu();
+                    await loadDotThu();
                 } catch (error) {
-                    // Xử lý lỗi chi tiết hơn
                     let errorMessage = error.message || 'Có lỗi xảy ra';
                     if (error.detail) {
                         errorMessage = error.detail;
-                    } else if (error.message && error.message.includes('Validation failed')) {
-                        errorMessage = 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.';
                     }
                     APIUtils.showError(errorMessage);
                 } finally {
@@ -414,85 +352,73 @@
             });
 
             // Reset form when modal is closed
-            $('#addFeeModal').on('hidden.bs.modal', function() {
-                $('#khoanThuForm')[0].reset();
+            $('#addDotThuModal').on('hidden.bs.modal', function() {
+                $('#dotThuForm')[0].reset();
                 editingId = null;
-                $('#donGiaArea').show();
-                $('#donGia').attr('required', 'required');
-                $('.modal-title').text('Tạo Khoản Thu Mới');
-            });
-            
-            // Set modal title when opening
-            $('#addFeeModal').on('show.bs.modal', function() {
-                if (!editingId) {
-                    $('.modal-title').text('Tạo Khoản Thu Mới');
-                }
+                $('.modal-title').text('Tạo Đợt Thu Mới');
             });
         });
 
-        async function loadKhoanThu() {
+        function validateDateRange() {
+            const ngayBatDau = $('#ngayBatDau').val();
+            const ngayKetThuc = $('#ngayKetThuc').val();
+            
+            if (ngayBatDau && ngayKetThuc) {
+                if (new Date(ngayKetThuc) < new Date(ngayBatDau)) {
+                    APIUtils.showError('Ngày kết thúc phải sau ngày bắt đầu');
+                    $('#ngayKetThuc').focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        function getStatusBadge(trangThai) {
+            if (!trangThai) return '<span class="badge badge-secondary">-</span>';
+            const statusMap = {
+                'Mo': { text: 'Mở', class: 'badge-success' },
+                'Dong': { text: 'Đóng', class: 'badge-danger' },
+                'HoanThanh': { text: 'Hoàn thành', class: 'badge-info' }
+            };
+            const status = statusMap[trangThai] || { text: trangThai, class: 'badge-secondary' };
+            return `<span class="badge ${status.class}">${status.text}</span>`;
+        }
+
+        async function loadDotThu() {
             try {
-                const data = await KhoanThuAPI.getAll();
-                const tbody = $('#khoanThuTableBody');
+                const data = await DotThuAPI.getAll();
+                const tbody = $('#dotThuTableBody');
                 tbody.empty();
 
                 if (!data || data.length === 0) {
-                    tbody.html('<tr><td colspan="7" class="text-center">Chưa có khoản thu nào</td></tr>');
+                    tbody.html('<tr><td colspan="7" class="text-center">Chưa có đợt thu nào</td></tr>');
+                    if (dataTable) {
+                        dataTable.destroy();
+                    }
                     return;
                 }
 
                 data.forEach((item, index) => {
-                    // Map id/maKhoanThu - backend có thể trả về cả hai
-                    const itemId = item.id || item.maKhoanThu;
-                    const tenKhoan = item.tenKhoan || item.tenKhoanThu || '';
-                    
-                    // Map loại phí từ backend (loai, batBuoc, loaiKhoanThu)
-                    let loaiPhiText = 'Tự nguyện';
-                    let loaiPhiValue = 'TuNguyen';
-                    if (item.batBuoc === true || item.loaiKhoanThu === 0 || 
-                        (item.loai && (item.loai.includes('Bắt buộc') || item.loai === 'Bắt buộc'))) {
-                        loaiPhiText = 'Bắt buộc';
-                        loaiPhiValue = 'BatBuoc';
-                    } else if (item.loai) {
-                        loaiPhiText = item.loai;
-                        loaiPhiValue = item.loai.includes('Bắt buộc') ? 'BatBuoc' : 'TuNguyen';
-                    }
-                    
-                    // Format đơn giá với đơn vị tính
-                    let donGiaText = 'Tùy tâm';
-                    if (item.donGia && parseFloat(item.donGia) > 0) {
-                        const donViTinh = item.donViTinh || 'VNĐ/m²';
-                        donGiaText = APIUtils.formatCurrency(item.donGia) + '/' + donViTinh.replace('VNĐ/', '');
-                    }
-                    
-                    // Đối tượng tính theo
-                    const tinhTheo = item.tinhTheo || 'Diện tích';
-                    
+                    const itemId = item.id || item.maDot;
                     const row = `
                         <tr>
-                            <td>
-                                <strong>${tenKhoan}</strong>
-                                ${item.moTa ? '<br><small class="text-muted">' + item.moTa + '</small>' : ''}
-                            </td>
-                            <td>
-                                <span class="badge ${loaiPhiValue === 'BatBuoc' ? 'badge-danger' : 'badge-info'}">
-                                    ${loaiPhiText}
-                                </span>
-                            </td>
-                            <td>${donGiaText}</td>
-                            <td>${tinhTheo}</td>
-                            <td>
-                                <div class="progress progress-sm mb-2">
-                                    <div class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
-                                </div>
-                                <small>Đang tính toán...</small>
-                            </td>
-                            <td><span class="badge badge-success">Hoạt động</span></td>
+                            <td>${index + 1}</td>
+                            <td><strong>${item.tenDot || ''}</strong></td>
+                            <td>${formatDate(item.ngayBatDau)}</td>
+                            <td>${formatDate(item.ngayKetThuc)}</td>
+                            <td>${getStatusBadge(item.trangThai)}</td>
+                            <td>${item.moTa || '-'}</td>
                             <td class="text-center">
-                                <button class="btn btn-warning btn-circle btn-sm" onclick="editKhoanThu(${itemId})" title="Sửa">
+                                <button class="btn btn-warning btn-circle btn-sm" onclick="editDotThu(${itemId})" title="Sửa">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-danger btn-circle btn-sm" onclick="deleteKhoanThu(${itemId})" title="Xóa">
+                                <button class="btn btn-danger btn-circle btn-sm" onclick="deleteDotThu(${itemId})" title="Xóa">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -501,7 +427,6 @@
                     tbody.append(row);
                 });
 
-                // Initialize/reinitialize DataTable
                 if (dataTable) {
                     dataTable.destroy();
                 }
@@ -512,78 +437,53 @@
                     }
                 });
             } catch (error) {
-                $('#khoanThuTableBody').html(`<tr><td colspan="7" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
-                APIUtils.showError('Không thể tải danh sách khoản thu: ' + error.message);
+                $('#dotThuTableBody').html(`<tr><td colspan="7" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
+                APIUtils.showError('Không thể tải danh sách đợt thu: ' + error.message);
             }
         }
 
-        async function editKhoanThu(id) {
+        async function editDotThu(id) {
             try {
-                const data = await KhoanThuAPI.getAll();
-                // Tìm item theo id hoặc maKhoanThu
-                const item = data.find(k => (k.id === id || k.maKhoanThu === id));
+                const data = await DotThuAPI.getAll();
+                const item = data.find(d => (d.id === id || d.maDot === id));
                 if (!item) {
-                    APIUtils.showError('Không tìm thấy khoản thu');
+                    APIUtils.showError('Không tìm thấy đợt thu');
                     return;
                 }
 
                 editingId = id;
-                $('#khoanThuId').val(id);
-                
-                // Map tenKhoan/tenKhoanThu
-                const tenKhoan = item.tenKhoan || item.tenKhoanThu || '';
-                $('#tenKhoanThu').val(tenKhoan);
-                
-                // Map loại phí từ backend (loai, batBuoc, loaiKhoanThu)
-                let loaiPhiValue = 'TuNguyen';
-                if (item.batBuoc === true || item.loaiKhoanThu === 0 || 
-                    (item.loai && (item.loai.includes('Bắt buộc') || item.loai === 'Bắt buộc'))) {
-                    loaiPhiValue = 'BatBuoc';
-                }
-                $('#loaiPhiSelect').val(loaiPhiValue);
-                
-                // Map donGia
-                $('#donGia').val(item.donGia || '');
-                
-                // Map moTa
+                $('#dotThuId').val(id);
+                $('#tenDot').val(item.tenDot || '');
+                $('#ngayBatDau').val(item.ngayBatDau || '');
+                $('#ngayKetThuc').val(item.ngayKetThuc || '');
+                $('#trangThai').val(item.trangThai || 'Mo');
                 $('#moTa').val(item.moTa || '');
-                
-                // hanNop không có trong model, để trống
-                $('#hanNop').val('');
-                
-                // Hiển thị/ẩn đơn giá dựa trên loại phí
-                if (loaiPhiValue === 'TuNguyen') {
-                    $('#donGiaArea').hide();
-                } else {
-                    $('#donGiaArea').show();
-                }
 
-                $('.modal-title').text('Sửa Khoản Thu');
-                $('#addFeeModal').modal('show');
+                $('.modal-title').text('Sửa Đợt Thu');
+                $('#addDotThuModal').modal('show');
             } catch (error) {
                 APIUtils.showError(error.message);
             }
         }
 
-        async function deleteKhoanThu(id) {
-            if (!confirm('Bạn có chắc chắn muốn xóa khoản thu này?')) {
+        async function deleteDotThu(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa đợt thu này?')) {
                 return;
             }
 
             try {
-                await KhoanThuAPI.delete(id);
-                APIUtils.showSuccess('Xóa khoản thu thành công');
-                await loadKhoanThu();
+                await DotThuAPI.delete(id);
+                APIUtils.showSuccess('Xóa đợt thu thành công');
+                await loadDotThu();
             } catch (error) {
-                // Xử lý lỗi khi xóa khoản thu đang được sử dụng
                 let errorMessage = error.message;
                 if (errorMessage && (
                     errorMessage.includes('đang được sử dụng') ||
                     errorMessage.includes('is being used') ||
-                    errorMessage.includes('ChiTietThu') ||
-                    errorMessage.includes('receipt detail')
+                    errorMessage.includes('PhieuThu') ||
+                    errorMessage.includes('receipt')
                 )) {
-                    errorMessage = 'Không thể xóa khoản thu này vì đang được sử dụng trong các phiếu thu. Vui lòng xóa các phiếu thu liên quan trước.';
+                    errorMessage = 'Không thể xóa đợt thu này vì đang có phiếu thu liên quan. Vui lòng xóa các phiếu thu trước.';
                 }
                 APIUtils.showError(errorMessage);
             }
@@ -610,3 +510,4 @@
     </div>
 </body>
 </html>
+

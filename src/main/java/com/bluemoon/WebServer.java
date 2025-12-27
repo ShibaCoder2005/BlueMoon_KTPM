@@ -38,6 +38,7 @@ public class WebServer {
     private final PhieuThuService phieuThuService;
     private final LichSuNopTienService lichSuNopTienService;
     private final ThongKeService thongKeService;
+    private final PhuongTienService phuongTienService;
 
     public WebServer() {
         // Initialize all services
@@ -50,6 +51,7 @@ public class WebServer {
         this.phieuThuService = new PhieuThuServiceImpl();
         this.lichSuNopTienService = new LichSuNopTienServiceImpl();
         this.thongKeService = new ThongKeServiceImpl();
+        this.phuongTienService = new PhuongTienServiceImpl();
     }
 
     public static void main(String[] args) {
@@ -527,6 +529,89 @@ public class WebServer {
                     ctx.json(createSuccessResponse("Collection drive deleted successfully", null));
                 } else {
                     ctx.status(400).json(createErrorResponse("Failed to delete collection drive (may be in use)"));
+                }
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+
+        // ========== PHUONG TIEN (Vehicle) ENDPOINTS ==========
+        app.get("/api/phuong-tien", ctx -> {
+            try {
+                ctx.json(phuongTienService.getAllPhuongTien());
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+        app.get("/api/phuong-tien/{id}", ctx -> {
+            try {
+                Integer id = parseIntSafe(ctx, "id");
+                if (id == null) return;
+                PhuongTien phuongTien = phuongTienService.getPhuongTienById(id);
+                if (phuongTien != null) {
+                    ctx.json(phuongTien);
+                } else {
+                    ctx.status(404).json(createErrorResponse("Vehicle not found"));
+                }
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+        app.get("/api/phuong-tien/ho-gia-dinh/{maHo}", ctx -> {
+            try {
+                Integer maHo = parseIntSafe(ctx, "maHo");
+                if (maHo == null) return;
+                ctx.json(phuongTienService.getPhuongTienByHoGiaDinh(maHo));
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+        app.get("/api/phuong-tien/search/{keyword}", ctx -> {
+            try {
+                String keyword = ctx.pathParam("keyword");
+                ctx.json(phuongTienService.searchPhuongTien(keyword));
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+        app.post("/api/phuong-tien", ctx -> {
+            try {
+                PhuongTien phuongTien = ctx.bodyAsClass(PhuongTien.class);
+                boolean success = phuongTienService.addPhuongTien(phuongTien);
+                if (success) {
+                    ctx.status(201).json(createSuccessResponse("Vehicle created successfully", phuongTien));
+                } else {
+                    ctx.status(400).json(createErrorResponse("Failed to create vehicle (may be duplicate license plate)"));
+                }
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+        app.put("/api/phuong-tien/{id}", ctx -> {
+            try {
+                Integer id = parseIntSafe(ctx, "id");
+                if (id == null) return;
+                PhuongTien phuongTien = ctx.bodyAsClass(PhuongTien.class);
+                phuongTien.setId(id);
+                boolean success = phuongTienService.updatePhuongTien(phuongTien);
+                if (success) {
+                    ctx.json(createSuccessResponse("Vehicle updated successfully", phuongTien));
+                } else {
+                    ctx.status(400).json(createErrorResponse("Failed to update vehicle (may be duplicate license plate)"));
+                }
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+        app.delete("/api/phuong-tien/{id}", ctx -> {
+            try {
+                Integer id = parseIntSafe(ctx, "id");
+                if (id == null) return;
+                boolean success = phuongTienService.deletePhuongTien(id);
+                if (success) {
+                    ctx.json(createSuccessResponse("Vehicle deleted successfully", null));
+                } else {
+                    ctx.status(400).json(createErrorResponse("Failed to delete vehicle"));
                 }
             } catch (Exception e) {
                 handleException(ctx, e);

@@ -38,6 +38,9 @@ public class KhoanThuServiceImpl implements KhoanThuService {
     private static final String DELETE = 
             "DELETE FROM KhoanThu WHERE id = ?";
 
+    private static final String CHECK_FEE_USED = 
+            "SELECT COUNT(*) FROM ChiTietThu WHERE maKhoan = ?";
+
     @Override
     public List<KhoanThu> getAllKhoanThu() {
         List<KhoanThu> result = new ArrayList<>();
@@ -70,6 +73,12 @@ public class KhoanThuServiceImpl implements KhoanThuService {
         // Validate required fields
         if (khoanThu.getTenKhoan() == null || khoanThu.getTenKhoan().trim().isEmpty()) {
             logger.log(Level.WARNING, "Cannot add fee: tenKhoan is empty");
+            return false;
+        }
+
+        // Validate donGia: must be non-negative
+        if (khoanThu.getDonGia() != null && khoanThu.getDonGia().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            logger.log(Level.WARNING, "Cannot add fee: donGia cannot be negative");
             return false;
         }
 
@@ -115,6 +124,12 @@ public class KhoanThuServiceImpl implements KhoanThuService {
             return false;
         }
 
+        // Validate donGia: must be non-negative
+        if (khoanThu.getDonGia() != null && khoanThu.getDonGia().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            logger.log(Level.WARNING, "Cannot update fee: donGia cannot be negative");
+            return false;
+        }
+
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(UPDATE)) {
 
@@ -147,21 +162,38 @@ public class KhoanThuServiceImpl implements KhoanThuService {
 
     @Override
     public boolean deleteKhoanThu(int maKhoanThu) {
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
-
-            pstmt.setInt(1, maKhoanThu);
-
-            int rowsAffected = pstmt.executeUpdate();
-            boolean success = rowsAffected > 0;
-
-            if (success) {
-                logger.log(Level.INFO, "Successfully deleted fee with id: " + maKhoanThu + " (rows affected: " + rowsAffected + ")");
-            } else {
-                logger.log(Level.WARNING, "Failed to delete fee with id: " + maKhoanThu + " (rows affected: " + rowsAffected + ")");
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            // Check if fee is being used in any ChiTietThu
+            try (PreparedStatement checkStmt = conn.prepareStatement(CHECK_FEE_USED)) {
+                checkStmt.setInt(1, maKhoanThu);
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        int count = rs.getInt(1);
+                        if (count > 0) {
+                            logger.log(Level.WARNING, 
+                                    "Cannot delete fee with id: " + maKhoanThu + 
+                                    ". Fee is being used in " + count + " receipt detail(s).");
+                            return false;
+                        }
+                    }
+                }
             }
 
-            return success;
+            // Proceed with deletion if not used
+            try (PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
+                pstmt.setInt(1, maKhoanThu);
+
+                int rowsAffected = pstmt.executeUpdate();
+                boolean success = rowsAffected > 0;
+
+                if (success) {
+                    logger.log(Level.INFO, "Successfully deleted fee with id: " + maKhoanThu + " (rows affected: " + rowsAffected + ")");
+                } else {
+                    logger.log(Level.WARNING, "Failed to delete fee with id: " + maKhoanThu + " (rows affected: " + rowsAffected + ")");
+                }
+
+                return success;
+            }
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error deleting fee with id: " + maKhoanThu, e);
