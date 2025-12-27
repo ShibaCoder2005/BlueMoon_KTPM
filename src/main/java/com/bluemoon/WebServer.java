@@ -297,8 +297,43 @@ public class WebServer {
                             donGia = BigDecimal.ZERO;
                         }
                         khoanThu.setDonGia(donGia);
-                        khoanThu.setDonViTinh("VNĐ/m²");
-                        khoanThu.setTinhTheo("Diện tích");
+                        
+                        // Handle tinhTheo from frontend
+                        String tinhTheo = (String) body.get("tinhTheo");
+                        if (tinhTheo != null && !tinhTheo.trim().isEmpty()) {
+                            // Map frontend values to backend format
+                            String tinhTheoLower = tinhTheo.toLowerCase().trim();
+                            switch (tinhTheoLower) {
+                                case "dientich":
+                                    khoanThu.setTinhTheo("Diện tích");
+                                    khoanThu.setDonViTinh("VNĐ/m²");
+                                    break;
+                                case "nhankhau":
+                                    khoanThu.setTinhTheo("Nhân khẩu");
+                                    khoanThu.setDonViTinh("VNĐ/người");
+                                    break;
+                                case "hokhau":
+                                    khoanThu.setTinhTheo("Hộ khẩu");
+                                    khoanThu.setDonViTinh("VNĐ/hộ");
+                                    break;
+                                case "xemay":
+                                    khoanThu.setTinhTheo("Xe máy");
+                                    khoanThu.setDonViTinh("VNĐ/xe máy");
+                                    break;
+                                case "oto":
+                                    khoanThu.setTinhTheo("Ô tô");
+                                    khoanThu.setDonViTinh("VNĐ/ô tô");
+                                    break;
+                                default:
+                                    khoanThu.setTinhTheo(tinhTheo);
+                                    khoanThu.setDonViTinh("VNĐ");
+                                    break;
+                            }
+                        } else {
+                            // Default to Diện tích if not provided
+                            khoanThu.setTinhTheo("Diện tích");
+                            khoanThu.setDonViTinh("VNĐ/m²");
+                        }
                     } catch (NumberFormatException e) {
                         ctx.status(400).json(createStandardErrorResponse(
                             "Validation failed",
@@ -310,6 +345,40 @@ public class WebServer {
                     }
                 } else {
                     khoanThu.setDonGia(BigDecimal.ZERO);
+                    // Set default tinhTheo even if donGia is not provided
+                    String tinhTheo = (String) body.get("tinhTheo");
+                    if (tinhTheo != null && !tinhTheo.trim().isEmpty()) {
+                        String tinhTheoLower = tinhTheo.toLowerCase().trim();
+                        switch (tinhTheoLower) {
+                            case "dientich":
+                                khoanThu.setTinhTheo("Diện tích");
+                                khoanThu.setDonViTinh("VNĐ/m²");
+                                break;
+                            case "nhankhau":
+                                khoanThu.setTinhTheo("Nhân khẩu");
+                                khoanThu.setDonViTinh("VNĐ/người");
+                                break;
+                            case "hokhau":
+                                khoanThu.setTinhTheo("Hộ khẩu");
+                                khoanThu.setDonViTinh("VNĐ/hộ");
+                                break;
+                            case "xemay":
+                                khoanThu.setTinhTheo("Xe máy");
+                                khoanThu.setDonViTinh("VNĐ/xe máy");
+                                break;
+                            case "oto":
+                                khoanThu.setTinhTheo("Ô tô");
+                                khoanThu.setDonViTinh("VNĐ/ô tô");
+                                break;
+                            default:
+                                khoanThu.setTinhTheo(tinhTheo);
+                                khoanThu.setDonViTinh("VNĐ");
+                                break;
+                        }
+                    } else {
+                        khoanThu.setTinhTheo("Diện tích");
+                        khoanThu.setDonViTinh("VNĐ/m²");
+                    }
                 }
                 
                 // Handle moTa
@@ -356,11 +425,21 @@ public class WebServer {
                     return;
                 }
                 
-                // Get existing KhoanThu or create new
+                // Get existing KhoanThu
                 KhoanThu existing = khoanThuService.getAllKhoanThu().stream()
                     .filter(k -> k.getId() == id)
                     .findFirst()
-                    .orElse(new KhoanThu());
+                    .orElse(null);
+                
+                if (existing == null) {
+                    ctx.status(404).json(createStandardErrorResponse(
+                        "Fee not found",
+                        "NOT_FOUND",
+                        "KhoanThu with id " + id + " not found",
+                        ctx.path()
+                    ));
+                    return;
+                }
                 
                 KhoanThu khoanThu = new KhoanThu();
                 khoanThu.setId(id);
@@ -402,8 +481,43 @@ public class WebServer {
                             donGia = existing.getDonGia() != null ? existing.getDonGia() : BigDecimal.ZERO;
                         }
                         khoanThu.setDonGia(donGia);
-                        khoanThu.setDonViTinh("VNĐ/m²");
-                        khoanThu.setTinhTheo("Diện tích");
+                        
+                        // Handle tinhTheo from frontend
+                        String tinhTheo = (String) body.get("tinhTheo");
+                        if (tinhTheo != null && !tinhTheo.trim().isEmpty()) {
+                            // Map frontend values to backend format
+                            String tinhTheoLower = tinhTheo.toLowerCase().trim();
+                            switch (tinhTheoLower) {
+                                case "dientich":
+                                    khoanThu.setTinhTheo("Diện tích");
+                                    khoanThu.setDonViTinh("VNĐ/m²");
+                                    break;
+                                case "nhankhau":
+                                    khoanThu.setTinhTheo("Nhân khẩu");
+                                    khoanThu.setDonViTinh("VNĐ/người");
+                                    break;
+                                case "hokhau":
+                                    khoanThu.setTinhTheo("Hộ khẩu");
+                                    khoanThu.setDonViTinh("VNĐ/hộ");
+                                    break;
+                                case "xemay":
+                                    khoanThu.setTinhTheo("Xe máy");
+                                    khoanThu.setDonViTinh("VNĐ/xe máy");
+                                    break;
+                                case "oto":
+                                    khoanThu.setTinhTheo("Ô tô");
+                                    khoanThu.setDonViTinh("VNĐ/ô tô");
+                                    break;
+                                default:
+                                    khoanThu.setTinhTheo(tinhTheo);
+                                    khoanThu.setDonViTinh("VNĐ");
+                                    break;
+                            }
+                        } else {
+                            // Preserve existing tinhTheo if not provided
+                            khoanThu.setTinhTheo(existing.getTinhTheo() != null ? existing.getTinhTheo() : "Diện tích");
+                            khoanThu.setDonViTinh(existing.getDonViTinh() != null ? existing.getDonViTinh() : "VNĐ/m²");
+                        }
                     } catch (NumberFormatException e) {
                         ctx.status(400).json(createStandardErrorResponse(
                             "Validation failed",
@@ -416,8 +530,42 @@ public class WebServer {
                 } else {
                     // Preserve existing donGia
                     khoanThu.setDonGia(existing.getDonGia() != null ? existing.getDonGia() : BigDecimal.ZERO);
-                    khoanThu.setDonViTinh(existing.getDonViTinh() != null ? existing.getDonViTinh() : "VNĐ/m²");
-                    khoanThu.setTinhTheo(existing.getTinhTheo() != null ? existing.getTinhTheo() : "Diện tích");
+                    
+                    // Handle tinhTheo from frontend even if donGia is not provided
+                    String tinhTheo = (String) body.get("tinhTheo");
+                    if (tinhTheo != null && !tinhTheo.trim().isEmpty()) {
+                        String tinhTheoLower = tinhTheo.toLowerCase().trim();
+                        switch (tinhTheoLower) {
+                            case "dientich":
+                                khoanThu.setTinhTheo("Diện tích");
+                                khoanThu.setDonViTinh("VNĐ/m²");
+                                break;
+                            case "nhankhau":
+                                khoanThu.setTinhTheo("Nhân khẩu");
+                                khoanThu.setDonViTinh("VNĐ/người");
+                                break;
+                            case "hokhau":
+                                khoanThu.setTinhTheo("Hộ khẩu");
+                                khoanThu.setDonViTinh("VNĐ/hộ");
+                                break;
+                            case "xemay":
+                                khoanThu.setTinhTheo("Xe máy");
+                                khoanThu.setDonViTinh("VNĐ/xe máy");
+                                break;
+                            case "oto":
+                                khoanThu.setTinhTheo("Ô tô");
+                                khoanThu.setDonViTinh("VNĐ/ô tô");
+                                break;
+                            default:
+                                khoanThu.setTinhTheo(tinhTheo);
+                                khoanThu.setDonViTinh("VNĐ");
+                                break;
+                        }
+                    } else {
+                        // Preserve existing values
+                        khoanThu.setDonViTinh(existing.getDonViTinh() != null ? existing.getDonViTinh() : "VNĐ/m²");
+                        khoanThu.setTinhTheo(existing.getTinhTheo() != null ? existing.getTinhTheo() : "Diện tích");
+                    }
                 }
                 
                 // Handle moTa
@@ -425,7 +573,21 @@ public class WebServer {
                 if (moTa != null) {
                     khoanThu.setMoTa(moTa.trim());
                 } else {
-                    khoanThu.setMoTa(existing.getMoTa());
+                    khoanThu.setMoTa(existing.getMoTa() != null ? existing.getMoTa() : null);
+                }
+                
+                // Ensure all required fields are set (use existing values if not provided)
+                if (khoanThu.getLoai() == null) {
+                    khoanThu.setLoai(existing.getLoai() != null ? existing.getLoai() : "Tự nguyện");
+                }
+                if (khoanThu.getDonGia() == null) {
+                    khoanThu.setDonGia(existing.getDonGia() != null ? existing.getDonGia() : BigDecimal.ZERO);
+                }
+                if (khoanThu.getDonViTinh() == null) {
+                    khoanThu.setDonViTinh(existing.getDonViTinh() != null ? existing.getDonViTinh() : "VNĐ/m²");
+                }
+                if (khoanThu.getTinhTheo() == null) {
+                    khoanThu.setTinhTheo(existing.getTinhTheo() != null ? existing.getTinhTheo() : "Diện tích");
                 }
                 
                 // hanNop is ignored (not in model)
@@ -866,14 +1028,184 @@ public class WebServer {
         });
         app.post("/api/phieu-thu", ctx -> {
             try {
-                PhieuThu phieuThu = ctx.bodyAsClass(PhieuThu.class);
-                int maPhieu = phieuThuService.createPhieuThu(phieuThu);
+                // Parse body as Map to handle field mapping and date parsing
+                Map<String, Object> body = ctx.bodyAsClass(Map.class);
+                
+                PhieuThu phieuThu = new PhieuThu();
+                
+                // Validate and set maHo
+                Object maHoObj = body.get("maHo");
+                if (maHoObj == null) {
+                    ctx.status(400).json(createStandardErrorResponse(
+                        "Validation failed",
+                        "MISSING_REQUIRED_FIELD",
+                        "maHo is required",
+                        ctx.path()
+                    ));
+                    return;
+                }
+                int maHo = parseIntegerFromObject(maHoObj);
+                if (maHo <= 0) {
+                    ctx.status(400).json(createStandardErrorResponse(
+                        "Validation failed",
+                        "INVALID_MAHO",
+                        "maHo must be a positive integer",
+                        ctx.path()
+                    ));
+                    return;
+                }
+                phieuThu.setMaHo(maHo);
+                
+                // Validate and set maDot
+                Object maDotObj = body.get("maDot");
+                if (maDotObj == null) {
+                    ctx.status(400).json(createStandardErrorResponse(
+                        "Validation failed",
+                        "MISSING_REQUIRED_FIELD",
+                        "maDot is required",
+                        ctx.path()
+                    ));
+                    return;
+                }
+                int maDot = parseIntegerFromObject(maDotObj);
+                if (maDot <= 0) {
+                    ctx.status(400).json(createStandardErrorResponse(
+                        "Validation failed",
+                        "INVALID_MADOT",
+                        "maDot must be a positive integer",
+                        ctx.path()
+                    ));
+                    return;
+                }
+                phieuThu.setMaDot(maDot);
+                
+                // Set maTaiKhoan (default to 1 if not provided)
+                Object maTaiKhoanObj = body.get("maTaiKhoan");
+                int maTaiKhoan = 1;
+                if (maTaiKhoanObj != null) {
+                    maTaiKhoan = parseIntegerFromObject(maTaiKhoanObj);
+                    if (maTaiKhoan <= 0) {
+                        maTaiKhoan = 1;
+                    }
+                }
+                phieuThu.setMaTaiKhoan(maTaiKhoan);
+                
+                // Parse ngayLap (can be String or LocalDateTime)
+                Object ngayLapObj = body.get("ngayLap");
+                if (ngayLapObj != null) {
+                    try {
+                        if (ngayLapObj instanceof String) {
+                            String ngayLapStr = (String) ngayLapObj;
+                            // Try to parse ISO format: "2025-12-27T15:28" or "2025-12-27T15:28:00"
+                            if (ngayLapStr.contains("T")) {
+                                phieuThu.setNgayLap(java.time.LocalDateTime.parse(ngayLapStr.replace(" ", "T")));
+                            } else {
+                                phieuThu.setNgayLap(java.time.LocalDateTime.now());
+                            }
+                        } else {
+                            // If already LocalDateTime, use objectMapper
+                            phieuThu.setNgayLap(objectMapper.convertValue(ngayLapObj, java.time.LocalDateTime.class));
+                        }
+                    } catch (Exception e) {
+                        // If parsing fails, use current time
+                        phieuThu.setNgayLap(java.time.LocalDateTime.now());
+                    }
+                } else {
+                    phieuThu.setNgayLap(java.time.LocalDateTime.now());
+                }
+                
+                // Parse tongTien (can be Number or String)
+                Object tongTienObj = body.get("tongTien");
+                if (tongTienObj != null) {
+                    try {
+                        BigDecimal tongTien;
+                        if (tongTienObj instanceof Number) {
+                            tongTien = BigDecimal.valueOf(((Number) tongTienObj).doubleValue());
+                        } else if (tongTienObj instanceof String) {
+                            String tongTienStr = (String) tongTienObj;
+                            if (tongTienStr.trim().isEmpty()) {
+                                tongTien = BigDecimal.ZERO;
+                            } else {
+                                tongTien = new BigDecimal(tongTienStr);
+                            }
+                        } else {
+                            tongTien = BigDecimal.ZERO;
+                        }
+                        phieuThu.setTongTien(tongTien);
+                    } catch (NumberFormatException e) {
+                        phieuThu.setTongTien(BigDecimal.ZERO);
+                    }
+                } else {
+                    phieuThu.setTongTien(BigDecimal.ZERO);
+                }
+                
+                // Set trangThai (default to "ChuaThu")
+                String trangThai = (String) body.get("trangThai");
+                phieuThu.setTrangThai(trangThai != null && !trangThai.trim().isEmpty() ? trangThai : "ChuaThu");
+                
+                // Set hinhThucThu (can be null)
+                String hinhThucThu = (String) body.get("hinhThucThu");
+                phieuThu.setHinhThucThu(hinhThucThu != null && !hinhThucThu.trim().isEmpty() ? hinhThucThu : null);
+                
+                // Check if chiTietList is provided in body
+                @SuppressWarnings("unchecked")
+                List<ChiTietThu> chiTietList = body.containsKey("chiTietList") && body.get("chiTietList") != null
+                        ? objectMapper.convertValue(body.get("chiTietList"),
+                                objectMapper.getTypeFactory().constructCollectionType(List.class, ChiTietThu.class))
+                        : null;
+                
+                int maPhieu;
+                if (chiTietList != null && !chiTietList.isEmpty()) {
+                    // If chiTietList is provided, use createPhieuThuWithDetails
+                    maPhieu = phieuThuService.createPhieuThuWithDetails(phieuThu, chiTietList);
+                } else {
+                    // If no chiTietList, automatically generate from mandatory fees
+                    // Generate ChiTietThu from mandatory fees and calculate total
+                    chiTietList = generateChiTietThuFromMandatoryFees(maHo, maDot);
+                    if (chiTietList == null || chiTietList.isEmpty()) {
+                        ctx.status(400).json(createStandardErrorResponse(
+                            "No mandatory fees",
+                            "NO_MANDATORY_FEES",
+                            "Không có khoản thu bắt buộc nào để tạo phiếu thu",
+                            ctx.path()
+                        ));
+                        return;
+                    }
+                    
+                    // Calculate total from ChiTietThu
+                    BigDecimal calculatedTotal = BigDecimal.ZERO;
+                    for (ChiTietThu chiTiet : chiTietList) {
+                        if (chiTiet.getThanhTien() != null) {
+                            calculatedTotal = calculatedTotal.add(chiTiet.getThanhTien());
+                        }
+                    }
+                    
+                    // Update tongTien with calculated total
+                    phieuThu.setTongTien(calculatedTotal);
+                    
+                    // Create receipt with details
+                    maPhieu = phieuThuService.createPhieuThuWithDetails(phieuThu, chiTietList);
+                }
+                
                 if (maPhieu > 0) {
                     phieuThu.setId(maPhieu);
                     ctx.status(201).json(createSuccessResponse("Receipt created successfully", phieuThu));
                 } else {
-                    ctx.status(400).json(createErrorResponse("Failed to create receipt"));
+                    ctx.status(400).json(createStandardErrorResponse(
+                        "Failed to create receipt",
+                        "CREATE_FAILED",
+                        "Service layer returned -1",
+                        ctx.path()
+                    ));
                 }
+            } catch (IllegalArgumentException e) {
+                // Handle business logic errors (e.g., drive is closed)
+                ctx.status(400).json(createStandardErrorResponse(
+                    "Cannot create receipt",
+                    "BUSINESS_RULE_VIOLATION",
+                    e.getMessage(),
+                    ctx.path()
+                ));
             } catch (Exception e) {
                 handleException(ctx, e);
             }
@@ -905,6 +1237,38 @@ public class WebServer {
                 } else {
                     ctx.status(400).json(createErrorResponse("Failed to add detail"));
                 }
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+        app.get("/api/phieu-thu/calculate-total", ctx -> {
+            try {
+                Integer maHo = parseIntSafe(ctx, "maHo");
+                Integer maDot = parseIntSafe(ctx, "maDot");
+                if (maHo == null || maDot == null) {
+                    ctx.status(400).json(createStandardErrorResponse(
+                        "Validation failed",
+                        "MISSING_PARAMETERS",
+                        "maHo and maDot are required",
+                        ctx.path()
+                    ));
+                    return;
+                }
+                BigDecimal totalAmount = phieuThuService.calculateTotalAmountForHousehold(maHo, maDot);
+                if (totalAmount == null) {
+                    ctx.status(400).json(createStandardErrorResponse(
+                        "Calculation failed",
+                        "CALCULATION_FAILED",
+                        "Could not calculate total amount. Check if drive is open and household exists.",
+                        ctx.path()
+                    ));
+                    return;
+                }
+                Map<String, Object> result = new java.util.HashMap<>();
+                result.put("maHo", maHo);
+                result.put("maDot", maDot);
+                result.put("tongTien", totalAmount);
+                ctx.json(createSuccessResponse("Total amount calculated successfully", result));
             } catch (Exception e) {
                 handleException(ctx, e);
             }
@@ -1405,6 +1769,177 @@ public class WebServer {
     }
 
     /**
+     * Generate ChiTietThu list from mandatory fees for a household and collection drive.
+     * This method calculates fees based on tinhTheo (calculation method) and creates ChiTietThu objects.
+     * 
+     * @param maHo Household ID
+     * @param maDot Collection drive ID
+     * @return List of ChiTietThu, or null if error
+     */
+    private List<ChiTietThu> generateChiTietThuFromMandatoryFees(int maHo, int maDot) {
+        try {
+            // Get household
+            HoGiaDinh household = hoGiaDinhService.findById(maHo);
+            if (household == null) {
+                logger.warning("Household not found: " + maHo);
+                return null;
+            }
+
+            // Get all mandatory fees
+            List<KhoanThu> allFees = khoanThuService.getAllKhoanThu();
+            List<KhoanThu> mandatoryFees = new java.util.ArrayList<>();
+            for (KhoanThu fee : allFees) {
+                if (fee.isBatBuoc()) {
+                    mandatoryFees.add(fee);
+                }
+            }
+
+            if (mandatoryFees.isEmpty()) {
+                logger.info("No mandatory fees found for household: " + maHo);
+                return new java.util.ArrayList<>();
+            }
+
+            // Get household data
+            List<NhanKhau> members = nhanKhauService.getNhanKhauByHoGiaDinh(maHo);
+            int memberCount = members.size();
+
+            // Count vehicles
+            List<PhuongTien> vehicles = phuongTienService.getPhuongTienByHoGiaDinh(maHo);
+            int motorbikeCount = 0;
+            int carCount = 0;
+            for (PhuongTien vehicle : vehicles) {
+                String loaiXe = vehicle.getLoaiXe();
+                if (loaiXe != null) {
+                    String loaiXeLower = loaiXe.toLowerCase().trim();
+                    if (loaiXeLower.contains("xe máy") || loaiXeLower.contains("xemay") || 
+                        loaiXeLower.contains("moto") || loaiXeLower.contains("xe may")) {
+                        motorbikeCount++;
+                    } else if (loaiXeLower.contains("ô tô") || loaiXeLower.contains("oto") || 
+                              loaiXeLower.contains("car") || loaiXeLower.contains("o to")) {
+                        carCount++;
+                    }
+                }
+            }
+
+            // Generate ChiTietThu for each mandatory fee
+            List<ChiTietThu> chiTietList = new java.util.ArrayList<>();
+            for (KhoanThu fee : mandatoryFees) {
+                BigDecimal feeAmount = calculateFeeAmountForHousehold(
+                    fee, 
+                    household, 
+                    memberCount,
+                    motorbikeCount,
+                    carCount
+                );
+
+                if (feeAmount != null && feeAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    ChiTietThu chiTiet = new ChiTietThu();
+                    chiTiet.setMaKhoan(fee.getId());
+                    chiTiet.setSoLuong(BigDecimal.ONE); // Default quantity
+                    chiTiet.setDonGia(fee.getDonGia()); // Snapshot current price
+                    chiTiet.setThanhTien(feeAmount);
+                    chiTietList.add(chiTiet);
+                }
+            }
+
+            logger.info("Generated " + chiTietList.size() + " ChiTietThu for household " + maHo + " in drive " + maDot);
+            return chiTietList;
+
+        } catch (Exception e) {
+            logger.severe("Error generating ChiTietThu from mandatory fees: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Calculate fee amount for a household based on tinhTheo (calculation method).
+     * Similar to PhieuThuServiceImpl.calculateFeeAmount but accessible from WebServer.
+     * 
+     * @param fee Fee definition
+     * @param household Household
+     * @param memberCount Number of members
+     * @param motorbikeCount Number of motorbikes
+     * @param carCount Number of cars
+     * @return Calculated fee amount
+     */
+    private BigDecimal calculateFeeAmountForHousehold(KhoanThu fee, HoGiaDinh household, 
+                                                      int memberCount, int motorbikeCount, int carCount) {
+        if (fee == null || fee.getDonGia() == null) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal basePrice = fee.getDonGia();
+        String tinhTheo = fee.getTinhTheo();
+        
+        if (tinhTheo == null || tinhTheo.trim().isEmpty()) {
+            // Default: Fixed fee per household
+            return basePrice;
+        }
+
+        String tinhTheoLower = tinhTheo.toLowerCase().trim();
+        BigDecimal multiplier = BigDecimal.ONE;
+
+        switch (tinhTheoLower) {
+            case "hokhau":
+            case "hộ khẩu":
+            case "codinh":
+            case "cố định":
+            case "fixed":
+                multiplier = BigDecimal.ONE;
+                break;
+
+            case "nhankhau":
+            case "nhân khẩu":
+            case "person":
+            case "perperson":
+                if (memberCount <= 0) {
+                    return BigDecimal.ZERO;
+                }
+                multiplier = BigDecimal.valueOf(memberCount);
+                break;
+
+            case "dientich":
+            case "diện tích":
+            case "area":
+            case "perarea":
+                if (household.getDienTich() == null || household.getDienTich().compareTo(BigDecimal.ZERO) <= 0) {
+                    return BigDecimal.ZERO;
+                }
+                multiplier = household.getDienTich();
+                break;
+
+            case "xemay":
+            case "xe máy":
+            case "xe may":
+            case "motorbike":
+            case "moto":
+                if (motorbikeCount <= 0) {
+                    return BigDecimal.ZERO;
+                }
+                multiplier = BigDecimal.valueOf(motorbikeCount);
+                break;
+
+            case "oto":
+            case "ô tô":
+            case "o to":
+            case "car":
+            case "automobile":
+                if (carCount <= 0) {
+                    return BigDecimal.ZERO;
+                }
+                multiplier = BigDecimal.valueOf(carCount);
+                break;
+
+            default:
+                multiplier = BigDecimal.ONE;
+                break;
+        }
+
+        return basePrice.multiply(multiplier);
+    }
+
+    /**
      * Safely parse integer from path parameter
      * @param ctx Javalin context
      * @param paramName Parameter name (e.g., "id", "maHo", "maDot")
@@ -1451,6 +1986,28 @@ public class WebServer {
             ctx.json(errorResponse);
             return null;
         }
+    }
+
+    /**
+     * Parse integer from Object (can be Number, String, or Integer).
+     * @param obj Object to parse
+     * @return parsed integer, or 0 if parsing fails
+     */
+    private int parseIntegerFromObject(Object obj) {
+        if (obj == null) {
+            return 0;
+        }
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue();
+        }
+        if (obj instanceof String) {
+            try {
+                return Integer.parseInt(((String) obj).trim());
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+        return 0;
     }
 }
 

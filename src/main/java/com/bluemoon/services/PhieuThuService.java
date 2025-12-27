@@ -134,6 +134,16 @@ public interface PhieuThuService {
      * @return true nếu thành công, false nếu đã thanh toán hoặc lỗi
      */
     boolean deletePhieuThu(int maPhieu);
+
+    /**
+     * Tính tổng số tiền cần đóng của một hộ gia đình cho một đợt thu.
+     * Tính dựa trên các khoản thu bắt buộc và cách tính (diện tích, nhân khẩu, hộ khẩu, xe máy, ô tô).
+     *
+     * @param maHo mã hộ gia đình
+     * @param maDot mã đợt thu
+     * @return tổng số tiền cần đóng, hoặc null nếu có lỗi
+     */
+    java.math.BigDecimal calculateTotalAmountForHousehold(int maHo, int maDot);
 }
 
 

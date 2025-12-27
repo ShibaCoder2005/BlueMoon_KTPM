@@ -133,11 +133,11 @@ public class KhoanThuServiceImpl implements KhoanThuService {
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(UPDATE)) {
 
-            pstmt.setString(1, khoanThu.getTenKhoan().trim());
-            pstmt.setString(2, khoanThu.getLoai());
-            pstmt.setBigDecimal(3, khoanThu.getDonGia());
-            pstmt.setString(4, khoanThu.getDonViTinh());
-            pstmt.setString(5, khoanThu.getTinhTheo());
+            pstmt.setString(1, khoanThu.getTenKhoan() != null ? khoanThu.getTenKhoan().trim() : null);
+            pstmt.setString(2, khoanThu.getLoai() != null ? khoanThu.getLoai() : "Tự nguyện");
+            pstmt.setBigDecimal(3, khoanThu.getDonGia() != null ? khoanThu.getDonGia() : BigDecimal.ZERO);
+            pstmt.setString(4, khoanThu.getDonViTinh() != null ? khoanThu.getDonViTinh() : "VNĐ/m²");
+            pstmt.setString(5, khoanThu.getTinhTheo() != null ? khoanThu.getTinhTheo() : "Diện tích");
             pstmt.setBoolean(6, khoanThu.isBatBuoc());
             pstmt.setString(7, khoanThu.getMoTa());
             pstmt.setInt(8, khoanThu.getId());

@@ -206,10 +206,23 @@
                             </select>
                         </div>
 
+                        <div class="form-group">
+                            <label>Tính theo</label>
+                            <select class="form-control" id="tinhTheoSelect" required>
+                                <option value="">Chọn cách tính</option>
+                                <option value="DienTich">Diện tích</option>
+                                <option value="NhanKhau">Nhân khẩu</option>
+                                <option value="HoKhau">Hộ khẩu (Cố định)</option>
+                                <option value="XeMay">Xe máy</option>
+                                <option value="OTo">Ô tô</option>
+                            </select>
+                            <small class="form-text text-muted">Chọn đơn vị tính cho khoản thu này.</small>
+                        </div>
+
                         <div class="form-group" id="donGiaArea">
-                            <label>Đơn giá (VNĐ/m2)</label>
-                            <input type="number" class="form-control" id="donGia" value="7000" placeholder="Nhập số tiền trên 1m2" min="0">
-                            <small class="form-text text-muted">Hệ thống sẽ tự nhân với diện tích căn hộ.</small>
+                            <label id="donGiaLabel">Đơn giá (VNĐ)</label>
+                            <input type="number" class="form-control" id="donGia" value="0" placeholder="Nhập đơn giá" min="0" step="0.01">
+                            <small class="form-text text-muted" id="donGiaHint">Hệ thống sẽ tự động tính dựa trên cách tính đã chọn.</small>
                         </div>
 
                         <div class="form-group">
@@ -292,9 +305,49 @@
         let dataTable;
         let editingId = null;
 
+        // Function to update donGia label and hint based on tinhTheo selection
+        // Must be defined outside $(document).ready() so it can be accessed from editKhoanThu()
+        function updateDonGiaLabel() {
+            const tinhTheo = $('#tinhTheoSelect').val();
+            const label = $('#donGiaLabel');
+            const hint = $('#donGiaHint');
+            
+            switch(tinhTheo) {
+                case 'DienTich':
+                    label.text('Đơn giá (VNĐ/m²)');
+                    hint.text('Hệ thống sẽ tự nhân với diện tích căn hộ.');
+                    break;
+                case 'NhanKhau':
+                    label.text('Đơn giá (VNĐ/người)');
+                    hint.text('Hệ thống sẽ tự nhân với số nhân khẩu trong hộ.');
+                    break;
+                case 'HoKhau':
+                    label.text('Đơn giá (VNĐ/hộ)');
+                    hint.text('Số tiền cố định cho mỗi hộ gia đình.');
+                    break;
+                case 'XeMay':
+                    label.text('Đơn giá (VNĐ/xe máy)');
+                    hint.text('Hệ thống sẽ tự nhân với số xe máy trong hộ.');
+                    break;
+                case 'OTo':
+                    label.text('Đơn giá (VNĐ/ô tô)');
+                    hint.text('Hệ thống sẽ tự nhân với số ô tô trong hộ.');
+                    break;
+                default:
+                    label.text('Đơn giá (VNĐ)');
+                    hint.text('Hệ thống sẽ tự động tính dựa trên cách tính đã chọn.');
+                    break;
+            }
+        }
+
         // Load data on page load
         $(document).ready(async function() {
             await loadKhoanThu();
+            
+            // Update donGia label and hint based on tinhTheo selection
+            $('#tinhTheoSelect').change(function() {
+                updateDonGiaLabel();
+            });
             
             $('#loaiPhiSelect').change(function() {
                 var selected = $(this).val();
@@ -318,6 +371,7 @@
                 // Validate and prepare payload - lấy giá trị an toàn
                 const tenKhoanThuEl = $('#tenKhoanThu');
                 const loaiPhiEl = $('#loaiPhiSelect');
+                const tinhTheoEl = $('#tinhTheoSelect');
                 const donGiaEl = $('#donGia');
                 const moTaEl = $('#moTa');
 
@@ -330,6 +384,12 @@
                 const loaiPhi = loaiPhiEl.length > 0 ? (loaiPhiEl.val() || '') : '';
                 if (!loaiPhi) {
                     APIUtils.showError('Vui lòng chọn loại phí');
+                    return;
+                }
+                
+                const tinhTheo = tinhTheoEl.length > 0 ? (tinhTheoEl.val() || '') : '';
+                if (!tinhTheo) {
+                    APIUtils.showError('Vui lòng chọn cách tính');
                     return;
                 }
                 
@@ -363,6 +423,7 @@
                 const khoanThu = {
                     tenKhoanThu: tenKhoanThu,
                     loaiPhi: loaiPhi,
+                    tinhTheo: tinhTheo,
                     donGia: donGia, // Send as number, not string
                     moTa: moTa
                     // Note: hanNop is not sent as it's not in the model
@@ -377,10 +438,14 @@
 
                 try {
                     if (editingId) {
-                        await KhoanThuAPI.update(editingId, khoanThu);
+                        console.log('[saveKhoanThu] Updating khoanThu with id:', editingId, 'payload:', khoanThu);
+                        const updateResult = await KhoanThuAPI.update(editingId, khoanThu);
+                        console.log('[saveKhoanThu] Update result:', updateResult);
                         APIUtils.showSuccess('Cập nhật khoản thu thành công');
                     } else {
+                        console.log('[saveKhoanThu] Creating new khoanThu, payload:', khoanThu);
                         const result = await KhoanThuAPI.create(khoanThu);
+                        console.log('[saveKhoanThu] Create result:', result);
                         APIUtils.showSuccess('Tạo khoản thu thành công');
                         
                         // Lưu timestamp khi tạo khoản thu
@@ -398,14 +463,22 @@
                     $('#addFeeModal').modal('hide');
                     form[0].reset();
                     editingId = null;
+                    // Reset tinhTheo label
+                    $('#donGiaLabel').text('Đơn giá (VNĐ)');
+                    $('#donGiaHint').text('Hệ thống sẽ tự động tính dựa trên cách tính đã chọn.');
                     await loadKhoanThu();
                 } catch (error) {
+                    console.error('[saveKhoanThu] Error:', error);
                     // Xử lý lỗi chi tiết hơn
                     let errorMessage = error.message || 'Có lỗi xảy ra';
                     if (error.detail) {
                         errorMessage = error.detail;
                     } else if (error.message && error.message.includes('Validation failed')) {
                         errorMessage = 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.';
+                    } else if (error.message && error.message.includes('NOT_FOUND')) {
+                        errorMessage = 'Không tìm thấy khoản thu để cập nhật.';
+                    } else if (error.message && error.message.includes('UPDATE_FAILED')) {
+                        errorMessage = 'Không thể cập nhật khoản thu. Vui lòng thử lại.';
                     }
                     APIUtils.showError(errorMessage);
                 } finally {
@@ -419,6 +492,9 @@
                 editingId = null;
                 $('#donGiaArea').show();
                 $('#donGia').attr('required', 'required');
+                // Reset tinhTheo label
+                $('#donGiaLabel').text('Đơn giá (VNĐ)');
+                $('#donGiaHint').text('Hệ thống sẽ tự động tính dựa trên cách tính đã chọn.');
                 $('.modal-title').text('Tạo Khoản Thu Mới');
             });
             
@@ -542,6 +618,27 @@
                 }
                 $('#loaiPhiSelect').val(loaiPhiValue);
                 
+                // Map tinhTheo - normalize value to match dropdown options
+                let tinhTheoValue = item.tinhTheo || '';
+                // Normalize: convert various formats to dropdown values
+                if (tinhTheoValue) {
+                    const tinhTheoLower = tinhTheoValue.toLowerCase().trim();
+                    if (tinhTheoLower.includes('diện tích') || tinhTheoLower === 'dientich' || tinhTheoLower === 'area') {
+                        tinhTheoValue = 'DienTich';
+                    } else if (tinhTheoLower.includes('nhân khẩu') || tinhTheoLower === 'nhankhau' || tinhTheoLower === 'person') {
+                        tinhTheoValue = 'NhanKhau';
+                    } else if (tinhTheoLower.includes('hộ khẩu') || tinhTheoLower === 'hokhau' || tinhTheoLower === 'codinh' || tinhTheoLower.includes('cố định') || tinhTheoLower === 'fixed') {
+                        tinhTheoValue = 'HoKhau';
+                    } else if (tinhTheoLower.includes('xe máy') || tinhTheoLower === 'xemay' || tinhTheoLower === 'motorbike') {
+                        tinhTheoValue = 'XeMay';
+                    } else if (tinhTheoLower.includes('ô tô') || tinhTheoLower === 'oto' || tinhTheoLower === 'car') {
+                        tinhTheoValue = 'OTo';
+                    }
+                }
+                $('#tinhTheoSelect').val(tinhTheoValue);
+                // Update label based on tinhTheo - call the function directly
+                updateDonGiaLabel();
+                
                 // Map donGia
                 $('#donGia').val(item.donGia || '');
                 
@@ -571,19 +668,25 @@
             }
 
             try {
-                await KhoanThuAPI.delete(id);
+                console.log('[deleteKhoanThu] Deleting khoanThu with id:', id);
+                const result = await KhoanThuAPI.delete(id);
+                console.log('[deleteKhoanThu] Delete result:', result);
                 APIUtils.showSuccess('Xóa khoản thu thành công');
                 await loadKhoanThu();
             } catch (error) {
+                console.error('[deleteKhoanThu] Error:', error);
                 // Xử lý lỗi khi xóa khoản thu đang được sử dụng
-                let errorMessage = error.message;
+                let errorMessage = error.message || 'Có lỗi xảy ra khi xóa khoản thu';
                 if (errorMessage && (
                     errorMessage.includes('đang được sử dụng') ||
                     errorMessage.includes('is being used') ||
                     errorMessage.includes('ChiTietThu') ||
-                    errorMessage.includes('receipt detail')
+                    errorMessage.includes('receipt detail') ||
+                    errorMessage.includes('may be in use')
                 )) {
                     errorMessage = 'Không thể xóa khoản thu này vì đang được sử dụng trong các phiếu thu. Vui lòng xóa các phiếu thu liên quan trước.';
+                } else if (errorMessage && errorMessage.includes('NOT_FOUND')) {
+                    errorMessage = 'Không tìm thấy khoản thu để xóa.';
                 }
                 APIUtils.showError(errorMessage);
             }

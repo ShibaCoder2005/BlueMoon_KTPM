@@ -124,9 +124,18 @@ const KhoanThuAPI = {
         const response = await apiRequest('/khoan-thu', 'GET');
         return Array.isArray(response) ? response : (response.data || []);
     },
-    create: (data) => apiRequest('/khoan-thu', 'POST', data),
-    update: (id, data) => apiRequest(`/khoan-thu/${id}`, 'PUT', data),
-    delete: (id) => apiRequest(`/khoan-thu/${id}`, 'DELETE')
+    create: async (data) => {
+        const response = await apiRequest('/khoan-thu', 'POST', data);
+        return response.data || response;
+    },
+    update: async (id, data) => {
+        const response = await apiRequest(`/khoan-thu/${id}`, 'PUT', data);
+        return response.data || response;
+    },
+    delete: async (id) => {
+        const response = await apiRequest(`/khoan-thu/${id}`, 'DELETE');
+        return response.data || response;
+    }
 };
 
 const HoGiaDinhAPI = {
