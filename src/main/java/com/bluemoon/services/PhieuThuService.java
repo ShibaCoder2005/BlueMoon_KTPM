@@ -144,6 +144,36 @@ public interface PhieuThuService {
      * @return tổng số tiền cần đóng, hoặc null nếu có lỗi
      */
     java.math.BigDecimal calculateTotalAmountForHousehold(int maHo, int maDot);
+
+    /**
+     * Tạo phiếu thu hàng loạt cho tất cả hộ gia đình trong một đợt thu (với batch insert để tối ưu performance).
+     * Sử dụng transaction để đảm bảo tính nhất quán: nếu một hộ thất bại, rollback toàn bộ.
+     *
+     * @param maDotThu mã đợt thu
+     * @return số lượng phiếu thu đã tạo thành công
+     * @throws IllegalArgumentException nếu đợt thu không tồn tại hoặc đã đóng
+     */
+    int createBatch(int maDotThu);
+
+    /**
+     * Lấy chi tiết đầy đủ của một phiếu thu, bao gồm thông tin hộ gia đình, đợt thu, và danh sách chi tiết thu với tên khoản thu.
+     * Thực hiện JOIN giữa PhieuThu, ChiTietThu, và KhoanThu để lấy đầy đủ thông tin.
+     *
+     * @param id mã phiếu thu
+     * @return Map chứa thông tin đầy đủ của phiếu thu, hoặc null nếu không tìm thấy
+     * @throws java.util.NoSuchElementException nếu phiếu thu không tồn tại
+     */
+    java.util.Map<String, Object> getInvoiceDetail(int id);
+
+    /**
+     * Xuất phiếu thu ra file PDF.
+     * Tạo một file PDF chuyên nghiệp với header, thông tin khách hàng, bảng chi tiết, tổng tiền, và khu vực chữ ký.
+     *
+     * @param id mã phiếu thu
+     * @return InputStream của file PDF
+     * @throws java.util.NoSuchElementException nếu phiếu thu không tồn tại
+     */
+    java.io.InputStream exportInvoiceToPdf(int id);
 }
 
 

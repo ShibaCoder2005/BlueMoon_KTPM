@@ -47,6 +47,9 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
     private static final String DELETE = 
             "DELETE FROM TaiKhoan WHERE id = ?";
 
+    private static final String UPDATE_STATUS = 
+            "UPDATE TaiKhoan SET trangThai = ? WHERE id = ?";
+
     @Override
     public List<TaiKhoan> getAllTaiKhoan() {
         List<TaiKhoan> result = new ArrayList<>();
@@ -352,6 +355,46 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error deleting account with id: " + id, e);
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean updateStatus(int id, String trangThai) {
+        if (id <= 0) {
+            logger.log(Level.WARNING, "Cannot update status: invalid id: " + id);
+            return false;
+        }
+
+        if (trangThai == null || trangThai.trim().isEmpty()) {
+            logger.log(Level.WARNING, "Cannot update status: trangThai is null or empty");
+            return false;
+        }
+
+        // Validate trangThai value
+        String normalizedStatus = trangThai.trim();
+        if (!normalizedStatus.equals("Hoạt động") && !normalizedStatus.equals("Đã đóng")) {
+            logger.log(Level.WARNING, "Cannot update status: invalid trangThai value: " + normalizedStatus);
+            return false;
+        }
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(UPDATE_STATUS)) {
+            
+            stmt.setString(1, normalizedStatus);
+            stmt.setInt(2, id);
+            
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                logger.log(Level.INFO, "Successfully updated status for account id: " + id + " to: " + normalizedStatus);
+                return true;
+            } else {
+                logger.log(Level.WARNING, "Failed to update status: account not found with id: " + id);
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error updating account status for id: " + id, e);
             return false;
         }
     }

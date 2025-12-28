@@ -73,5 +73,14 @@ public interface TaiKhoanService {
      * @return true nếu thành công
      */
     boolean deleteTaiKhoan(int id);
+
+    /**
+     * Cập nhật trạng thái tài khoản.
+     *
+     * @param id        ID tài khoản
+     * @param trangThai trạng thái mới ("Hoạt động" hoặc "Đã đóng")
+     * @return true nếu thành công
+     */
+    boolean updateStatus(int id, String trangThai);
 }
 

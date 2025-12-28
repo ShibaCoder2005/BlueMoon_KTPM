@@ -261,6 +261,54 @@ public class WebServer {
                 handleException(ctx, e);
             }
         });
+        app.put("/api/tai-khoan/{id}/status", ctx -> {
+            try {
+                Integer id = parseIntSafe(ctx, "id");
+                if (id == null) return;
+                
+                // Parse body to get trangThai and currentUserId
+                Map<String, Object> body = ctx.bodyAsClass(Map.class);
+                String trangThai = body.get("trangThai") != null ? body.get("trangThai").toString().trim() : null;
+                
+                if (trangThai == null || trangThai.isEmpty()) {
+                    ctx.status(400).json(createErrorResponse("Trạng thái là bắt buộc"));
+                    return;
+                }
+                
+                // Validate trangThai value
+                if (!trangThai.equals("Hoạt động") && !trangThai.equals("Đã đóng")) {
+                    ctx.status(400).json(createErrorResponse("Trạng thái không hợp lệ. Chỉ chấp nhận 'Hoạt động' hoặc 'Đã đóng'"));
+                    return;
+                }
+                
+                // Check if user is trying to change their own status
+                Object currentUserIdObj = body.get("currentUserId");
+                if (currentUserIdObj != null) {
+                    try {
+                        int currentUserId = Integer.parseInt(currentUserIdObj.toString());
+                        if (currentUserId == id) {
+                            ctx.status(403).json(createErrorResponse("Không thể thay đổi trạng thái của chính tài khoản đang đăng nhập"));
+                            return;
+                        }
+                    } catch (NumberFormatException e) {
+                        // currentUserId is not a valid number, ignore
+                    }
+                }
+                
+                logger.info("Updating account status: id=" + id + ", trangThai=" + trangThai);
+                boolean success = taiKhoanService.updateStatus(id, trangThai);
+                if (success) {
+                    TaiKhoan updatedAccount = taiKhoanService.findById(id);
+                    ctx.json(createSuccessResponse("Trạng thái tài khoản đã được cập nhật", updatedAccount));
+                } else {
+                    ctx.status(400).json(createErrorResponse("Không thể cập nhật trạng thái. Tài khoản có thể không tồn tại."));
+                }
+            } catch (Exception e) {
+                logger.severe("Error updating account status: " + e.getMessage());
+                e.printStackTrace();
+                handleException(ctx, e);
+            }
+        });
 
         // ========== KHOAN THU (Fee) ENDPOINTS ==========
         app.get("/api/khoan-thu", ctx -> {
@@ -1375,6 +1423,67 @@ public class WebServer {
                 handleException(ctx, e);
             }
         });
+        // Create batch invoices
+        app.post("/api/phieu-thu/batch", ctx -> {
+            try {
+                Map<String, Object> body = ctx.bodyAsClass(Map.class);
+                Object maDotThuObj = body.get("maDotThu");
+                if (maDotThuObj == null) {
+                    ctx.status(400).json(createErrorResponse("maDotThu is required"));
+                    return;
+                }
+                int maDotThu = Integer.parseInt(maDotThuObj.toString());
+                int count = phieuThuService.createBatch(maDotThu);
+                ctx.json(createSuccessResponse("Created " + count + " invoices successfully", count));
+            } catch (IllegalArgumentException e) {
+                ctx.status(400).json(createErrorResponse(e.getMessage()));
+            } catch (Exception e) {
+                logger.severe("Error creating batch invoices: " + e.getMessage());
+                e.printStackTrace();
+                handleException(ctx, e);
+            }
+        });
+        // Get invoice detail with JOIN
+        app.get("/api/phieu-thu/{id}/detail", ctx -> {
+            try {
+                Integer id = parseIntSafe(ctx, "id");
+                if (id == null) return;
+                try {
+                    Map<String, Object> detail = phieuThuService.getInvoiceDetail(id);
+                    ctx.json(createSuccessResponse("Invoice detail retrieved", detail));
+                } catch (java.util.NoSuchElementException e) {
+                    ctx.status(404).json(createErrorResponse(e.getMessage()));
+                }
+            } catch (Exception e) {
+                logger.severe("Error getting invoice detail: " + e.getMessage());
+                e.printStackTrace();
+                handleException(ctx, e);
+            }
+        });
+        // Export invoice to PDF
+        app.get("/api/phieu-thu/{id}/export", ctx -> {
+            try {
+                Integer id = parseIntSafe(ctx, "id");
+                if (id == null) return;
+                try {
+                    InputStream pdfStream = phieuThuService.exportInvoiceToPdf(id);
+                    byte[] pdfBytes = pdfStream.readAllBytes();
+                    
+                    String filename = "PhieuThu_" + id + "_" + 
+                        LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".pdf";
+                    
+                    ctx.header("Content-Type", "application/pdf");
+                    ctx.header("Content-Disposition", "inline; filename=\"" + filename + "\"");
+                    ctx.result(pdfBytes);
+                } catch (java.util.NoSuchElementException e) {
+                    ctx.status(404).json(createErrorResponse(e.getMessage()));
+                }
+            } catch (Exception e) {
+                logger.severe("Error exporting invoice to PDF: " + e.getMessage());
+                e.printStackTrace();
+                handleException(ctx, e);
+            }
+        });
 
 
         // ========== THONG KE (Statistics) ENDPOINTS ==========
@@ -1468,6 +1577,128 @@ public class WebServer {
             }
         });
 
+        // ========== BAO CAO (Reports) ENDPOINTS ==========
+        com.bluemoon.services.BaoCaoService baoCaoService = new com.bluemoon.services.impl.BaoCaoServiceImpl();
+        
+        // Revenue Report - JSON
+        app.get("/api/reports/revenue", ctx -> {
+            try {
+                String monthStr = ctx.queryParam("month");
+                String yearStr = ctx.queryParam("year");
+                String fromDateStr = ctx.queryParam("fromDate");
+                String toDateStr = ctx.queryParam("toDate");
+                
+                List<com.bluemoon.models.dto.BaoCaoThuDTO> result;
+                
+                if (monthStr != null && yearStr != null) {
+                    int month = Integer.parseInt(monthStr);
+                    int year = Integer.parseInt(yearStr);
+                    result = baoCaoService.getRevenueReport(month, year);
+                } else if (fromDateStr != null && toDateStr != null) {
+                    java.time.LocalDate fromDate = java.time.LocalDate.parse(fromDateStr);
+                    java.time.LocalDate toDate = java.time.LocalDate.parse(toDateStr);
+                    result = baoCaoService.getRevenueReport(fromDate, toDate);
+                } else {
+                    ctx.status(400).json(createErrorResponse("Either month/year or fromDate/toDate parameters are required"));
+                    return;
+                }
+                
+                ctx.json(result);
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+        
+        // Revenue Report - Excel Export
+        app.get("/api/reports/export/revenue", ctx -> {
+            try {
+                String monthStr = ctx.queryParam("month");
+                String yearStr = ctx.queryParam("year");
+                String fromDateStr = ctx.queryParam("fromDate");
+                String toDateStr = ctx.queryParam("toDate");
+                
+                List<com.bluemoon.models.dto.BaoCaoThuDTO> data;
+                java.time.LocalDate fromDate;
+                java.time.LocalDate toDate;
+                
+                if (monthStr != null && yearStr != null) {
+                    int month = Integer.parseInt(monthStr);
+                    int year = Integer.parseInt(yearStr);
+                    fromDate = java.time.LocalDate.of(year, month, 1);
+                    toDate = fromDate.withDayOfMonth(fromDate.lengthOfMonth());
+                    data = baoCaoService.getRevenueReport(month, year);
+                } else if (fromDateStr != null && toDateStr != null) {
+                    fromDate = java.time.LocalDate.parse(fromDateStr);
+                    toDate = java.time.LocalDate.parse(toDateStr);
+                    data = baoCaoService.getRevenueReport(fromDate, toDate);
+                } else {
+                    ctx.status(400).json(createErrorResponse("Either month/year or fromDate/toDate parameters are required"));
+                    return;
+                }
+                
+                java.io.InputStream excelStream = baoCaoService.exportRevenueToExcel(data, fromDate, toDate);
+                byte[] excelBytes = excelStream.readAllBytes();
+                
+                String filename = "BaoCaoThu_" + fromDate.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + 
+                                 "_" + toDate.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xlsx";
+                
+                ctx.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                ctx.header("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+                ctx.result(excelBytes);
+            } catch (Exception e) {
+                logger.severe("Error exporting revenue report: " + e.getMessage());
+                e.printStackTrace();
+                handleException(ctx, e);
+            }
+        });
+        
+        // Debt Report - JSON
+        app.get("/api/reports/debt", ctx -> {
+            try {
+                String maDotStr = ctx.queryParam("maDot");
+                List<com.bluemoon.models.dto.BaoCaoCongNoDTO> result;
+                
+                if (maDotStr != null && !maDotStr.isEmpty()) {
+                    int maDot = Integer.parseInt(maDotStr);
+                    result = baoCaoService.getDebtReport(maDot);
+                } else {
+                    result = baoCaoService.getDebtReport();
+                }
+                
+                ctx.json(result);
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+        
+        // Debt Report - Excel Export
+        app.get("/api/reports/export/debt", ctx -> {
+            try {
+                String maDotStr = ctx.queryParam("maDot");
+                List<com.bluemoon.models.dto.BaoCaoCongNoDTO> data;
+                
+                if (maDotStr != null && !maDotStr.isEmpty()) {
+                    int maDot = Integer.parseInt(maDotStr);
+                    data = baoCaoService.getDebtReport(maDot);
+                } else {
+                    data = baoCaoService.getDebtReport();
+                }
+                
+                java.io.InputStream excelStream = baoCaoService.exportDebtToExcel(data);
+                byte[] excelBytes = excelStream.readAllBytes();
+                
+                String filename = "BaoCaoCongNo_" + java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xlsx";
+                
+                ctx.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+                ctx.header("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+                ctx.result(excelBytes);
+            } catch (Exception e) {
+                logger.severe("Error exporting debt report: " + e.getMessage());
+                e.printStackTrace();
+                handleException(ctx, e);
+            }
+        });
+
         // Health check endpoint
         app.get("/api/health", ctx -> {
             try {
@@ -1490,7 +1721,7 @@ public class WebServer {
                 routes.put("endpoints", Map.of(
                     "health", "GET /api/health",
                     "auth", "POST /api/login, POST /api/change-password, GET /api/check-username/{username}",
-                    "accounts", "GET /api/tai-khoan, GET /api/tai-khoan/{id}, POST /api/tai-khoan, PUT /api/tai-khoan/{id}, DELETE /api/tai-khoan/{id}",
+                    "accounts", "GET /api/tai-khoan, GET /api/tai-khoan/{id}, POST /api/tai-khoan, PUT /api/tai-khoan/{id}, DELETE /api/tai-khoan/{id}, PUT /api/tai-khoan/{id}/status",
                     "fees", "GET /api/khoan-thu, POST /api/khoan-thu, PUT /api/khoan-thu/{id}, DELETE /api/khoan-thu/{id}",
                     "collection_drives", "GET /api/dot-thu, GET /api/dot-thu/{id}, POST /api/dot-thu, PUT /api/dot-thu/{id}, DELETE /api/dot-thu/{id}",
                     "households", "GET /api/ho-gia-dinh, GET /api/ho-gia-dinh/{id}, POST /api/ho-gia-dinh, PUT /api/ho-gia-dinh/{id}, DELETE /api/ho-gia-dinh/{id}",

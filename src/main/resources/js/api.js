@@ -115,7 +115,14 @@ const TaiKhoanAPI = {
     },
     create: (data) => apiRequest('/tai-khoan', 'POST', data),
     update: (id, data) => apiRequest(`/tai-khoan/${id}`, 'PUT', data),
-    delete: (id) => apiRequest(`/tai-khoan/${id}`, 'DELETE')
+    delete: (id) => apiRequest(`/tai-khoan/${id}`, 'DELETE'),
+    updateStatus: (id, trangThai, currentUserId) => {
+        const data = { trangThai };
+        if (currentUserId) {
+            data.currentUserId = currentUserId;
+        }
+        return apiRequest(`/tai-khoan/${id}/status`, 'PUT', data);
+    }
 };
 
 const KhoanThuAPI = {
@@ -183,6 +190,33 @@ const PhieuThuAPI = {
     },
     getById: (id) => apiRequest(`/phieu-thu/${id}`, 'GET'),
     getChiTiet: (id) => apiRequest(`/phieu-thu/${id}/chi-tiet`, 'GET'),
+    getDetail: async (id) => {
+        const response = await apiRequest(`/phieu-thu/${id}/detail`, 'GET');
+        return response.data || response;
+    },
+    exportPdf: async (id) => {
+        const response = await fetch(`/api/phieu-thu/${id}/export`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${sessionStorage.getItem('accessToken') || ''}`
+            }
+        });
+        
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`Export failed: ${text}`);
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `PhieuThu_${id}_${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    },
     create: (data) => apiRequest('/phieu-thu', 'POST', data),
     createWithDetails: (phieuThu, chiTietList) => apiRequest('/phieu-thu/with-details', 'POST', { phieuThu, chiTietList }),
     update: (id, data) => apiRequest(`/phieu-thu/${id}`, 'PUT', data),
@@ -246,6 +280,83 @@ const ThongKeAPI = {
     debtDetails: () => apiRequest('/thong-ke/debt/details', 'GET'),
     report: (maDotThu) => apiRequest(`/thong-ke/report/${maDotThu}`, 'GET'),
     demographics: () => apiRequest('/thong-ke/demographics', 'GET')
+};
+
+const BaoCaoAPI = {
+    // Revenue Report
+    getRevenueReport: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params.month) queryParams.append('month', params.month);
+        if (params.year) queryParams.append('year', params.year);
+        if (params.fromDate) queryParams.append('fromDate', params.fromDate);
+        if (params.toDate) queryParams.append('toDate', params.toDate);
+        const queryString = queryParams.toString();
+        return apiRequest(`/reports/revenue${queryString ? '?' + queryString : ''}`, 'GET');
+    },
+    exportRevenue: async (params) => {
+        const queryParams = new URLSearchParams();
+        if (params.month) queryParams.append('month', params.month);
+        if (params.year) queryParams.append('year', params.year);
+        if (params.fromDate) queryParams.append('fromDate', params.fromDate);
+        if (params.toDate) queryParams.append('toDate', params.toDate);
+        const queryString = queryParams.toString();
+        
+        const response = await fetch(`/api/reports/export/revenue${queryString ? '?' + queryString : ''}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${sessionStorage.getItem('accessToken') || ''}`
+            }
+        });
+        
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`Export failed: ${text}`);
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `BaoCaoThu_${params.fromDate || params.month}_${params.toDate || params.year}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    },
+    // Debt Report
+    getDebtReport: (maDot) => {
+        const queryParams = new URLSearchParams();
+        if (maDot) queryParams.append('maDot', maDot);
+        const queryString = queryParams.toString();
+        return apiRequest(`/reports/debt${queryString ? '?' + queryString : ''}`, 'GET');
+    },
+    exportDebt: async (maDot) => {
+        const queryParams = new URLSearchParams();
+        if (maDot) queryParams.append('maDot', maDot);
+        const queryString = queryParams.toString();
+        
+        const response = await fetch(`/api/reports/export/debt${queryString ? '?' + queryString : ''}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${sessionStorage.getItem('accessToken') || ''}`
+            }
+        });
+        
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`Export failed: ${text}`);
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `BaoCaoCongNo_${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    }
 };
 
 const ThongBaoAPI = {

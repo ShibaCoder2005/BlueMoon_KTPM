@@ -109,6 +109,13 @@
                     <span>Thống kê</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
+                </a>
+            </li>
+
 
             <li class="nav-item">
 
@@ -203,6 +210,14 @@
                                         <option value="KeToan">Kế toán</option>
                                     </select>
                                 </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="statusFilter">Trạng thái</label>
+                                    <select id="statusFilter" onchange="applyFilters()" class="form-control">
+                                        <option value="all">Tất cả</option>
+                                        <option value="Hoạt động">Hoạt động</option>
+                                        <option value="Đã đóng">Đã đóng</option>
+                                    </select>
+                                </div>
                                 <div class="col-md-2 mb-3">
                                     <button onclick="resetFilters()" class="btn btn-secondary btn-block">
                                         <i class="fas fa-sync-alt"></i> Làm mới
@@ -233,8 +248,9 @@
                                     <thead class="thead-light">
                                         <tr>
                                             <th style="width: 5%">#</th>
-                                            <th style="width: 40%">Thông tin tài khoản</th>
-                                            <th style="width: 25%">Vai trò</th>
+                                            <th style="width: 30%">Thông tin tài khoản</th>
+                                            <th style="width: 20%">Vai trò</th>
+                                            <th style="width: 15%">Trạng thái</th>
                                             <th style="width: 30%" class="text-center">Hành động</th>
                                         </tr>
                                     </thead>
@@ -382,7 +398,7 @@
             if (currentItems.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="4" class="text-center py-4 text-muted">
+                        <td colspan="5" class="text-center py-4 text-muted">
                             <i class="fas fa-inbox fa-2x mb-2"></i><br>
                             Không tìm thấy tài khoản nào phù hợp.
                         </td>
@@ -403,6 +419,24 @@
                     roleBadge = '<span class="badge badge-info">Kế toán</span>';
                 }
 
+                // Badge Trạng thái
+                const accStatus = acc.trangThai || '';
+                let statusBadge = '';
+                let statusToggleBtn = '';
+                if (accStatus === 'Hoạt động') {
+                    statusBadge = '<span class="badge badge-success">Hoạt động</span>';
+                    statusToggleBtn = `<button onclick="handleToggleStatus(${acc.id || acc.maTaiKhoan}, 'Đã đóng')" class="btn btn-warning btn-sm action-btn mr-1" title="Đóng tài khoản">
+                                <i class="fas fa-lock"></i>
+                            </button>`;
+                } else if (accStatus === 'Đã đóng') {
+                    statusBadge = '<span class="badge badge-danger">Đã đóng</span>';
+                    statusToggleBtn = `<button onclick="handleToggleStatus(${acc.id || acc.maTaiKhoan}, 'Hoạt động')" class="btn btn-success btn-sm action-btn mr-1" title="Mở tài khoản">
+                                <i class="fas fa-unlock"></i>
+                            </button>`;
+                } else {
+                    statusBadge = '<span class="badge badge-secondary">' + (accStatus || 'N/A') + '</span>';
+                }
+
                 const row = `
                     <tr>
                         <td class="align-middle">${globalIndex}</td>
@@ -418,7 +452,9 @@
                             </div>
                         </td>
                         <td class="align-middle">${roleBadge}</td>
+                        <td class="align-middle">${statusBadge}</td>
                         <td class="align-middle text-center">
+                            ${statusToggleBtn}
                             <button onclick="handleEdit(${acc.id || acc.maTaiKhoan})" class="btn btn-primary btn-sm action-btn mr-1" title="Sửa">
                                 <i class="fas fa-edit"></i>
                             </button>
@@ -482,6 +518,7 @@
         function applyFilters() {
             const keyword = document.getElementById('searchInput').value.toLowerCase();
             const role = document.getElementById('roleFilter').value;
+            const status = document.getElementById('statusFilter').value;
 
             filteredAccounts = accounts.filter(acc => {
                 const username = (acc.tenDangNhap || acc.username || '').toLowerCase();
@@ -496,7 +533,10 @@
                                  (role === 'BanQuanLy' && (accRole === 'Ban Quản lý' || accRole === 'Admin')) ||
                                  (role === 'KeToan' && accRole === 'Kế toán');
 
-                return matchKeyword && matchRole;
+                const accStatus = acc.trangThai || '';
+                const matchStatus = status === 'all' || accStatus === status;
+
+                return matchKeyword && matchRole && matchStatus;
             });
 
             currentPage = 1;
@@ -506,6 +546,7 @@
         function resetFilters() {
             document.getElementById('searchInput').value = '';
             document.getElementById('roleFilter').value = 'all';
+            document.getElementById('statusFilter').value = 'all';
             applyFilters();
         }
 
@@ -630,6 +671,60 @@
             }
         }
 
+        async function handleToggleStatus(id, newStatus) {
+            try {
+                // Convert id to number for consistent comparison
+                const accountId = parseInt(id);
+                if (isNaN(accountId)) {
+                    APIUtils.showError('ID tài khoản không hợp lệ');
+                    return;
+                }
+
+                // Get current user to check if trying to change own status
+                const userStr = sessionStorage.getItem('currentUser');
+                let currentUserId = null;
+                if (userStr) {
+                    try {
+                        const currentUser = JSON.parse(userStr);
+                        currentUserId = currentUser.id || currentUser.maTaiKhoan;
+                    } catch (e) {
+                        console.error('Error parsing currentUser:', e);
+                    }
+                }
+
+                // Check if trying to change own status
+                if (currentUserId && parseInt(currentUserId) === accountId) {
+                    APIUtils.showError('Không thể thay đổi trạng thái của chính tài khoản đang đăng nhập');
+                    return;
+                }
+
+                // Find account for confirmation message
+                const account = accounts.find(acc => {
+                    const accId = acc.id || acc.maTaiKhoan;
+                    return parseInt(accId) === accountId;
+                });
+
+                if (!account) {
+                    APIUtils.showError('Không tìm thấy tài khoản');
+                    return;
+                }
+
+                const username = account.tenDangNhap || account.username || 'này';
+                const action = newStatus === 'Hoạt động' ? 'mở' : 'đóng';
+                const confirmMessage = `Bạn có chắc muốn ${action} tài khoản "${username}"?`;
+                
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+
+                await TaiKhoanAPI.updateStatus(accountId, newStatus, currentUserId);
+                APIUtils.showSuccess(`Đã ${action} tài khoản "${username}" thành công`);
+                await loadAccounts();
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
         async function handleDelete(id) {
             // Convert id to number for consistent comparison
             const accountId = parseInt(id);
@@ -690,7 +785,7 @@
             } catch (error) {
                 console.error('Error loading accounts:', error);
                 APIUtils.showError('Không thể tải danh sách tài khoản: ' + error.message);
-                $('#tableBody').html(`<tr><td colspan="4" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
+                $('#tableBody').html(`<tr><td colspan="5" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
             }
         }
 

@@ -1,17 +1,34 @@
 package com.bluemoon.services.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.math.BigDecimal;
+
+import com.lowagie.text.Document;
+import com.lowagie.text.Element;
+import com.lowagie.text.Font;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 
 import com.bluemoon.models.ChiTietThu;
 import com.bluemoon.models.DotThu;
@@ -1097,5 +1114,405 @@ public class PhieuThuServiceImpl implements PhieuThuService {
             return Timestamp.valueOf(LocalDateTime.now());
         }
         return Timestamp.valueOf(localDateTime);
+    }
+
+    @Override
+    public int createBatch(int maDotThu) {
+        // Validate: Kiểm tra đợt thu có đang mở không
+        if (!isDotThuOpen(maDotThu)) {
+            DotThu dotThu = dotThuService.getDotThuById(maDotThu);
+            String errorMsg = "Không thể tạo phiếu thu hàng loạt: Đợt thu đã đóng";
+            if (dotThu != null) {
+                errorMsg = "Không thể tạo phiếu thu hàng loạt: Đợt thu \"" + dotThu.getTenDot() + "\" đã đóng (trạng thái: " + dotThu.getTrangThai() + ")";
+            }
+            logger.log(Level.WARNING, "Cannot create batch: DotThu with id " + maDotThu + " is closed");
+            throw new IllegalArgumentException(errorMsg);
+        }
+
+        // Get current user ID for maTaiKhoan (default to 1 if not available)
+        int maTaiKhoan = 1;
+        
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            conn.setAutoCommit(false);
+            int successCount = 0;
+
+            try {
+                // Step 1: Fetch all required data efficiently
+                List<HoGiaDinh> allHouseholds = hoGiaDinhService.getAllHoGiaDinh();
+                List<KhoanThu> allFees = khoanThuService.getAllKhoanThu();
+                
+                // Filter only mandatory fees (batBuoc = true)
+                List<KhoanThu> mandatoryFees = allFees.stream()
+                    .filter(KhoanThu::isBatBuoc)
+                    .collect(java.util.stream.Collectors.toList());
+
+                if (mandatoryFees.isEmpty()) {
+                    logger.log(Level.WARNING, "No mandatory fees found for batch creation");
+                    conn.rollback();
+                    return 0;
+                }
+
+                logger.log(Level.INFO, "Creating batch receipts for " + allHouseholds.size() + 
+                    " households with " + mandatoryFees.size() + " mandatory fees");
+
+                // Step 2: Pre-fetch all household data to avoid N+1 queries
+                java.util.Map<Integer, HoGiaDinh> householdMap = new java.util.HashMap<>();
+                java.util.Map<Integer, Integer> memberCountMap = new java.util.HashMap<>();
+                java.util.Map<Integer, Integer> motorbikeCountMap = new java.util.HashMap<>();
+                java.util.Map<Integer, Integer> carCountMap = new java.util.HashMap<>();
+
+                for (HoGiaDinh household : allHouseholds) {
+                    int householdId = household.getId();
+                    householdMap.put(householdId, household);
+                    
+                    // Count members
+                    List<NhanKhau> members = nhanKhauService.getNhanKhauByHoGiaDinh(householdId);
+                    memberCountMap.put(householdId, members.size());
+                    
+                    // Count vehicles
+                    List<PhuongTien> vehicles = phuongTienService.getPhuongTienByHoGiaDinh(householdId);
+                    int motorbikeCount = 0;
+                    int carCount = 0;
+                    for (PhuongTien vehicle : vehicles) {
+                        String loaiXe = vehicle.getLoaiXe();
+                        if (loaiXe != null) {
+                            String loaiXeLower = loaiXe.toLowerCase().trim();
+                            if (loaiXeLower.contains("xe máy") || loaiXeLower.contains("xemay") || 
+                                loaiXeLower.contains("moto") || loaiXeLower.contains("xe may")) {
+                                motorbikeCount++;
+                            } else if (loaiXeLower.contains("ô tô") || loaiXeLower.contains("oto") || 
+                                      loaiXeLower.contains("car") || loaiXeLower.contains("o to")) {
+                                carCount++;
+                            }
+                        }
+                    }
+                    motorbikeCountMap.put(householdId, motorbikeCount);
+                    carCountMap.put(householdId, carCount);
+                }
+
+                // Step 3: Prepare data structures
+                LocalDateTime now = LocalDateTime.now();
+                java.util.List<java.util.Map<String, Object>> phieuDataList = new java.util.ArrayList<>();
+                
+                // Step 4: Calculate and prepare PhieuThu data for each household
+                for (HoGiaDinh household : allHouseholds) {
+                    int householdId = household.getId();
+                    
+                    // Calculate total amount for this household
+                    BigDecimal totalAmount = BigDecimal.ZERO;
+                    List<ChiTietThu> chiTietList = new ArrayList<>();
+
+                    // Calculate each mandatory fee based on tinhTheo
+                    for (KhoanThu fee : mandatoryFees) {
+                        BigDecimal feeAmount = calculateFeeAmount(
+                            fee, 
+                            household, 
+                            memberCountMap.get(householdId),
+                            motorbikeCountMap.get(householdId),
+                            carCountMap.get(householdId)
+                        );
+
+                        if (feeAmount != null && feeAmount.compareTo(BigDecimal.ZERO) > 0) {
+                            totalAmount = totalAmount.add(feeAmount);
+                            
+                            // Create ChiTietThu
+                            ChiTietThu chiTiet = new ChiTietThu();
+                            chiTiet.setMaKhoan(fee.getId());
+                            chiTiet.setSoLuong(BigDecimal.ONE);
+                            chiTiet.setDonGia(fee.getDonGia());
+                            chiTiet.setThanhTien(feeAmount);
+                            chiTietList.add(chiTiet);
+                        }
+                    }
+
+                    // Only create receipt if total amount > 0
+                    if (totalAmount.compareTo(BigDecimal.ZERO) > 0) {
+                        java.util.Map<String, Object> phieuData = new java.util.HashMap<>();
+                        phieuData.put("maHo", householdId);
+                        phieuData.put("tongTien", totalAmount);
+                        phieuData.put("chiTietList", chiTietList);
+                        phieuDataList.add(phieuData);
+                    }
+                }
+
+                // Step 5: Insert PhieuThu one by one to get generated IDs, then batch insert ChiTietThu
+                String insertPhieuThu = "INSERT INTO PhieuThu (maHo, maDot, maTaiKhoan, ngayLap, tongTien, trangThai, hinhThucThu, ghiChu) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                String insertChiTiet = "INSERT INTO ChiTietThu (maPhieu, maKhoan, soLuong, donGia, thanhTien) VALUES (?, ?, ?, ?, ?)";
+                
+                PreparedStatement chiTietStmt = conn.prepareStatement(insertChiTiet);
+                
+                for (java.util.Map<String, Object> phieuData : phieuDataList) {
+                    // Insert PhieuThu and get generated ID
+                    int maPhieu = -1;
+                    try (PreparedStatement phieuStmt = conn.prepareStatement(insertPhieuThu, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                        phieuStmt.setInt(1, (Integer) phieuData.get("maHo"));
+                        phieuStmt.setInt(2, maDotThu);
+                        phieuStmt.setInt(3, maTaiKhoan);
+                        phieuStmt.setTimestamp(4, Timestamp.valueOf(now));
+                        phieuStmt.setBigDecimal(5, (BigDecimal) phieuData.get("tongTien"));
+                        phieuStmt.setString(6, "ChuaThu");
+                        phieuStmt.setString(7, null);
+                        phieuStmt.setString(8, null);
+                        
+                        int rowsAffected = phieuStmt.executeUpdate();
+                        if (rowsAffected > 0) {
+                            try (ResultSet generatedKeys = phieuStmt.getGeneratedKeys()) {
+                                if (generatedKeys.next()) {
+                                    maPhieu = generatedKeys.getInt(1);
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (maPhieu > 0) {
+                        successCount++;
+                        
+                        // Add ChiTietThu to batch
+                        @SuppressWarnings("unchecked")
+                        List<ChiTietThu> chiTietList = (List<ChiTietThu>) phieuData.get("chiTietList");
+                        for (ChiTietThu chiTiet : chiTietList) {
+                            chiTietStmt.setInt(1, maPhieu);
+                            chiTietStmt.setInt(2, chiTiet.getMaKhoan());
+                            chiTietStmt.setBigDecimal(3, chiTiet.getSoLuong());
+                            chiTietStmt.setBigDecimal(4, chiTiet.getDonGia());
+                            chiTietStmt.setBigDecimal(5, chiTiet.getThanhTien());
+                            chiTietStmt.addBatch();
+                        }
+                    }
+                }
+
+                // Step 6: Execute ChiTietThu batch insert
+                chiTietStmt.executeBatch();
+                chiTietStmt.close();
+
+                // Commit transaction
+                conn.commit();
+                logger.log(Level.INFO, "Successfully created " + successCount + " batch receipts for drive: " + maDotThu);
+                return successCount;
+
+            } catch (Exception e) {
+                conn.rollback();
+                logger.log(Level.SEVERE, "Error creating batch receipts for drive: " + maDotThu, e);
+                e.printStackTrace();
+                throw new RuntimeException("Failed to create batch receipts: " + e.getMessage(), e);
+            } finally {
+                conn.setAutoCommit(true);
+            }
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error in createBatch for maDotThu: " + maDotThu, e);
+            e.printStackTrace();
+            throw new RuntimeException("Database error while creating batch receipts: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Map<String, Object> getInvoiceDetail(int id) {
+        // SQL query với JOIN để lấy đầy đủ thông tin
+        String sql = "SELECT " +
+                     "pt.id as maPhieu, pt.maHo, pt.maDot, pt.maTaiKhoan, pt.ngayLap, " +
+                     "pt.tongTien, pt.trangThai, pt.hinhThucThu, " +
+                     "hg.soPhong, hg.maChuHo, " +
+                     "nk.hoTen as tenChuHo, " +
+                     "dt.tenDot, " +
+                     "tk.hoTen as tenNguoiLap " +
+                     "FROM PhieuThu pt " +
+                     "INNER JOIN HoGiaDinh hg ON pt.maHo = hg.id " +
+                     "LEFT JOIN NhanKhau nk ON hg.maChuHo = nk.id " +
+                     "LEFT JOIN DotThu dt ON pt.maDot = dt.id " +
+                     "LEFT JOIN TaiKhoan tk ON pt.maTaiKhoan = tk.id " +
+                     "WHERE pt.id = ?";
+
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, id);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    throw new NoSuchElementException("Phiếu thu với ID " + id + " không tồn tại");
+                }
+                
+                // Build invoice detail map
+                Map<String, Object> invoiceDetail = new HashMap<>();
+                
+                // General info
+                invoiceDetail.put("id", rs.getInt("maPhieu"));
+                invoiceDetail.put("maHo", rs.getInt("maHo"));
+                invoiceDetail.put("soPhong", rs.getInt("soPhong"));
+                invoiceDetail.put("maDot", rs.getInt("maDot"));
+                invoiceDetail.put("tenDot", rs.getString("tenDot"));
+                invoiceDetail.put("tenChuHo", rs.getString("tenChuHo"));
+                invoiceDetail.put("tongTien", rs.getBigDecimal("tongTien"));
+                invoiceDetail.put("trangThai", rs.getString("trangThai"));
+                invoiceDetail.put("hinhThucThu", rs.getString("hinhThucThu"));
+                invoiceDetail.put("ngayLap", rs.getTimestamp("ngayLap"));
+                invoiceDetail.put("tenNguoiLap", rs.getString("tenNguoiLap"));
+                
+                // Get ChiTietThu with KhoanThu info
+                String chiTietSql = "SELECT " +
+                                   "ct.id, ct.maPhieu, ct.maKhoan, ct.soLuong, ct.donGia, ct.thanhTien, " +
+                                   "kt.tenKhoan, kt.donViTinh " +
+                                   "FROM ChiTietThu ct " +
+                                   "INNER JOIN KhoanThu kt ON ct.maKhoan = kt.id " +
+                                   "WHERE ct.maPhieu = ? " +
+                                   "ORDER BY ct.id";
+                
+                List<Map<String, Object>> chiTietList = new ArrayList<>();
+                try (PreparedStatement chiTietStmt = conn.prepareStatement(chiTietSql)) {
+                    chiTietStmt.setInt(1, id);
+                    try (ResultSet chiTietRs = chiTietStmt.executeQuery()) {
+                        while (chiTietRs.next()) {
+                            Map<String, Object> chiTiet = new HashMap<>();
+                            chiTiet.put("id", chiTietRs.getInt("id"));
+                            chiTiet.put("maKhoan", chiTietRs.getInt("maKhoan"));
+                            chiTiet.put("tenKhoan", chiTietRs.getString("tenKhoan"));
+                            chiTiet.put("soLuong", chiTietRs.getBigDecimal("soLuong"));
+                            chiTiet.put("donGia", chiTietRs.getBigDecimal("donGia"));
+                            chiTiet.put("thanhTien", chiTietRs.getBigDecimal("thanhTien"));
+                            chiTiet.put("donViTinh", chiTietRs.getString("donViTinh"));
+                            chiTietList.add(chiTiet);
+                        }
+                    }
+                }
+                
+                invoiceDetail.put("chiTietList", chiTietList);
+                
+                return invoiceDetail;
+            }
+            
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error getting invoice detail for id: " + id, e);
+            e.printStackTrace();
+            throw new RuntimeException("Database error while retrieving invoice detail: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public InputStream exportInvoiceToPdf(int id) {
+        try {
+            // Get invoice detail
+            Map<String, Object> invoiceDetail = getInvoiceDetail(id);
+            
+            // Create PDF document
+            Document document = new Document(PageSize.A4);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PdfWriter.getInstance(document, outputStream);
+            
+            document.open();
+            
+            // Add header
+            Font headerFont = new Font(Font.HELVETICA, 18, Font.BOLD);
+            Paragraph header = new Paragraph("PHIẾU THU", headerFont);
+            header.setAlignment(Element.ALIGN_CENTER);
+            header.setSpacingAfter(20);
+            document.add(header);
+            
+            // Add apartment name
+            Font companyFont = new Font(Font.HELVETICA, 14, Font.BOLD);
+            Paragraph company = new Paragraph("CHUNG CƯ BLUEMOON", companyFont);
+            company.setAlignment(Element.ALIGN_CENTER);
+            company.setSpacingAfter(30);
+            document.add(company);
+            
+            // Add invoice info
+            Font normalFont = new Font(Font.HELVETICA, 10);
+            Font boldFont = new Font(Font.HELVETICA, 10, Font.BOLD);
+            
+            Timestamp ngayLap = (Timestamp) invoiceDetail.get("ngayLap");
+            String ngayLapStr = ngayLap != null ? 
+                ngayLap.toLocalDateTime().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "N/A";
+            
+            Paragraph invoiceInfo = new Paragraph();
+            invoiceInfo.add(new com.lowagie.text.Chunk("Mã phiếu: ", boldFont));
+            invoiceInfo.add(new com.lowagie.text.Chunk(String.valueOf(invoiceDetail.get("id")), normalFont));
+            invoiceInfo.add(new com.lowagie.text.Chunk("        Ngày lập: ", boldFont));
+            invoiceInfo.add(new com.lowagie.text.Chunk(ngayLapStr, normalFont));
+            invoiceInfo.setSpacingAfter(10);
+            document.add(invoiceInfo);
+            
+            // Add customer info
+            Paragraph customerInfo = new Paragraph();
+            customerInfo.add(new com.lowagie.text.Chunk("Hộ gia đình: ", boldFont));
+            customerInfo.add(new com.lowagie.text.Chunk("Phòng " + invoiceDetail.get("soPhong"), normalFont));
+            customerInfo.add(new com.lowagie.text.Chunk("        Chủ hộ: ", boldFont));
+            customerInfo.add(new com.lowagie.text.Chunk((String) invoiceDetail.getOrDefault("tenChuHo", "N/A"), normalFont));
+            customerInfo.setSpacingAfter(10);
+            document.add(customerInfo);
+            
+            Paragraph dotInfo = new Paragraph();
+            dotInfo.add(new com.lowagie.text.Chunk("Đợt thu: ", boldFont));
+            dotInfo.add(new com.lowagie.text.Chunk((String) invoiceDetail.getOrDefault("tenDot", "N/A"), normalFont));
+            dotInfo.setSpacingAfter(20);
+            document.add(dotInfo);
+            
+            // Add items table
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> chiTietList = (List<Map<String, Object>>) invoiceDetail.get("chiTietList");
+            
+            if (chiTietList != null && !chiTietList.isEmpty()) {
+                PdfPTable table = new PdfPTable(5);
+                table.setWidthPercentage(100);
+                table.setWidths(new float[]{1, 3, 1, 1.5f, 1.5f});
+                
+                // Table header
+                table.addCell(new PdfPCell(new Phrase("STT", boldFont)));
+                table.addCell(new PdfPCell(new Phrase("Tên khoản thu", boldFont)));
+                table.addCell(new PdfPCell(new Phrase("SL", boldFont)));
+                table.addCell(new PdfPCell(new Phrase("Đơn giá", boldFont)));
+                table.addCell(new PdfPCell(new Phrase("Thành tiền", boldFont)));
+                
+                // Table rows
+                int stt = 1;
+                DecimalFormat df = new DecimalFormat("#,##0");
+                for (Map<String, Object> chiTiet : chiTietList) {
+                    table.addCell(new PdfPCell(new Phrase(String.valueOf(stt++), normalFont)));
+                    table.addCell(new PdfPCell(new Phrase((String) chiTiet.getOrDefault("tenKhoan", "N/A"), normalFont)));
+                    
+                    BigDecimal soLuong = (BigDecimal) chiTiet.get("soLuong");
+                    table.addCell(new PdfPCell(new Phrase(
+                        soLuong != null ? soLuong.toString() : "0", normalFont)));
+                    
+                    BigDecimal donGia = (BigDecimal) chiTiet.get("donGia");
+                    table.addCell(new PdfPCell(new Phrase(
+                        donGia != null ? df.format(donGia) + " đ" : "0 đ", normalFont)));
+                    
+                    BigDecimal thanhTien = (BigDecimal) chiTiet.get("thanhTien");
+                    table.addCell(new PdfPCell(new Phrase(
+                        thanhTien != null ? df.format(thanhTien) + " đ" : "0 đ", normalFont)));
+                }
+                
+                document.add(table);
+            }
+            
+            // Add total
+            BigDecimal tongTien = (BigDecimal) invoiceDetail.get("tongTien");
+            Paragraph total = new Paragraph();
+            total.setSpacingBefore(20);
+            total.setAlignment(Element.ALIGN_RIGHT);
+            total.add(new com.lowagie.text.Chunk("TỔNG CỘNG: ", boldFont));
+            total.add(new com.lowagie.text.Chunk(
+                tongTien != null ? new DecimalFormat("#,##0").format(tongTien) + " đ" : "0 đ", 
+                new Font(Font.HELVETICA, 12, Font.BOLD)));
+            document.add(total);
+            
+            // Add signature area
+            document.add(new Paragraph(" "));
+            Paragraph signature = new Paragraph();
+            signature.setSpacingBefore(40);
+            signature.add(new com.lowagie.text.Chunk("Người lập: ", boldFont));
+            signature.add(new com.lowagie.text.Chunk((String) invoiceDetail.getOrDefault("tenNguoiLap", "N/A"), normalFont));
+            signature.setAlignment(Element.ALIGN_RIGHT);
+            document.add(signature);
+            
+            document.close();
+            
+            return new ByteArrayInputStream(outputStream.toByteArray());
+            
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error exporting invoice to PDF for id: " + id, e);
+            e.printStackTrace();
+            throw new RuntimeException("Error exporting invoice to PDF: " + e.getMessage(), e);
+        }
     }
 }
