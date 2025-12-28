@@ -115,7 +115,7 @@ const TaiKhoanAPI = {
     },
     create: (data) => apiRequest('/tai-khoan', 'POST', data),
     update: (id, data) => apiRequest(`/tai-khoan/${id}`, 'PUT', data),
-    updateStatus: (id, status) => apiRequest(`/tai-khoan/${id}/status`, 'PUT', { trangThai: status })
+    delete: (id) => apiRequest(`/tai-khoan/${id}`, 'DELETE')
 };
 
 const KhoanThuAPI = {

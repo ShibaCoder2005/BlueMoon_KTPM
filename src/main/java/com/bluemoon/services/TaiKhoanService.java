@@ -58,15 +58,6 @@ public interface TaiKhoanService {
     boolean updateTaiKhoan(TaiKhoan taiKhoan);
 
     /**
-     * Cập nhật trạng thái tài khoản.
-     *
-     * @param id        ID tài khoản
-     * @param trangThai trạng thái mới
-     * @return true nếu thành công
-     */
-    boolean updateStatus(int id, String trangThai);
-
-    /**
      * Cập nhật mật khẩu tài khoản.
      *
      * @param id           ID tài khoản
@@ -74,5 +65,13 @@ public interface TaiKhoanService {
      * @return true nếu thành công
      */
     boolean updatePassword(int id, String hashedPassword);
+
+    /**
+     * Xóa tài khoản.
+     *
+     * @param id ID tài khoản
+     * @return true nếu thành công
+     */
+    boolean deleteTaiKhoan(int id);
 }
 

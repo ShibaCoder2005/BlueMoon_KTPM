@@ -199,29 +199,63 @@ public class WebServer {
             try {
                 Integer id = parseIntSafe(ctx, "id");
                 if (id == null) return;
-                TaiKhoan account = ctx.bodyAsClass(TaiKhoan.class);
+                
+                // Parse body manually to handle optional password
+                Map<String, Object> body = ctx.bodyAsClass(Map.class);
+                
+                // Validate required fields
+                String tenDangNhap = body.get("tenDangNhap") != null ? body.get("tenDangNhap").toString().trim() : null;
+                String hoTen = body.get("hoTen") != null ? body.get("hoTen").toString().trim() : null;
+                String vaiTro = body.get("vaiTro") != null ? body.get("vaiTro").toString().trim() : null;
+                
+                if (tenDangNhap == null || tenDangNhap.isEmpty()) {
+                    ctx.status(400).json(createErrorResponse("Tên đăng nhập là bắt buộc"));
+                    return;
+                }
+                if (hoTen == null || hoTen.isEmpty()) {
+                    ctx.status(400).json(createErrorResponse("Họ tên là bắt buộc"));
+                    return;
+                }
+                if (vaiTro == null || vaiTro.isEmpty()) {
+                    ctx.status(400).json(createErrorResponse("Vai trò là bắt buộc"));
+                    return;
+                }
+                
+                TaiKhoan account = new TaiKhoan();
                 account.setId(id);
+                account.setTenDangNhap(tenDangNhap);
+                account.setHoTen(hoTen);
+                account.setVaiTro(vaiTro);
+                account.setDienThoai(body.get("dienThoai") != null ? body.get("dienThoai").toString().trim() : null);
+                // Không set trangThai vì sẽ giữ nguyên từ database
+                
+                // Only set password if provided
+                if (body.containsKey("matKhau") && body.get("matKhau") != null && !body.get("matKhau").toString().trim().isEmpty()) {
+                    account.setMatKhau(body.get("matKhau").toString());
+                }
+                
+                logger.info("Updating account: id=" + id + ", username=" + tenDangNhap + ", role=" + vaiTro);
                 boolean success = taiKhoanService.updateTaiKhoan(account);
                 if (success) {
                     ctx.json(createSuccessResponse("Account updated successfully", account));
                 } else {
-                    ctx.status(400).json(createErrorResponse("Failed to update account"));
+                    ctx.status(400).json(createErrorResponse("Failed to update account. Username may already exist or account not found."));
                 }
             } catch (Exception e) {
+                logger.severe("Error updating account: " + e.getMessage());
+                e.printStackTrace();
                 handleException(ctx, e);
             }
         });
-        app.put("/api/tai-khoan/{id}/status", ctx -> {
+        app.delete("/api/tai-khoan/{id}", ctx -> {
             try {
                 Integer id = parseIntSafe(ctx, "id");
                 if (id == null) return;
-                Map<String, String> body = ctx.bodyAsClass(Map.class);
-                String status = body.get("trangThai");
-                boolean success = taiKhoanService.updateStatus(id, status);
+                boolean success = taiKhoanService.deleteTaiKhoan(id);
                 if (success) {
-                    ctx.json(createSuccessResponse("Status updated successfully", null));
+                    ctx.json(createSuccessResponse("Account deleted successfully", null));
                 } else {
-                    ctx.status(400).json(createErrorResponse("Failed to update status"));
+                    ctx.status(400).json(createErrorResponse("Failed to delete account. Account may not exist."));
                 }
             } catch (Exception e) {
                 handleException(ctx, e);
@@ -1456,7 +1490,7 @@ public class WebServer {
                 routes.put("endpoints", Map.of(
                     "health", "GET /api/health",
                     "auth", "POST /api/login, POST /api/change-password, GET /api/check-username/{username}",
-                    "accounts", "GET /api/tai-khoan, GET /api/tai-khoan/{id}, POST /api/tai-khoan, PUT /api/tai-khoan/{id}, PUT /api/tai-khoan/{id}/status",
+                    "accounts", "GET /api/tai-khoan, GET /api/tai-khoan/{id}, POST /api/tai-khoan, PUT /api/tai-khoan/{id}, DELETE /api/tai-khoan/{id}",
                     "fees", "GET /api/khoan-thu, POST /api/khoan-thu, PUT /api/khoan-thu/{id}, DELETE /api/khoan-thu/{id}",
                     "collection_drives", "GET /api/dot-thu, GET /api/dot-thu/{id}, POST /api/dot-thu, PUT /api/dot-thu/{id}, DELETE /api/dot-thu/{id}",
                     "households", "GET /api/ho-gia-dinh, GET /api/ho-gia-dinh/{id}, POST /api/ho-gia-dinh, PUT /api/ho-gia-dinh/{id}, DELETE /api/ho-gia-dinh/{id}",

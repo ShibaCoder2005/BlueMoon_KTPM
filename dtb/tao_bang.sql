@@ -91,17 +91,6 @@ CREATE TABLE ChiTietThu (
     ghiChu TEXT
 );
 
--- Bảng LichSuNopTien
-CREATE TABLE LichSuNopTien (
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    maPhieu INT,
-    ngayNop TIMESTAMP,
-    soTien DECIMAL(14,2),
-    phuongThuc VARCHAR(50),
-    nguoiThu INT,
-    ghiChu TEXT
-);
-
 -- Bảng PhuongTien
 CREATE TABLE PhuongTien (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -111,15 +100,6 @@ CREATE TABLE PhuongTien (
     tenChuXe VARCHAR(200),
     ngayDangKy DATE,
     ghiChu TEXT
-);
-
--- Bảng ThongKe
-CREATE TABLE ThongKe (
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    thoiGian TIMESTAMP,
-    kieuThongKe VARCHAR(100),
-    noiDung TEXT,
-    ketQua TEXT
 );
 
 -- THÊM CÁC KHÓA NGOẠI (FOREIGN KEY)

@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import com.bluemoon.models.TaiKhoan;
 import com.bluemoon.services.TaiKhoanService;
 import com.bluemoon.utils.DatabaseConnector;
+import com.bluemoon.utils.Helper;
 
 /**
  * Triển khai {@link TaiKhoanService} với database integration.
@@ -37,14 +38,14 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
     private static final String UPDATE = 
             "UPDATE TaiKhoan SET tenDangNhap = ?, matKhau = ?, hoTen = ?, vaiTro = ?, dienThoai = ?, trangThai = ? WHERE id = ?";
 
-    private static final String UPDATE_STATUS = 
-            "UPDATE TaiKhoan SET trangThai = ? WHERE id = ?";
-
     private static final String UPDATE_PASSWORD = 
             "UPDATE TaiKhoan SET matKhau = ? WHERE id = ?";
 
     private static final String CHECK_USERNAME_EXISTS = 
             "SELECT COUNT(*) FROM TaiKhoan WHERE LOWER(TRIM(tenDangNhap)) = LOWER(TRIM(?)) AND id != ?";
+
+    private static final String DELETE = 
+            "DELETE FROM TaiKhoan WHERE id = ?";
 
     @Override
     public List<TaiKhoan> getAllTaiKhoan() {
@@ -160,15 +161,22 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
             return false;
         }
 
+        // Hash password before saving
+        String hashedPassword = Helper.hashPassword(taiKhoan.getMatKhau());
+        if (hashedPassword == null) {
+            logger.log(Level.WARNING, "Cannot add account: failed to hash password");
+            return false;
+        }
+
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(INSERT)) {
 
             pstmt.setString(1, taiKhoan.getTenDangNhap().trim());
-            pstmt.setString(2, taiKhoan.getMatKhau());
+            pstmt.setString(2, hashedPassword);
             pstmt.setString(3, taiKhoan.getHoTen());
             pstmt.setString(4, taiKhoan.getVaiTro());
             pstmt.setString(5, taiKhoan.getDienThoai());
-            pstmt.setString(6, taiKhoan.getTrangThai() != null ? taiKhoan.getTrangThai() : "Hoạt động");
+            pstmt.setString(6, "Hoạt động"); // Luôn set mặc định là "Hoạt động"
 
             int rowsAffected = pstmt.executeUpdate();
             boolean success = rowsAffected > 0;
@@ -200,23 +208,66 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
             logger.log(Level.WARNING, "Cannot update account: tenDangNhap is empty");
             return false;
         }
-
-        // Check username uniqueness (exclude current account)
-        if (isUsernameExists(taiKhoan.getTenDangNhap(), taiKhoan.getId())) {
-            logger.log(Level.WARNING, "Cannot update account: username already exists: " + taiKhoan.getTenDangNhap());
+        if (taiKhoan.getHoTen() == null || taiKhoan.getHoTen().trim().isEmpty()) {
+            logger.log(Level.WARNING, "Cannot update account: hoTen is empty");
             return false;
+        }
+        if (taiKhoan.getVaiTro() == null || taiKhoan.getVaiTro().trim().isEmpty()) {
+            logger.log(Level.WARNING, "Cannot update account: vaiTro is empty");
+            return false;
+        }
+
+        // Get current account to preserve password if not updating
+        TaiKhoan currentAccount = findById(taiKhoan.getId());
+        if (currentAccount == null) {
+            logger.log(Level.WARNING, "Cannot update account: account not found with id: " + taiKhoan.getId());
+            return false;
+        }
+
+        // Check username uniqueness ONLY if username has changed
+        // Compare case-insensitively and trimmed to avoid false positives
+        String currentUsername = currentAccount.getTenDangNhap() != null ? currentAccount.getTenDangNhap().trim().toLowerCase() : "";
+        String newUsername = taiKhoan.getTenDangNhap() != null ? taiKhoan.getTenDangNhap().trim().toLowerCase() : "";
+        
+        if (!currentUsername.equals(newUsername)) {
+            // Username has changed, check for uniqueness
+            if (isUsernameExists(taiKhoan.getTenDangNhap(), taiKhoan.getId())) {
+                logger.log(Level.WARNING, "Cannot update account: username already exists: " + taiKhoan.getTenDangNhap());
+                return false;
+            }
+        }
+
+        // Hash password only if new password is provided
+        String passwordToUse = currentAccount.getMatKhau(); // Keep current password by default
+        if (taiKhoan.getMatKhau() != null && !taiKhoan.getMatKhau().trim().isEmpty()) {
+            // New password provided, hash it
+            passwordToUse = Helper.hashPassword(taiKhoan.getMatKhau());
+            if (passwordToUse == null) {
+                logger.log(Level.WARNING, "Cannot update account: failed to hash password");
+                return false;
+            }
         }
 
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(UPDATE)) {
 
             pstmt.setString(1, taiKhoan.getTenDangNhap().trim());
-            pstmt.setString(2, taiKhoan.getMatKhau());
+            pstmt.setString(2, passwordToUse);
             pstmt.setString(3, taiKhoan.getHoTen());
             pstmt.setString(4, taiKhoan.getVaiTro());
-            pstmt.setString(5, taiKhoan.getDienThoai());
-            pstmt.setString(6, taiKhoan.getTrangThai());
+            // dienThoai có thể null
+            if (taiKhoan.getDienThoai() != null && !taiKhoan.getDienThoai().trim().isEmpty()) {
+                pstmt.setString(5, taiKhoan.getDienThoai().trim());
+            } else {
+                pstmt.setNull(5, java.sql.Types.VARCHAR);
+            }
+            pstmt.setString(6, currentAccount.getTrangThai()); // Giữ nguyên trạng thái hiện tại
             pstmt.setInt(7, taiKhoan.getId());
+
+            logger.log(Level.INFO, "Executing UPDATE for account id: " + taiKhoan.getId() + 
+                    ", username: " + taiKhoan.getTenDangNhap() + 
+                    ", hoTen: " + taiKhoan.getHoTen() + 
+                    ", vaiTro: " + taiKhoan.getVaiTro());
 
             int rowsAffected = pstmt.executeUpdate();
             boolean success = rowsAffected > 0;
@@ -230,33 +281,11 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
             return success;
 
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error updating account with id: " + taiKhoan.getId(), e);
+            logger.log(Level.SEVERE, "SQL Error updating account with id: " + taiKhoan.getId() + ", error: " + e.getMessage(), e);
             e.printStackTrace();
             return false;
-        }
-    }
-
-    @Override
-    public boolean updateStatus(int id, String trangThai) {
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(UPDATE_STATUS)) {
-
-            pstmt.setString(1, trangThai);
-            pstmt.setInt(2, id);
-
-            int rowsAffected = pstmt.executeUpdate();
-            boolean success = rowsAffected > 0;
-
-            if (success) {
-                logger.log(Level.INFO, "Successfully updated status for account id: " + id + " to " + trangThai + " (rows affected: " + rowsAffected + ")");
-            } else {
-                logger.log(Level.WARNING, "Failed to update status for account id: " + id + " (rows affected: " + rowsAffected + ")");
-            }
-
-            return success;
-
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error updating status for account id: " + id, e);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Unexpected error updating account with id: " + taiKhoan.getId() + ", error: " + e.getMessage(), e);
             e.printStackTrace();
             return false;
         }
@@ -301,5 +330,29 @@ public class TaiKhoanServiceImpl implements TaiKhoanService {
         taiKhoan.setDienThoai(rs.getString("dienThoai"));
         taiKhoan.setTrangThai(rs.getString("trangThai"));
         return taiKhoan;
+    }
+
+    @Override
+    public boolean deleteTaiKhoan(int id) {
+        try (Connection conn = DatabaseConnector.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
+
+            pstmt.setInt(1, id);
+            int rowsAffected = pstmt.executeUpdate();
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                logger.log(Level.INFO, "Successfully deleted account with id: " + id + " (rows affected: " + rowsAffected + ")");
+            } else {
+                logger.log(Level.WARNING, "Failed to delete account with id: " + id + " (rows affected: " + rowsAffected + ")");
+            }
+
+            return success;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error deleting account with id: " + id, e);
+            e.printStackTrace();
+            return false;
+        }
     }
 }

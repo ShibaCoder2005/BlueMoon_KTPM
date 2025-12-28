@@ -98,8 +98,8 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="tai-khoan.html">
+            <li class="nav-item" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
                     <i class="fas fa-fw fa-user-cog"></i>
                     <span>Tài khoản</span>
                 </a>
@@ -665,6 +665,37 @@
         }
     </script>
 
+
+    <script>
+        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
+        $(document).ready(function() {
+            try {
+                const userInfo = sessionStorage.getItem('currentUser');
+                if (userInfo) {
+                    const user = JSON.parse(userInfo);
+                    const role = user.vaiTro || user.role || '';
+                
+                // Debug: log để kiểm tra giá trị role
+                console.log('Current user:', user);
+                console.log('Role value:', role);
+                console.log('Role type:', typeof role);
+                
+                // Kiểm tra nhiều giá trị có thể là Admin
+                const isAdmin = role === 'BanQuanLy' || 
+                               role === 'Ban Quản lý' || 
+                               role === 'Admin' ||
+                               role === 'admin' ||
+                               role === 'BANQUANLY' ||
+                               role.toLowerCase() === 'banquanly';
+                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
+                        $('#menuTaiKhoan').show();
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking admin role:', error);
+            }
+        });
+    </script>
 </body>
 
 </html>
