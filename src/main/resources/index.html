@@ -293,12 +293,16 @@
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="js/sb-admin-2.min.js"></script>
+    <script src="js/rbac.js"></script>
     
     <script src="vendor/chart.js/Chart.min.js"></script>
 
     <script>
         // Xử lý Tác vụ nhanh - đảm bảo chạy sau DOM ready
         $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+            applyDashboardRBAC();
             // Nút "Xuất danh sách cư dân" - xuất file CSV
             $('#btnQuickExportResidents').on('click', async function(e) {
                 e.preventDefault();
@@ -746,6 +750,7 @@
     </div>
 
     <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
 
     <!-- Modal Tạo Khoản Thu -->
     <div class="modal fade" id="addFeeModal" tabindex="-1" role="dialog" aria-hidden="true">

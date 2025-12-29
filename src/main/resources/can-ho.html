@@ -189,6 +189,7 @@
     <script src="vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
 
     <!-- Modal Thêm/Sửa Hộ Gia Đình -->
     <div class="modal fade" id="addHouseholdModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -232,6 +233,9 @@
     <script>
         // Load và hiển thị thông tin user
         $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
             loadUserDisplay();
         });
         

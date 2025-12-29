@@ -230,6 +230,7 @@
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="js/sb-admin-2.min.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
     <script>
         function loadUserDisplay() {
             try {
@@ -282,6 +283,9 @@
         }
 
         $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
             loadUserDisplay();
         });
     </script>

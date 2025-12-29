@@ -404,12 +404,16 @@
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
 
     <script>
         let dataTable;
         let editingResidentId = null;
 
         $(document).ready(async function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
             // Load và hiển thị thông tin user
             loadUserDisplay();
             

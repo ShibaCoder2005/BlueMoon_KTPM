@@ -308,6 +308,7 @@
     <script src="vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
     <script>
         let reportData = [];
         let dataTable = null;
@@ -521,6 +522,9 @@
         }
 
         $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
             loadUserDisplay();
             
             // Set current month/year as default

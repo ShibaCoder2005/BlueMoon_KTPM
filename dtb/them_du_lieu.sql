@@ -1,7 +1,7 @@
 -- TAIKHOAN
 INSERT INTO taikhoan (tenDangNhap, matKhau, hoTen, vaiTro, email, dienThoai)
 VALUES
-('admin', '123456', 'Nguyễn Quản Trị', 'Admin', 'admin@example.com', '0900000001'),
+('admin', '123456', 'Nguyễn Quản Trị', 'admin', 'admin@example.com', '0900000001'),
 ('user1', '123456', 'Nguyễn Văn A', 'Nhân viên', 'a@example.com', '0900000002'),
 ('user2', '123456', 'Trần Thị B', 'Nhân viên', 'b@example.com', '0900000003'),
 ('user3', '123456', 'Lê Văn C', 'Kế toán', 'c@example.com', '0900000004');

@@ -142,6 +142,13 @@
                     // Store user info in sessionStorage
                     sessionStorage.setItem('currentUser', JSON.stringify(result.data));
                     sessionStorage.setItem('isLoggedIn', 'true');
+                    
+                    // Store role in localStorage for RBAC (ưu tiên vaiTro từ backend)
+                    const userRole = result.data.vaiTro || result.data.role || null;
+                    if (userRole) {
+                        localStorage.setItem('role', userRole);
+                    }
+                    
                     // Redirect to dashboard
                     window.location.href = 'index.html';
                 } else {

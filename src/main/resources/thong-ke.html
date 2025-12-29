@@ -347,10 +347,14 @@
     <script src="js/sb-admin-2.min.js"></script>
     <script src="vendor/chart.js/Chart.min.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
 
     <script>
         // Load và hiển thị thông tin user
         $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+            applyStatisticsRBAC();
             loadUserDisplay();
             
             // Load profile image for navbar avatar
