@@ -152,8 +152,17 @@ public class PhieuThuServiceImpl implements PhieuThuService {
             throw new IllegalArgumentException(errorMsg);
         }
 
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(INSERT, PreparedStatement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            // Check for duplicate (maHo, maDot) combination
+            if (checkDuplicatePhieuThu(phieuThu.getMaHo(), phieuThu.getMaDot(), 0, conn)) {
+                String errorMsg = "Đã tồn tại phiếu thu cho hộ gia đình này trong đợt thu này. " +
+                                 "Mỗi hộ gia đình chỉ có thể có một phiếu thu trong mỗi đợt thu.";
+                logger.log(Level.WARNING, "Duplicate PhieuThu: maHo=" + phieuThu.getMaHo() + 
+                    ", maDot=" + phieuThu.getMaDot());
+                throw new IllegalArgumentException(errorMsg);
+            }
+
+            try (PreparedStatement pstmt = conn.prepareStatement(INSERT, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setInt(1, phieuThu.getMaHo());
             pstmt.setInt(2, phieuThu.getMaDot());
@@ -178,6 +187,22 @@ public class PhieuThuServiceImpl implements PhieuThuService {
             logger.log(Level.WARNING, "Failed to create PhieuThu (rows affected: " + rowsAffected + ")");
             return -1;
 
+            } catch (IllegalArgumentException e) {
+                throw e; // Re-throw business logic errors
+            } catch (SQLException e) {
+                // Check for unique constraint violation
+                if (e.getSQLState() != null && e.getSQLState().startsWith("23")) { // PostgreSQL unique violation
+                    logger.log(Level.WARNING, "Duplicate PhieuThu detected by database constraint", e);
+                    throw new IllegalArgumentException(
+                        "Đã tồn tại phiếu thu cho hộ gia đình này trong đợt thu này."
+                    );
+                }
+                logger.log(Level.SEVERE, "Error creating PhieuThu", e);
+                e.printStackTrace();
+                return -1;
+            }
+        } catch (IllegalArgumentException e) {
+            throw e; // Re-throw business logic errors
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error creating PhieuThu", e);
             e.printStackTrace();
@@ -244,10 +269,10 @@ public class PhieuThuServiceImpl implements PhieuThuService {
 
                 // Step 2: Add all ChiTietThu using ChiTietThuService (with transaction support)
                 BigDecimal calculatedTotal = BigDecimal.ZERO;
-                if (chiTietList != null && !chiTietList.isEmpty()) {
+        if (chiTietList != null && !chiTietList.isEmpty()) {
                     // Set maPhieu for all chiTiet
-                    for (ChiTietThu chiTiet : chiTietList) {
-                        chiTiet.setMaPhieu(maPhieu);
+            for (ChiTietThu chiTiet : chiTietList) {
+                chiTiet.setMaPhieu(maPhieu);
                         
                         // Calculate thanhTien if not set (donGia * soLuong)
                         if (chiTiet.getThanhTien() == null || chiTiet.getThanhTien().compareTo(BigDecimal.ZERO) == 0) {
@@ -291,7 +316,7 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                 // Commit transaction
                 conn.commit();
                 logger.log(Level.INFO, "Successfully created PhieuThu with details, id: " + maPhieu + ", total: " + calculatedTotal);
-                return maPhieu;
+        return maPhieu;
 
             } catch (SQLException e) {
                 conn.rollback();
@@ -770,6 +795,87 @@ public class PhieuThuServiceImpl implements PhieuThuService {
     }
 
     /**
+     * Generate ChiTietThu list from mandatory fees for a household and collection drive.
+     * This method calculates fees based on tinhTheo (calculation method) and creates ChiTietThu objects.
+     * 
+     * @param maHo Household ID
+     * @param maDot Collection drive ID
+     * @return List of ChiTietThu, or empty list if no mandatory fees
+     */
+    private List<ChiTietThu> generateChiTietThuFromMandatoryFees(int maHo, int maDot) {
+        try {
+            // Get household
+            HoGiaDinh household = hoGiaDinhService.findById(maHo);
+            if (household == null) {
+                logger.log(Level.WARNING, "Household not found: " + maHo);
+                return new ArrayList<>();
+            }
+
+            // Get all mandatory fees
+            List<KhoanThu> allFees = khoanThuService.getAllKhoanThu();
+            List<KhoanThu> mandatoryFees = allFees.stream()
+                .filter(KhoanThu::isBatBuoc)
+                .collect(java.util.stream.Collectors.toList());
+
+            if (mandatoryFees.isEmpty()) {
+                logger.log(Level.INFO, "No mandatory fees found for household: " + maHo);
+                return new ArrayList<>();
+            }
+
+            // Get household data
+            List<NhanKhau> members = nhanKhauService.getNhanKhauByHoGiaDinh(maHo);
+            int memberCount = members.size();
+
+            // Count vehicles
+            List<PhuongTien> vehicles = phuongTienService.getPhuongTienByHoGiaDinh(maHo);
+            int motorbikeCount = 0;
+            int carCount = 0;
+            for (PhuongTien vehicle : vehicles) {
+                String loaiXe = vehicle.getLoaiXe();
+                if (loaiXe != null) {
+                    String loaiXeLower = loaiXe.toLowerCase().trim();
+                    if (loaiXeLower.contains("xe máy") || loaiXeLower.contains("xemay") || 
+                        loaiXeLower.contains("moto") || loaiXeLower.contains("xe may")) {
+                        motorbikeCount++;
+                    } else if (loaiXeLower.contains("ô tô") || loaiXeLower.contains("oto") || 
+                              loaiXeLower.contains("car") || loaiXeLower.contains("o to")) {
+                        carCount++;
+                    }
+                }
+            }
+
+            // Generate ChiTietThu for each mandatory fee
+            List<ChiTietThu> chiTietList = new ArrayList<>();
+            for (KhoanThu fee : mandatoryFees) {
+                BigDecimal feeAmount = calculateFeeAmount(
+                    fee, 
+                    household, 
+                    memberCount,
+                    motorbikeCount,
+                    carCount
+                );
+
+                if (feeAmount != null && feeAmount.compareTo(BigDecimal.ZERO) > 0) {
+                    ChiTietThu chiTiet = new ChiTietThu();
+                    chiTiet.setMaKhoan(fee.getId());
+                    chiTiet.setSoLuong(BigDecimal.ONE); // Default quantity
+                    chiTiet.setDonGia(fee.getDonGia()); // Snapshot current price
+                    chiTiet.setThanhTien(feeAmount);
+                    chiTietList.add(chiTiet);
+                }
+            }
+
+            logger.log(Level.INFO, "Generated " + chiTietList.size() + " ChiTietThu for household " + maHo + " in drive " + maDot);
+            return chiTietList;
+
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error generating ChiTietThu from mandatory fees: " + e.getMessage(), e);
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
+    /**
      * Create PhieuThu with details using an existing connection (for transaction support).
      * 
      * @param phieuThu The receipt to create
@@ -932,6 +1038,42 @@ public class PhieuThuServiceImpl implements PhieuThuService {
         return true;
     }
 
+    /**
+     * Kiểm tra xem đã tồn tại phiếu thu cho cùng (maHo, maDot) chưa.
+     * @param maHo Mã hộ gia đình
+     * @param maDot Mã đợt thu
+     * @param excludeId ID phiếu thu cần loại trừ (cho trường hợp update)
+     * @param conn Database connection
+     * @return true nếu đã tồn tại, false nếu chưa
+     */
+    private boolean checkDuplicatePhieuThu(int maHo, int maDot, int excludeId, Connection conn) {
+        try {
+            String query = "SELECT COUNT(*) FROM PhieuThu WHERE maHo = ? AND maDot = ?";
+            if (excludeId > 0) {
+                query += " AND id != ?";
+            }
+            
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setInt(1, maHo);
+                pstmt.setInt(2, maDot);
+                if (excludeId > 0) {
+                    pstmt.setInt(3, excludeId);
+                }
+                
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        int count = rs.getInt(1);
+                        return count > 0;
+                    }
+                }
+            }
+            return false;
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error checking duplicate PhieuThu", e);
+            return true; // Fail-safe: assume duplicate exists on error
+        }
+    }
+
     @Override
     public boolean updatePhieuThu(PhieuThu phieuThu, List<ChiTietThu> chiTietList) {
         if (phieuThu == null || phieuThu.getId() == 0) {
@@ -946,9 +1088,15 @@ public class PhieuThuServiceImpl implements PhieuThuService {
             return false;
         }
 
-        // Validate: Nếu maDot thay đổi, kiểm tra đợt thu mới có đang mở không
+        // Get existing PhieuThu to compare changes
         PhieuThu existingPhieuThu = getPhieuThuWithDetails(phieuThu.getId());
-        if (existingPhieuThu != null && existingPhieuThu.getMaDot() != phieuThu.getMaDot()) {
+        if (existingPhieuThu == null) {
+            logger.log(Level.WARNING, "PhieuThu with id: " + phieuThu.getId() + " not found");
+                return false;
+            }
+
+        // Validate: Nếu maDot thay đổi, kiểm tra đợt thu mới có đang mở không
+        if (existingPhieuThu.getMaDot() != phieuThu.getMaDot()) {
             // Đợt thu đã thay đổi, kiểm tra đợt thu mới
             if (!isDotThuOpen(phieuThu.getMaDot())) {
                 DotThu dotThu = dotThuService.getDotThuById(phieuThu.getMaDot());
@@ -958,6 +1106,57 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                 }
                 logger.log(Level.WARNING, "Cannot update PhieuThu: new DotThu with id " + phieuThu.getMaDot() + " is closed");
                 throw new IllegalArgumentException(errorMsg);
+            }
+        }
+
+        // Check if maHo or maDot changed - need to check for duplicate
+        boolean maHoChanged = existingPhieuThu.getMaHo() != phieuThu.getMaHo();
+        boolean maDotChanged = existingPhieuThu.getMaDot() != phieuThu.getMaDot();
+        
+        if (maHoChanged || maDotChanged) {
+            // Check for duplicate (maHo, maDot) combination
+            try (Connection conn = DatabaseConnector.getConnection()) {
+                if (checkDuplicatePhieuThu(phieuThu.getMaHo(), phieuThu.getMaDot(), phieuThu.getId(), conn)) {
+                    String errorMsg = "Đã tồn tại phiếu thu cho hộ gia đình này trong đợt thu này. " +
+                                     "Mỗi hộ gia đình chỉ có thể có một phiếu thu trong mỗi đợt thu.";
+                    logger.log(Level.WARNING, "Duplicate PhieuThu: maHo=" + phieuThu.getMaHo() + 
+                        ", maDot=" + phieuThu.getMaDot());
+                    throw new IllegalArgumentException(errorMsg);
+                }
+            } catch (IllegalArgumentException e) {
+                throw e; // Re-throw business logic errors
+            } catch (SQLException e) {
+                logger.log(Level.SEVERE, "Error checking duplicate PhieuThu", e);
+                return false;
+            }
+        }
+
+        // Auto-calculate tongTien and regenerate chiTietList if maHo or maDot changed and chiTietList is not provided
+        boolean needRecalculate = (maHoChanged || maDotChanged) && (chiTietList == null || chiTietList.isEmpty());
+        if (needRecalculate) {
+            // Generate new ChiTietThu list from mandatory fees
+            chiTietList = generateChiTietThuFromMandatoryFees(phieuThu.getMaHo(), phieuThu.getMaDot());
+            
+            // Calculate total from generated chiTietList
+            BigDecimal calculatedTotal = BigDecimal.ZERO;
+            if (chiTietList != null && !chiTietList.isEmpty()) {
+                for (ChiTietThu chiTiet : chiTietList) {
+                    if (chiTiet.getThanhTien() != null) {
+                        calculatedTotal = calculatedTotal.add(chiTiet.getThanhTien());
+                    }
+                }
+            }
+            
+            if (calculatedTotal.compareTo(BigDecimal.ZERO) > 0) {
+                phieuThu.setTongTien(calculatedTotal);
+                logger.log(Level.INFO, "Auto-calculated tongTien and generated ChiTietThu for updated PhieuThu: " + calculatedTotal);
+            } else {
+                // Fallback: use calculateTotalAmountForHousehold if chiTietList generation failed
+                BigDecimal fallbackTotal = calculateTotalAmountForHousehold(phieuThu.getMaHo(), phieuThu.getMaDot());
+                if (fallbackTotal != null && fallbackTotal.compareTo(BigDecimal.ZERO) > 0) {
+                    phieuThu.setTongTien(fallbackTotal);
+                    logger.log(Level.INFO, "Auto-calculated tongTien (fallback) for updated PhieuThu: " + fallbackTotal);
+                }
             }
         }
 
@@ -987,7 +1186,7 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                 }
 
                 // Step 2: Update ChiTietThu if provided
-                if (chiTietList != null) {
+            if (chiTietList != null) {
                     // Delete old details using ChiTietThuService (with transaction support)
                     ChiTietThuServiceImpl chiTietServiceImpl = (ChiTietThuServiceImpl) chiTietThuService;
                     if (!chiTietServiceImpl.deleteByMaPhieu(phieuThu.getId(), conn)) {
@@ -997,10 +1196,10 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                     }
 
                     // Add new details using ChiTietThuService (with transaction support)
-                    if (!chiTietList.isEmpty()) {
+                if (!chiTietList.isEmpty()) {
                         // Set maPhieu for all chiTiet
-                        for (ChiTietThu chiTiet : chiTietList) {
-                            chiTiet.setMaPhieu(phieuThu.getId());
+                    for (ChiTietThu chiTiet : chiTietList) {
+                        chiTiet.setMaPhieu(phieuThu.getId());
                         }
                         
                         if (!chiTietServiceImpl.saveAll(chiTietList, conn)) {
@@ -1095,6 +1294,9 @@ public class PhieuThuServiceImpl implements PhieuThuService {
         Timestamp ngayLap = rs.getTimestamp("ngayLap");
         if (ngayLap != null) {
             phieuThu.setNgayLap(ngayLap.toLocalDateTime());
+        } else {
+            // If ngayLap is null in database, set to current time as fallback
+            phieuThu.setNgayLap(java.time.LocalDateTime.now());
         }
         
         phieuThu.setTongTien(rs.getBigDecimal("tongTien"));

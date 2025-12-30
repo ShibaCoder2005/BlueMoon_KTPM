@@ -47,6 +47,12 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
     private static final String CHECK_MAHO_EXISTS_EXCLUDE_ID = 
             "SELECT COUNT(*) FROM HoGiaDinh WHERE maHo = ? AND id != ?";
 
+    private static final String CHECK_SOPHONG_EXISTS = 
+            "SELECT COUNT(*) FROM HoGiaDinh WHERE soPhong = ?";
+
+    private static final String CHECK_SOPHONG_EXISTS_EXCLUDE_ID = 
+            "SELECT COUNT(*) FROM HoGiaDinh WHERE soPhong = ? AND id != ?";
+
     private static final String CHECK_NHAN_KHAU_DEPENDENCIES = 
             "SELECT COUNT(*) FROM NhanKhau WHERE maHo = ?";
 
@@ -122,6 +128,13 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
         if (checkMaHoExists(hoGiaDinh.getMaHo())) {
             logger.log(Level.WARNING, "Cannot add household: maHo already exists: " + hoGiaDinh.getMaHo());
             return false;
+        }
+
+        // Check if soPhong already exists (must be unique)
+        if (hoGiaDinh.getSoPhong() > 0 && checkSoPhongExists(hoGiaDinh.getSoPhong(), 0)) {
+            String errorMsg = "Số phòng " + hoGiaDinh.getSoPhong() + " đã tồn tại. Mỗi số phòng chỉ có thể được sử dụng bởi một hộ gia đình.";
+            logger.log(Level.WARNING, "Cannot add household: soPhong already exists: " + hoGiaDinh.getSoPhong());
+            throw new IllegalArgumentException(errorMsg);
         }
 
         try (Connection conn = DatabaseConnector.getConnection();
@@ -200,6 +213,14 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
                 return false;
             }
 
+            // Check soPhong uniqueness (exclude current record)
+            if (hoGiaDinh.getSoPhong() > 0 && checkSoPhongExists(hoGiaDinh.getSoPhong(), hoGiaDinh.getId())) {
+                String errorMsg = "Số phòng " + hoGiaDinh.getSoPhong() + " đã tồn tại. Mỗi số phòng chỉ có thể được sử dụng bởi một hộ gia đình.";
+                logger.log(Level.WARNING, 
+                        "Cannot update household: soPhong already exists: " + hoGiaDinh.getSoPhong());
+                throw new IllegalArgumentException(errorMsg);
+            }
+
             // Get current ngayTao from database to preserve it
             LocalDate currentNgayTao = null;
             try (PreparedStatement getCurrentStmt = conn.prepareStatement(SELECT_BY_ID)) {
@@ -248,7 +269,16 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
                 return success;
             }
 
+        } catch (IllegalArgumentException e) {
+            throw e; // Re-throw business logic errors
         } catch (SQLException e) {
+            // Check for unique constraint violation (if database has unique constraint on soPhong)
+            if (e.getSQLState() != null && e.getSQLState().startsWith("23")) { // PostgreSQL unique violation
+                logger.log(Level.WARNING, "Duplicate soPhong detected by database constraint", e);
+                throw new IllegalArgumentException(
+                    "Số phòng đã tồn tại. Mỗi số phòng chỉ có thể được sử dụng bởi một hộ gia đình."
+                );
+            }
             logger.log(Level.SEVERE, "Error updating household with id: " + hoGiaDinh.getId(), e);
             e.printStackTrace();
             return false;
@@ -366,6 +396,40 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error checking maHo existence: " + maHo, e);
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Kiểm tra xem số phòng đã tồn tại chưa.
+     * @param soPhong Số phòng cần kiểm tra
+     * @param excludeId ID hộ gia đình cần loại trừ (cho trường hợp update), 0 nếu không loại trừ
+     * @return true nếu số phòng đã tồn tại, false nếu chưa
+     */
+    private boolean checkSoPhongExists(int soPhong, int excludeId) {
+        if (soPhong <= 0) {
+            return false; // Số phòng <= 0 không cần kiểm tra
+        }
+
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            String query = excludeId > 0 ? CHECK_SOPHONG_EXISTS_EXCLUDE_ID : CHECK_SOPHONG_EXISTS;
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.setInt(1, soPhong);
+                if (excludeId > 0) {
+                    pstmt.setInt(2, excludeId);
+                }
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        int count = rs.getInt(1);
+                        return count > 0;
+                    }
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error checking soPhong existence: " + soPhong, e);
             e.printStackTrace();
             return false;
         }

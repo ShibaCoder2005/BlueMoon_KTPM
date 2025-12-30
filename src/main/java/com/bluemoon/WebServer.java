@@ -6,6 +6,8 @@ import com.bluemoon.services.*;
 import com.bluemoon.services.impl.*;
 import com.bluemoon.models.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -25,7 +27,9 @@ import java.util.logging.Logger;
 public class WebServer {
 
     private static final int PORT = 7070;
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     private static final Logger logger = Logger.getLogger(WebServer.class.getName());
 
     // Service instances
@@ -895,8 +899,21 @@ public class WebServer {
                 if (success) {
                     ctx.status(201).json(createSuccessResponse("Household created successfully", hoGiaDinh));
                 } else {
-                    ctx.status(400).json(createErrorResponse("Failed to create household"));
+                    ctx.status(400).json(createStandardErrorResponse(
+                        "Validation failed",
+                        "VALIDATION_ERROR",
+                        "Không thể tạo hộ gia đình. Vui lòng kiểm tra lại thông tin.",
+                        ctx.path()
+                    ));
                 }
+            } catch (IllegalArgumentException e) {
+                // Handle business logic errors (duplicate room number, etc.)
+                ctx.status(400).json(createStandardErrorResponse(
+                    "Validation failed",
+                    "VALIDATION_ERROR",
+                    e.getMessage(),
+                    ctx.path()
+                ));
             } catch (Exception e) {
                 handleException(ctx, e);
             }
@@ -911,8 +928,21 @@ public class WebServer {
                 if (success) {
                     ctx.json(createSuccessResponse("Household updated successfully", hoGiaDinh));
                 } else {
-                    ctx.status(400).json(createErrorResponse("Failed to update household"));
+                    ctx.status(400).json(createStandardErrorResponse(
+                        "Validation failed",
+                        "VALIDATION_ERROR",
+                        "Không thể cập nhật hộ gia đình. Vui lòng kiểm tra lại thông tin.",
+                        ctx.path()
+                    ));
                 }
+            } catch (IllegalArgumentException e) {
+                // Handle business logic errors (duplicate room number, etc.)
+                ctx.status(400).json(createStandardErrorResponse(
+                    "Validation failed",
+                    "VALIDATION_ERROR",
+                    e.getMessage(),
+                    ctx.path()
+                ));
             } catch (Exception e) {
                 handleException(ctx, e);
             }
@@ -1058,7 +1088,10 @@ public class WebServer {
         // ========== PHIEU THU (Receipt) ENDPOINTS ==========
         app.get("/api/phieu-thu", ctx -> {
             try {
-                ctx.json(phieuThuService.getAllPhieuThu());
+                List<PhieuThu> phieuThuList = phieuThuService.getAllPhieuThu();
+                // Manually serialize using our configured ObjectMapper
+                String json = objectMapper.writeValueAsString(phieuThuList);
+                ctx.result(json);
             } catch (Exception e) {
                 handleException(ctx, e);
             }
@@ -1069,7 +1102,9 @@ public class WebServer {
                 if (id == null) return;
                 PhieuThu phieuThu = phieuThuService.getPhieuThuWithDetails(id);
                 if (phieuThu != null) {
-                    ctx.json(phieuThu);
+                    // Manually serialize using our configured ObjectMapper
+                    String json = objectMapper.writeValueAsString(phieuThu);
+                    ctx.result(json);
                 } else {
                     ctx.status(404).json(createErrorResponse("Receipt not found"));
                 }
@@ -1365,10 +1400,20 @@ public class WebServer {
                         : null;
                 boolean success = phieuThuService.updatePhieuThu(phieuThu, chiTietList);
                 if (success) {
-                    ctx.json(createSuccessResponse("Receipt updated successfully", phieuThu));
+                    // Return updated PhieuThu with details
+                    PhieuThu updatedPhieuThu = phieuThuService.getPhieuThuWithDetails(id);
+                    ctx.json(createSuccessResponse("Receipt updated successfully", updatedPhieuThu));
                 } else {
                     ctx.status(400).json(createErrorResponse("Failed to update receipt (may be paid)"));
                 }
+            } catch (IllegalArgumentException e) {
+                // Handle business logic errors (duplicate, closed drive, etc.)
+                ctx.status(400).json(createStandardErrorResponse(
+                    "Validation failed",
+                    "VALIDATION_ERROR",
+                    e.getMessage(),
+                    ctx.path()
+                ));
             } catch (Exception e) {
                 handleException(ctx, e);
             }
