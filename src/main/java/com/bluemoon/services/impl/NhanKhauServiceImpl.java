@@ -353,7 +353,7 @@ public class NhanKhauServiceImpl implements NhanKhauService {
                 // Commit transaction
                 conn.commit();
                 logger.log(Level.INFO, "Successfully updated resident with id: " + nhanKhau.getId());
-                return true;
+        return true;
                 
             } catch (SQLException e) {
                 conn.rollback();
@@ -507,51 +507,53 @@ public class NhanKhauServiceImpl implements NhanKhauService {
     @Override
     public boolean deleteNhanKhau(int id) {
         try (Connection conn = DatabaseConnector.getConnection()) {
-            // Check if this resident is a household head (maChuHo) in any household
-            int householdCount = 0;
-            try (PreparedStatement checkChuHoStmt = conn.prepareStatement(
-                    "SELECT COUNT(*) FROM HoGiaDinh WHERE maChuHo = ?")) {
-                checkChuHoStmt.setInt(1, id);
-                try (ResultSet rs = checkChuHoStmt.executeQuery()) {
-                    if (rs.next()) {
-                        householdCount = rs.getInt(1);
+            // Disable auto-commit for transaction
+            conn.setAutoCommit(false);
+            
+            try {
+                // Step 1: Clear maChuHo in HoGiaDinh if this resident is a household head
+                try (PreparedStatement clearChuHoStmt = conn.prepareStatement(
+                        "UPDATE HoGiaDinh SET maChuHo = NULL WHERE maChuHo = ?")) {
+                    clearChuHoStmt.setInt(1, id);
+                    int clearedRows = clearChuHoStmt.executeUpdate();
+                    if (clearedRows > 0) {
+                        logger.log(Level.INFO, "Cleared maChuHo in " + clearedRows + 
+                            " household(s) before deleting resident id: " + id);
                     }
                 }
-            }
 
-            if (householdCount > 0) {
-                logger.log(Level.WARNING, 
-                        "Cannot delete resident with id: " + id + 
-                        ". Resident is a household head (maChuHo) in " + householdCount + " household(s). " +
-                        "Please reassign or delete the household(s) first.");
-                return false;
-            }
-
-            // First, delete all history records for this resident (CASCADE handling)
-            try (PreparedStatement deleteHistoryStmt = conn.prepareStatement(
-                    "DELETE FROM LichSuNhanKhau WHERE maNhanKhau = ?")) {
-                deleteHistoryStmt.setInt(1, id);
-                int historyRowsDeleted = deleteHistoryStmt.executeUpdate();
-                logger.log(Level.INFO, "Deleted " + historyRowsDeleted + " history records for resident id: " + id);
-            } catch (SQLException historyError) {
-                logger.log(Level.WARNING, "Error deleting history records for resident id: " + id + ", continuing with resident deletion", historyError);
-                // Continue with resident deletion even if history deletion fails
-            }
-
-            // Then delete the resident
-            try (PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
-                pstmt.setInt(1, id);
-
-                int rowsAffected = pstmt.executeUpdate();
-                boolean success = rowsAffected > 0;
-
-                if (success) {
-                    logger.log(Level.INFO, "Successfully deleted resident with id: " + id + " (rows affected: " + rowsAffected + ")");
-                } else {
-                    logger.log(Level.WARNING, "Failed to delete resident with id: " + id + " (rows affected: " + rowsAffected + ") - resident may not exist");
+                // Step 2: Delete all history records for this resident
+                try (PreparedStatement deleteHistoryStmt = conn.prepareStatement(
+                        "DELETE FROM LichSuNhanKhau WHERE maNhanKhau = ?")) {
+                    deleteHistoryStmt.setInt(1, id);
+                    int historyRowsDeleted = deleteHistoryStmt.executeUpdate();
+                    logger.log(Level.INFO, "Deleted " + historyRowsDeleted + " history records for resident id: " + id);
                 }
 
-                return success;
+                // Step 3: Delete the resident
+                try (PreparedStatement pstmt = conn.prepareStatement(DELETE)) {
+                    pstmt.setInt(1, id);
+                    int rowsAffected = pstmt.executeUpdate();
+                    
+                    if (rowsAffected <= 0) {
+                        conn.rollback();
+                        logger.log(Level.WARNING, "Failed to delete resident with id: " + id + 
+                            " (rows affected: " + rowsAffected + ") - resident may not exist");
+                        return false;
+                    }
+                    
+                    // Commit transaction
+                    conn.commit();
+                    logger.log(Level.INFO, "Successfully deleted resident with id: " + id + 
+                        " (rows affected: " + rowsAffected + ")");
+                    return true;
+                }
+                
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
             }
 
         } catch (SQLException e) {
