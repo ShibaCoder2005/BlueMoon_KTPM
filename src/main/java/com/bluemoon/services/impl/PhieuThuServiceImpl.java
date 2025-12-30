@@ -795,87 +795,6 @@ public class PhieuThuServiceImpl implements PhieuThuService {
     }
 
     /**
-     * Generate ChiTietThu list from mandatory fees for a household and collection drive.
-     * This method calculates fees based on tinhTheo (calculation method) and creates ChiTietThu objects.
-     * 
-     * @param maHo Household ID
-     * @param maDot Collection drive ID
-     * @return List of ChiTietThu, or empty list if no mandatory fees
-     */
-    private List<ChiTietThu> generateChiTietThuFromMandatoryFees(int maHo, int maDot) {
-        try {
-            // Get household
-            HoGiaDinh household = hoGiaDinhService.findById(maHo);
-            if (household == null) {
-                logger.log(Level.WARNING, "Household not found: " + maHo);
-                return new ArrayList<>();
-            }
-
-            // Get all mandatory fees
-            List<KhoanThu> allFees = khoanThuService.getAllKhoanThu();
-            List<KhoanThu> mandatoryFees = allFees.stream()
-                .filter(KhoanThu::isBatBuoc)
-                .collect(java.util.stream.Collectors.toList());
-
-            if (mandatoryFees.isEmpty()) {
-                logger.log(Level.INFO, "No mandatory fees found for household: " + maHo);
-                return new ArrayList<>();
-            }
-
-            // Get household data
-            List<NhanKhau> members = nhanKhauService.getNhanKhauByHoGiaDinh(maHo);
-            int memberCount = members.size();
-
-            // Count vehicles
-            List<PhuongTien> vehicles = phuongTienService.getPhuongTienByHoGiaDinh(maHo);
-            int motorbikeCount = 0;
-            int carCount = 0;
-            for (PhuongTien vehicle : vehicles) {
-                String loaiXe = vehicle.getLoaiXe();
-                if (loaiXe != null) {
-                    String loaiXeLower = loaiXe.toLowerCase().trim();
-                    if (loaiXeLower.contains("xe máy") || loaiXeLower.contains("xemay") || 
-                        loaiXeLower.contains("moto") || loaiXeLower.contains("xe may")) {
-                        motorbikeCount++;
-                    } else if (loaiXeLower.contains("ô tô") || loaiXeLower.contains("oto") || 
-                              loaiXeLower.contains("car") || loaiXeLower.contains("o to")) {
-                        carCount++;
-                    }
-                }
-            }
-
-            // Generate ChiTietThu for each mandatory fee
-            List<ChiTietThu> chiTietList = new ArrayList<>();
-            for (KhoanThu fee : mandatoryFees) {
-                BigDecimal feeAmount = calculateFeeAmount(
-                    fee, 
-                    household, 
-                    memberCount,
-                    motorbikeCount,
-                    carCount
-                );
-
-                if (feeAmount != null && feeAmount.compareTo(BigDecimal.ZERO) > 0) {
-                    ChiTietThu chiTiet = new ChiTietThu();
-                    chiTiet.setMaKhoan(fee.getId());
-                    chiTiet.setSoLuong(BigDecimal.ONE); // Default quantity
-                    chiTiet.setDonGia(fee.getDonGia()); // Snapshot current price
-                    chiTiet.setThanhTien(feeAmount);
-                    chiTietList.add(chiTiet);
-                }
-            }
-
-            logger.log(Level.INFO, "Generated " + chiTietList.size() + " ChiTietThu for household " + maHo + " in drive " + maDot);
-            return chiTietList;
-
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error generating ChiTietThu from mandatory fees: " + e.getMessage(), e);
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
-    }
-
-    /**
      * Create PhieuThu with details using an existing connection (for transaction support).
      * 
      * @param phieuThu The receipt to create
@@ -1131,32 +1050,14 @@ public class PhieuThuServiceImpl implements PhieuThuService {
             }
         }
 
-        // Auto-calculate tongTien and regenerate chiTietList if maHo or maDot changed and chiTietList is not provided
+        // Auto-calculate tongTien if maHo or maDot changed and chiTietList is not provided
         boolean needRecalculate = (maHoChanged || maDotChanged) && (chiTietList == null || chiTietList.isEmpty());
         if (needRecalculate) {
-            // Generate new ChiTietThu list from mandatory fees
-            chiTietList = generateChiTietThuFromMandatoryFees(phieuThu.getMaHo(), phieuThu.getMaDot());
-            
-            // Calculate total from generated chiTietList
-            BigDecimal calculatedTotal = BigDecimal.ZERO;
-            if (chiTietList != null && !chiTietList.isEmpty()) {
-                for (ChiTietThu chiTiet : chiTietList) {
-                    if (chiTiet.getThanhTien() != null) {
-                        calculatedTotal = calculatedTotal.add(chiTiet.getThanhTien());
-                    }
-                }
-            }
-            
-            if (calculatedTotal.compareTo(BigDecimal.ZERO) > 0) {
+            // Use existing method to calculate total amount
+            BigDecimal calculatedTotal = calculateTotalAmountForHousehold(phieuThu.getMaHo(), phieuThu.getMaDot());
+            if (calculatedTotal != null && calculatedTotal.compareTo(BigDecimal.ZERO) > 0) {
                 phieuThu.setTongTien(calculatedTotal);
-                logger.log(Level.INFO, "Auto-calculated tongTien and generated ChiTietThu for updated PhieuThu: " + calculatedTotal);
-            } else {
-                // Fallback: use calculateTotalAmountForHousehold if chiTietList generation failed
-                BigDecimal fallbackTotal = calculateTotalAmountForHousehold(phieuThu.getMaHo(), phieuThu.getMaDot());
-                if (fallbackTotal != null && fallbackTotal.compareTo(BigDecimal.ZERO) > 0) {
-                    phieuThu.setTongTien(fallbackTotal);
-                    logger.log(Level.INFO, "Auto-calculated tongTien (fallback) for updated PhieuThu: " + fallbackTotal);
-                }
+                logger.log(Level.INFO, "Auto-calculated tongTien for updated PhieuThu: " + calculatedTotal);
             }
         }
 
