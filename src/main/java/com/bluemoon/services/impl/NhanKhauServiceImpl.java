@@ -210,6 +210,25 @@ public class NhanKhauServiceImpl implements NhanKhauService {
                             return false;
                         }
                     }
+                    
+                    // Step 3: If this resident is "Chủ hộ", update maChuHo in HoGiaDinh
+                    String quanHe = nhanKhau.getQuanHeVoiChuHo();
+                    if (quanHe != null && quanHe.trim().equalsIgnoreCase("Chủ hộ")) {
+                        try (PreparedStatement updateHoStmt = conn.prepareStatement(
+                                "UPDATE HoGiaDinh SET maChuHo = ? WHERE id = ?")) {
+                            updateHoStmt.setInt(1, newResidentId);
+                            updateHoStmt.setInt(2, nhanKhau.getMaHo());
+                            
+                            int updateRows = updateHoStmt.executeUpdate();
+                            if (updateRows > 0) {
+                                logger.log(Level.INFO, "Updated maChuHo in HoGiaDinh (id: " + nhanKhau.getMaHo() + 
+                                    ") to resident ID: " + newResidentId);
+                            } else {
+                                logger.log(Level.WARNING, "Failed to update maChuHo in HoGiaDinh (id: " + 
+                                    nhanKhau.getMaHo() + ") - household may not exist");
+                            }
+                        }
+                    }
                 } else {
                     conn.rollback();
                     logger.log(Level.WARNING, "Failed to get generated ID for resident, transaction rolled back");
@@ -256,29 +275,92 @@ public class NhanKhauServiceImpl implements NhanKhauService {
             }
         }
 
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(UPDATE)) {
+        try (Connection conn = DatabaseConnector.getConnection()) {
+            // Disable auto-commit for transaction
+            conn.setAutoCommit(false);
+            
+            try {
+                // Get old relationship to check if maChuHo needs to be updated
+                String oldQuanHe = null;
+                int oldMaHo = 0;
+                try (PreparedStatement getOldStmt = conn.prepareStatement(
+                        "SELECT quanHeVoiChuHo, maHo FROM NhanKhau WHERE id = ?")) {
+                    getOldStmt.setInt(1, nhanKhau.getId());
+                    try (ResultSet rs = getOldStmt.executeQuery()) {
+                        if (rs.next()) {
+                            oldQuanHe = rs.getString("quanHeVoiChuHo");
+                            oldMaHo = rs.getInt("maHo");
+                        }
+                    }
+                }
+                
+                // Update resident
+                try (PreparedStatement pstmt = conn.prepareStatement(UPDATE)) {
+                    pstmt.setInt(1, nhanKhau.getMaHo());
+                    pstmt.setString(2, nhanKhau.getHoTen().trim());
+                    pstmt.setDate(3, convertToSqlDate(nhanKhau.getNgaySinh()));
+                    pstmt.setString(4, nhanKhau.getGioiTinh());
+                    pstmt.setString(5, nhanKhau.getSoCCCD());
+                    pstmt.setString(6, nhanKhau.getNgheNghiep());
+                    pstmt.setString(7, nhanKhau.getQuanHeVoiChuHo());
+                    pstmt.setString(8, nhanKhau.getTinhTrang());
+                    pstmt.setInt(9, nhanKhau.getId());
 
-            pstmt.setInt(1, nhanKhau.getMaHo());
-            pstmt.setString(2, nhanKhau.getHoTen().trim());
-            pstmt.setDate(3, convertToSqlDate(nhanKhau.getNgaySinh()));
-            pstmt.setString(4, nhanKhau.getGioiTinh());
-            pstmt.setString(5, nhanKhau.getSoCCCD());
-            pstmt.setString(6, nhanKhau.getNgheNghiep());
-            pstmt.setString(7, nhanKhau.getQuanHeVoiChuHo());
-            pstmt.setString(8, nhanKhau.getTinhTrang());
-            pstmt.setInt(9, nhanKhau.getId());
-
-            int rowsAffected = pstmt.executeUpdate();
-            boolean success = rowsAffected > 0;
-
-            if (success) {
-                logger.log(Level.INFO, "Successfully updated resident with id: " + nhanKhau.getId() + " (rows affected: " + rowsAffected + ")");
-            } else {
-                logger.log(Level.WARNING, "Failed to update resident with id: " + nhanKhau.getId() + " (rows affected: " + rowsAffected + ")");
+                    int rowsAffected = pstmt.executeUpdate();
+                    if (rowsAffected <= 0) {
+                        conn.rollback();
+                        logger.log(Level.WARNING, "Failed to update resident with id: " + nhanKhau.getId());
+                        return false;
+                    }
+                }
+                
+                // Update maChuHo in HoGiaDinh if relationship changed
+                String newQuanHe = nhanKhau.getQuanHeVoiChuHo();
+                boolean wasChuHo = oldQuanHe != null && oldQuanHe.trim().equalsIgnoreCase("Chủ hộ");
+                boolean isChuHo = newQuanHe != null && newQuanHe.trim().equalsIgnoreCase("Chủ hộ");
+                boolean maHoChanged = oldMaHo > 0 && oldMaHo != nhanKhau.getMaHo();
+                
+                // If was chu ho in old household, clear maChuHo in old household
+                if (wasChuHo && oldMaHo > 0 && (maHoChanged || !isChuHo)) {
+                    try (PreparedStatement clearStmt = conn.prepareStatement(
+                            "UPDATE HoGiaDinh SET maChuHo = NULL WHERE id = ? AND maChuHo = ?")) {
+                        clearStmt.setInt(1, oldMaHo);
+                        clearStmt.setInt(2, nhanKhau.getId());
+                        clearStmt.executeUpdate();
+                        logger.log(Level.INFO, "Cleared maChuHo in HoGiaDinh (id: " + oldMaHo + 
+                            ") - resident no longer is Chủ hộ or moved to different household");
+                    }
+                }
+                
+                // If is now chu ho, update maChuHo in new household
+                if (isChuHo && nhanKhau.getMaHo() > 0) {
+                    try (PreparedStatement updateStmt = conn.prepareStatement(
+                            "UPDATE HoGiaDinh SET maChuHo = ? WHERE id = ?")) {
+                        updateStmt.setInt(1, nhanKhau.getId());
+                        updateStmt.setInt(2, nhanKhau.getMaHo());
+                        
+                        int updateRows = updateStmt.executeUpdate();
+                        if (updateRows > 0) {
+                            logger.log(Level.INFO, "Updated maChuHo in HoGiaDinh (id: " + nhanKhau.getMaHo() + 
+                                ") to resident ID: " + nhanKhau.getId());
+                        } else {
+                            logger.log(Level.WARNING, "Failed to update maChuHo in HoGiaDinh (id: " + 
+                                nhanKhau.getMaHo() + ") - household may not exist");
+                        }
+                    }
+                }
+                
+                // Commit transaction
+                conn.commit();
+                logger.log(Level.INFO, "Successfully updated resident with id: " + nhanKhau.getId());
+                return true;
+                
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(true);
             }
-
-            return success;
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error updating resident with id: " + nhanKhau.getId(), e);
