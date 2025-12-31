@@ -1060,6 +1060,14 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                 logger.log(Level.INFO, "Auto-calculated tongTien for updated PhieuThu: " + calculatedTotal);
             }
         }
+        
+        // Preserve tongTien from existing record if not provided or is zero and no recalculation needed
+        if (!needRecalculate && (phieuThu.getTongTien() == null || phieuThu.getTongTien().compareTo(BigDecimal.ZERO) == 0)) {
+            if (existingPhieuThu.getTongTien() != null && existingPhieuThu.getTongTien().compareTo(BigDecimal.ZERO) > 0) {
+                phieuThu.setTongTien(existingPhieuThu.getTongTien());
+                logger.log(Level.INFO, "Preserved tongTien from existing PhieuThu: " + existingPhieuThu.getTongTien());
+            }
+        }
 
         try (Connection conn = DatabaseConnector.getConnection()) {
             // Disable auto-commit for transaction

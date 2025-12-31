@@ -1,4 +1,4 @@
-package com.bluemoon.models.dto;
+package com.bluemoon.models;
 
 import java.math.BigDecimal;
 
@@ -6,7 +6,7 @@ import java.math.BigDecimal;
  * DTO cho báo cáo công nợ (Debt Report).
  * Chứa thông tin các hộ gia đình chưa thanh toán.
  */
-public class BaoCaoCongNoDTO {
+public class BaoCaoCongNo {
     
     /** Mã hộ gia đình */
     private int maHo;
@@ -38,11 +38,11 @@ public class BaoCaoCongNoDTO {
     /** Ghi chú */
     private String ghiChu;
 
-    public BaoCaoCongNoDTO() {}
+    public BaoCaoCongNo() {}
 
-    public BaoCaoCongNoDTO(int maHo, int soPhong, String chuHo, String tenDot, 
-                          int maDot, BigDecimal tongTien, BigDecimal daThu, 
-                          BigDecimal conNo, String trangThai, String ghiChu) {
+    public BaoCaoCongNo(int maHo, int soPhong, String chuHo, String tenDot, 
+                      int maDot, BigDecimal tongTien, BigDecimal daThu, 
+                      BigDecimal conNo, String trangThai, String ghiChu) {
         this.maHo = maHo;
         this.soPhong = soPhong;
         this.chuHo = chuHo;

@@ -4,8 +4,8 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.bluemoon.models.dto.BaoCaoCongNoDTO;
-import com.bluemoon.models.dto.BaoCaoThuDTO;
+import com.bluemoon.models.BaoCaoCongNo;
+import com.bluemoon.models.BaoCaoThu;
 
 /**
  * Service interface cho báo cáo và xuất file.
@@ -19,7 +19,7 @@ public interface BaoCaoService {
      * @param year năm
      * @return danh sách báo cáo thu
      */
-    List<BaoCaoThuDTO> getRevenueReport(int month, int year);
+    List<BaoCaoThu> getRevenueReport(int month, int year);
     
     /**
      * Lấy báo cáo thu theo khoảng thời gian.
@@ -28,14 +28,14 @@ public interface BaoCaoService {
      * @param toDate ngày kết thúc
      * @return danh sách báo cáo thu
      */
-    List<BaoCaoThuDTO> getRevenueReport(LocalDate fromDate, LocalDate toDate);
+    List<BaoCaoThu> getRevenueReport(LocalDate fromDate, LocalDate toDate);
     
     /**
      * Lấy báo cáo công nợ.
      * 
      * @return danh sách báo cáo công nợ
      */
-    List<BaoCaoCongNoDTO> getDebtReport();
+    List<BaoCaoCongNo> getDebtReport();
     
     /**
      * Lấy báo cáo công nợ theo đợt thu.
@@ -43,7 +43,7 @@ public interface BaoCaoService {
      * @param maDot mã đợt thu
      * @return danh sách báo cáo công nợ
      */
-    List<BaoCaoCongNoDTO> getDebtReport(int maDot);
+    List<BaoCaoCongNo> getDebtReport(int maDot);
     
     /**
      * Xuất báo cáo thu ra file Excel.
@@ -53,7 +53,7 @@ public interface BaoCaoService {
      * @param toDate ngày kết thúc (cho tên file)
      * @return InputStream của file Excel
      */
-    InputStream exportRevenueToExcel(List<BaoCaoThuDTO> data, LocalDate fromDate, LocalDate toDate);
+    InputStream exportRevenueToExcel(List<BaoCaoThu> data, LocalDate fromDate, LocalDate toDate);
     
     /**
      * Xuất báo cáo công nợ ra file Excel.
@@ -61,6 +61,6 @@ public interface BaoCaoService {
      * @param data danh sách dữ liệu báo cáo công nợ
      * @return InputStream của file Excel
      */
-    InputStream exportDebtToExcel(List<BaoCaoCongNoDTO> data);
+    InputStream exportDebtToExcel(List<BaoCaoCongNo> data);
 }
 

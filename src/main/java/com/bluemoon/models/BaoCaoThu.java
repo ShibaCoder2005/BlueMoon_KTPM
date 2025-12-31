@@ -1,4 +1,4 @@
-package com.bluemoon.models.dto;
+package com.bluemoon.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
  * DTO cho báo cáo thu (Revenue Report).
  * Chứa thông tin tổng hợp từ PhieuThu và ChiTietThu.
  */
-public class BaoCaoThuDTO {
+public class BaoCaoThu {
     
     /** Mã hộ gia đình */
     private int maHo;
@@ -36,11 +36,11 @@ public class BaoCaoThuDTO {
     /** Hình thức thu */
     private String hinhThucThu;
 
-    public BaoCaoThuDTO() {}
+    public BaoCaoThu() {}
 
-    public BaoCaoThuDTO(int maHo, int soPhong, String chuHo, LocalDateTime ngayThu, 
-                        BigDecimal soTien, String noiDung, String tenDot, 
-                        String trangThai, String hinhThucThu) {
+    public BaoCaoThu(int maHo, int soPhong, String chuHo, LocalDateTime ngayThu, 
+                    BigDecimal soTien, String noiDung, String tenDot, 
+                    String trangThai, String hinhThucThu) {
         this.maHo = maHo;
         this.soPhong = soPhong;
         this.chuHo = chuHo;

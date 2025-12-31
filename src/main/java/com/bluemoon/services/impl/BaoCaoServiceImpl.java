@@ -20,8 +20,8 @@ import java.util.logging.Logger;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import com.bluemoon.models.dto.BaoCaoCongNoDTO;
-import com.bluemoon.models.dto.BaoCaoThuDTO;
+import com.bluemoon.models.BaoCaoCongNo;
+import com.bluemoon.models.BaoCaoThu;
 import com.bluemoon.services.BaoCaoService;
 import com.bluemoon.services.DotThuService;
 import com.bluemoon.services.HoGiaDinhService;
@@ -50,15 +50,15 @@ public class BaoCaoServiceImpl implements BaoCaoService {
     }
     
     @Override
-    public List<BaoCaoThuDTO> getRevenueReport(int month, int year) {
+    public List<BaoCaoThu> getRevenueReport(int month, int year) {
         LocalDate fromDate = LocalDate.of(year, month, 1);
         LocalDate toDate = fromDate.withDayOfMonth(fromDate.lengthOfMonth());
         return getRevenueReport(fromDate, toDate);
     }
     
     @Override
-    public List<BaoCaoThuDTO> getRevenueReport(LocalDate fromDate, LocalDate toDate) {
-        List<BaoCaoThuDTO> result = new ArrayList<>();
+    public List<BaoCaoThu> getRevenueReport(LocalDate fromDate, LocalDate toDate) {
+        List<BaoCaoThu> result = new ArrayList<>();
         
         // SQL query để lấy dữ liệu từ PhieuThu kèm thông tin hộ gia đình và đợt thu
         String sql = "SELECT " +
@@ -102,7 +102,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                     String trangThai = rs.getString("trangThai");
                     String hinhThucThu = rs.getString("hinhThucThu");
                     
-                    BaoCaoThuDTO dto = new BaoCaoThuDTO(
+                    BaoCaoThu dto = new BaoCaoThu(
                         maHo,
                         soPhong,
                         chuHo,
@@ -127,13 +127,13 @@ public class BaoCaoServiceImpl implements BaoCaoService {
     }
     
     @Override
-    public List<BaoCaoCongNoDTO> getDebtReport() {
+    public List<BaoCaoCongNo> getDebtReport() {
         return getDebtReport(0); // 0 means all
     }
     
     @Override
-    public List<BaoCaoCongNoDTO> getDebtReport(int maDot) {
-        List<BaoCaoCongNoDTO> result = new ArrayList<>();
+    public List<BaoCaoCongNo> getDebtReport(int maDot) {
+        List<BaoCaoCongNo> result = new ArrayList<>();
         
         // SQL query để lấy các hộ gia đình có công nợ
         // Công nợ = các hộ có PhieuThu với trangThai != 'DaThu' hoặc chưa có PhieuThu cho đợt thu
@@ -201,7 +201,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                         logger.log(Level.WARNING, "Error getting chu ho name for id: " + maChuHo, e);
                     }
                     
-                    BaoCaoCongNoDTO dto = new BaoCaoCongNoDTO(
+                    BaoCaoCongNo dto = new BaoCaoCongNo(
                         maHo,
                         soPhong,
                         chuHo,
@@ -227,7 +227,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
     }
     
     @Override
-    public InputStream exportRevenueToExcel(List<BaoCaoThuDTO> data, LocalDate fromDate, LocalDate toDate) {
+    public InputStream exportRevenueToExcel(List<BaoCaoThu> data, LocalDate fromDate, LocalDate toDate) {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Báo cáo Thu");
             
@@ -265,7 +265,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
             int stt = 1;
             BigDecimal total = BigDecimal.ZERO;
             
-            for (BaoCaoThuDTO dto : data) {
+            for (BaoCaoThu dto : data) {
                 Row row = sheet.createRow(rowNum++);
                 
                 row.createCell(0).setCellValue(stt++);
@@ -319,7 +319,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
     }
     
     @Override
-    public InputStream exportDebtToExcel(List<BaoCaoCongNoDTO> data) {
+    public InputStream exportDebtToExcel(List<BaoCaoCongNo> data) {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Báo cáo Công nợ");
             
@@ -354,7 +354,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
             int stt = 1;
             BigDecimal totalDebt = BigDecimal.ZERO;
             
-            for (BaoCaoCongNoDTO dto : data) {
+            for (BaoCaoCongNo dto : data) {
                 Row row = sheet.createRow(rowNum++);
                 
                 row.createCell(0).setCellValue(stt++);

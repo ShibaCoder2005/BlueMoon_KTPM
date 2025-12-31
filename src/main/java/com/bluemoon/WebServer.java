@@ -1633,7 +1633,7 @@ public class WebServer {
                 String fromDateStr = ctx.queryParam("fromDate");
                 String toDateStr = ctx.queryParam("toDate");
                 
-                List<com.bluemoon.models.dto.BaoCaoThuDTO> result;
+                List<com.bluemoon.models.BaoCaoThu> result;
                 
                 if (monthStr != null && yearStr != null) {
                     int month = Integer.parseInt(monthStr);
@@ -1662,7 +1662,7 @@ public class WebServer {
                 String fromDateStr = ctx.queryParam("fromDate");
                 String toDateStr = ctx.queryParam("toDate");
                 
-                List<com.bluemoon.models.dto.BaoCaoThuDTO> data;
+                List<com.bluemoon.models.BaoCaoThu> data;
                 java.time.LocalDate fromDate;
                 java.time.LocalDate toDate;
                 
@@ -1701,7 +1701,7 @@ public class WebServer {
         app.get("/api/reports/debt", ctx -> {
             try {
                 String maDotStr = ctx.queryParam("maDot");
-                List<com.bluemoon.models.dto.BaoCaoCongNoDTO> result;
+                List<com.bluemoon.models.BaoCaoCongNo> result;
                 
                 if (maDotStr != null && !maDotStr.isEmpty()) {
                     int maDot = Integer.parseInt(maDotStr);
@@ -1720,7 +1720,7 @@ public class WebServer {
         app.get("/api/reports/export/debt", ctx -> {
             try {
                 String maDotStr = ctx.queryParam("maDot");
-                List<com.bluemoon.models.dto.BaoCaoCongNoDTO> data;
+                List<com.bluemoon.models.BaoCaoCongNo> data;
                 
                 if (maDotStr != null && !maDotStr.isEmpty()) {
                     int maDot = Integer.parseInt(maDotStr);
