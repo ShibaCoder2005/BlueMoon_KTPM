@@ -41,7 +41,7 @@ CREATE TABLE TaiKhoan (
     tenDangNhap VARCHAR(100) UNIQUE,
     matKhau VARCHAR(255),
     hoTen VARCHAR(200),
-    vaiTro VARCHAR(50) CHECK (vaiTro IN ('Admin', 'KeToan', 'NhanVien', 'NguoiDung')),
+    vaiTro VARCHAR(50) CHECK (vaiTro IN ('Admin', 'KeToan', 'BanQuanLy')),
     email VARCHAR(100),
     dienThoai VARCHAR(20),
     trangThai VARCHAR(20) DEFAULT 'Hoạt động',

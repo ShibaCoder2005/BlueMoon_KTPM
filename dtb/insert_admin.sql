@@ -15,7 +15,7 @@ VALUES (
     'admin',                           -- tenDangNhap
     '123456',                          -- matKhau (plain text - có thể hash sau)
     'Quản Trị Viên',                   -- hoTen
-    'Admin',                           -- vaiTro (phải là 'Admin', 'KeToan', 'NhanVien', hoặc 'NguoiDung')
+    'Admin',                           -- vaiTro (phải là 'Admin', 'KeToan', hoặc 'BanQuanLy')
     'admin@bluemoon.com',              -- email
     '0900000000',                      -- dienThoai
     'Hoạt động',                       -- trangThai
