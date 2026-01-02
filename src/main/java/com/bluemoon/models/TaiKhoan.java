@@ -15,23 +15,30 @@ public class TaiKhoan {
     private String hoTen;
     /** vaiTro: vai trò (varchar(50)). */
     private String vaiTro;
+    /** email: email (varchar(100)). */
+    private String email;
     /** dienThoai: số điện thoại (varchar(20)). */
     private String dienThoai;
-    /** trangThai: trạng thái (varchar(50) - "Hoạt động"/"Bị khóa"). */
+    /** trangThai: trạng thái (varchar(20) - "Hoạt động"/"Bị khóa"). */
     private String trangThai;
+    /** ghiChu: ghi chú (TEXT). */
+    private String ghiChu;
 
     /** Constructor mặc định. */
     public TaiKhoan() {}
 
     /** Constructor đầy đủ. */
-    public TaiKhoan(int id, String tenDangNhap, String matKhau, String hoTen, String vaiTro, String dienThoai, String trangThai) {
+    public TaiKhoan(int id, String tenDangNhap, String matKhau, String hoTen, String vaiTro, 
+                    String email, String dienThoai, String trangThai, String ghiChu) {
         this.id = id;
         this.tenDangNhap = tenDangNhap;
         this.matKhau = matKhau;
         this.hoTen = hoTen;
         this.vaiTro = vaiTro;
+        this.email = email;
         this.dienThoai = dienThoai;
         this.trangThai = trangThai;
+        this.ghiChu = ghiChu;
     }
 
     public int getId() { return id; }
@@ -52,8 +59,14 @@ public class TaiKhoan {
     public String getDienThoai() { return dienThoai; }
     public void setDienThoai(String dienThoai) { this.dienThoai = dienThoai; }
 
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
+
+    public String getGhiChu() { return ghiChu; }
+    public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
 }
 
 

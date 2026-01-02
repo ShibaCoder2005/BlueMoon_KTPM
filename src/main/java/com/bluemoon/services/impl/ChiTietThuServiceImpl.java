@@ -29,8 +29,9 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
             "LEFT JOIN KhoanThu kt ON ct.maKhoan = kt.id " +
             "WHERE ct.maPhieu = ? ORDER BY ct.id";
 
+    // Lưu ý: thanhTien là GENERATED ALWAYS AS (soLuong * donGia) STORED, không cần INSERT
     private static final String INSERT = 
-            "INSERT INTO ChiTietThu (maPhieu, maKhoan, soLuong, donGia, thanhTien, ghiChu) VALUES (?, ?, ?, ?, ?, ?)";
+            "INSERT INTO ChiTietThu (maPhieu, maKhoan, soLuong, donGia, ghiChu) VALUES (?, ?, ?, ?, ?)";
 
     private static final String DELETE_BY_MAPHIEU = 
             "DELETE FROM ChiTietThu WHERE maPhieu = ?";
@@ -78,15 +79,10 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
             return false;
         }
 
-        // Calculate thanhTien if not set
-        if (chiTiet.getThanhTien() == null || chiTiet.getThanhTien().compareTo(BigDecimal.ZERO) == 0) {
-            if (chiTiet.getDonGia() != null && chiTiet.getSoLuong() != null) {
-                BigDecimal thanhTien = chiTiet.getDonGia().multiply(chiTiet.getSoLuong());
-                chiTiet.setThanhTien(thanhTien);
-            } else {
-                logger.log(Level.WARNING, "Cannot calculate thanhTien: donGia or soLuong is null");
-                return false;
-            }
+        // Validate donGia and soLuong (thanhTien sẽ được database tự động tính - GENERATED column)
+        if (chiTiet.getDonGia() == null || chiTiet.getSoLuong() == null) {
+            logger.log(Level.WARNING, "Cannot save ChiTietThu: donGia or soLuong is null");
+            return false;
         }
 
         try (Connection conn = DatabaseConnector.getConnection();
@@ -96,8 +92,7 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
             pstmt.setInt(2, chiTiet.getMaKhoan());
             pstmt.setBigDecimal(3, chiTiet.getSoLuong());
             pstmt.setBigDecimal(4, chiTiet.getDonGia());
-            pstmt.setBigDecimal(5, chiTiet.getThanhTien());
-            pstmt.setString(6, null); // ghiChu field not in model
+            pstmt.setString(5, null); // ghiChu (field not in model)
 
             int rowsAffected = pstmt.executeUpdate();
             boolean success = rowsAffected > 0;
@@ -140,23 +135,17 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
                     continue;
                 }
 
-                // Calculate thanhTien if not set
-                if (chiTiet.getThanhTien() == null || chiTiet.getThanhTien().compareTo(BigDecimal.ZERO) == 0) {
-                    if (chiTiet.getDonGia() != null && chiTiet.getSoLuong() != null) {
-                        BigDecimal thanhTien = chiTiet.getDonGia().multiply(chiTiet.getSoLuong());
-                        chiTiet.setThanhTien(thanhTien);
-                    } else {
-                        logger.log(Level.WARNING, "Skipping ChiTietThu with invalid donGia or soLuong");
-                        continue;
-                    }
+                // Validate donGia and soLuong (thanhTien sẽ được database tự động tính - GENERATED column)
+                if (chiTiet.getDonGia() == null || chiTiet.getSoLuong() == null) {
+                    logger.log(Level.WARNING, "Skipping ChiTietThu with invalid donGia or soLuong");
+                    continue;
                 }
 
                 pstmt.setInt(1, chiTiet.getMaPhieu());
                 pstmt.setInt(2, chiTiet.getMaKhoan());
                 pstmt.setBigDecimal(3, chiTiet.getSoLuong());
                 pstmt.setBigDecimal(4, chiTiet.getDonGia());
-                pstmt.setBigDecimal(5, chiTiet.getThanhTien());
-                pstmt.setString(6, null); // ghiChu
+                pstmt.setString(5, null); // ghiChu (field not in model)
 
                 pstmt.addBatch();
                 batchCount++;
@@ -217,23 +206,17 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
                     continue;
                 }
 
-                // Calculate thanhTien if not set
-                if (chiTiet.getThanhTien() == null || chiTiet.getThanhTien().compareTo(BigDecimal.ZERO) == 0) {
-                    if (chiTiet.getDonGia() != null && chiTiet.getSoLuong() != null) {
-                        BigDecimal thanhTien = chiTiet.getDonGia().multiply(chiTiet.getSoLuong());
-                        chiTiet.setThanhTien(thanhTien);
-                    } else {
-                        logger.log(Level.WARNING, "Skipping ChiTietThu with invalid donGia or soLuong");
-                        continue;
-                    }
+                // Validate donGia and soLuong (thanhTien sẽ được database tự động tính - GENERATED column)
+                if (chiTiet.getDonGia() == null || chiTiet.getSoLuong() == null) {
+                    logger.log(Level.WARNING, "Skipping ChiTietThu with invalid donGia or soLuong");
+                    continue;
                 }
 
                 pstmt.setInt(1, chiTiet.getMaPhieu());
                 pstmt.setInt(2, chiTiet.getMaKhoan());
                 pstmt.setBigDecimal(3, chiTiet.getSoLuong());
                 pstmt.setBigDecimal(4, chiTiet.getDonGia());
-                pstmt.setBigDecimal(5, chiTiet.getThanhTien());
-                pstmt.setString(6, null); // ghiChu
+                pstmt.setString(5, null); // ghiChu (field not in model)
 
                 pstmt.addBatch();
                 batchCount++;

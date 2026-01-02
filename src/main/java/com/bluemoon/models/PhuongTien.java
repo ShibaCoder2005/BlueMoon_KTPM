@@ -15,7 +15,7 @@ public class PhuongTien {
     private String loaiXe;
     /** bienSo: biển số (varchar(50)). */
     private String bienSo;
-    /** tenChuXe: tên chủ xe (varchar(200)). */
+    /** tenChuXe: tên chủ xe (varchar(100)). */
     private String tenChuXe;
     /** ngayDangKy: ngày đăng ký (date). */
     private LocalDate ngayDangKy;

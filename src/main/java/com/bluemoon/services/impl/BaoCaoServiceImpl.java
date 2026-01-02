@@ -22,6 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.bluemoon.models.BaoCaoCongNo;
 import com.bluemoon.models.BaoCaoThu;
+import com.bluemoon.models.NhanKhau;
 import com.bluemoon.services.BaoCaoService;
 import com.bluemoon.services.DotThuService;
 import com.bluemoon.services.HoGiaDinhService;
@@ -82,17 +83,23 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                 while (rs.next()) {
                     int maHo = rs.getInt("maHo");
                     int soPhong = rs.getInt("soPhong");
-                    int maChuHo = rs.getInt("maChuHo");
+                    String maChuHo = rs.getString("maChuHo"); // maChuHo bây giờ là soCCCD (VARCHAR)
                     
-                    // Lấy tên chủ hộ
+                    // Lấy tên chủ hộ - tìm theo soCCCD thay vì id
                     String chuHo = "N/A";
-                    try {
-                        var nhanKhau = nhanKhauService.findById(maChuHo);
-                        if (nhanKhau != null) {
-                            chuHo = nhanKhau.getHoTen();
+                    if (maChuHo != null && !maChuHo.trim().isEmpty()) {
+                        try {
+                            // Tìm NhanKhau theo soCCCD (cần thêm method findBySoCCCD hoặc dùng getAll rồi filter)
+                            List<NhanKhau> allResidents = nhanKhauService.getAll();
+                            for (NhanKhau nk : allResidents) {
+                                if (maChuHo.equals(nk.getSoCCCD())) {
+                                    chuHo = nk.getHoTen();
+                                    break;
+                                }
+                            }
+                        } catch (Exception e) {
+                            logger.log(Level.WARNING, "Error getting chu ho name for soCCCD: " + maChuHo, e);
                         }
-                    } catch (Exception e) {
-                        logger.log(Level.WARNING, "Error getting chu ho name for id: " + maChuHo, e);
                     }
                     
                     Timestamp ngayLap = rs.getTimestamp("ngayLap");
@@ -182,7 +189,7 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                 while (rs.next()) {
                     int maHo = rs.getInt("maHo");
                     int soPhong = rs.getInt("soPhong");
-                    int maChuHo = rs.getInt("maChuHo");
+                    String maChuHo = rs.getString("maChuHo"); // maChuHo bây giờ là soCCCD (VARCHAR)
                     int maDotResult = rs.getInt("maDot");
                     String tenDot = rs.getString("tenDot");
                     BigDecimal tongTien = rs.getBigDecimal("tongTien");
@@ -190,15 +197,21 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                     BigDecimal conNo = rs.getBigDecimal("conNo");
                     String trangThai = rs.getString("trangThai");
                     
-                    // Lấy tên chủ hộ
+                    // Lấy tên chủ hộ - tìm theo soCCCD thay vì id
                     String chuHo = "N/A";
-                    try {
-                        var nhanKhau = nhanKhauService.findById(maChuHo);
-                        if (nhanKhau != null) {
-                            chuHo = nhanKhau.getHoTen();
+                    if (maChuHo != null && !maChuHo.trim().isEmpty()) {
+                        try {
+                            // Tìm NhanKhau theo soCCCD
+                            List<NhanKhau> allResidents = nhanKhauService.getAll();
+                            for (NhanKhau nk : allResidents) {
+                                if (maChuHo.equals(nk.getSoCCCD())) {
+                                    chuHo = nk.getHoTen();
+                                    break;
+                                }
+                            }
+                        } catch (Exception e) {
+                            logger.log(Level.WARNING, "Error getting chu ho name for soCCCD: " + maChuHo, e);
                         }
-                    } catch (Exception e) {
-                        logger.log(Level.WARNING, "Error getting chu ho name for id: " + maChuHo, e);
                     }
                     
                     BaoCaoCongNo dto = new BaoCaoCongNo(

@@ -17,7 +17,9 @@ public class ChiTietThu {
     private BigDecimal soLuong;
     /** donGia: đơn giá (decimal(12,2)). */
     private BigDecimal donGia;
-    /** thanhTien: thành tiền (decimal(14,2)). */
+    /** thanhTien: thành tiền (decimal(14,2)) - GENERATED ALWAYS AS (soLuong * donGia) STORED. 
+     * Lưu ý: Trong database mới, thanhTien là generated column, không cần set khi insert/update.
+     */
     private BigDecimal thanhTien;
 
     /** Constructor mặc định. */

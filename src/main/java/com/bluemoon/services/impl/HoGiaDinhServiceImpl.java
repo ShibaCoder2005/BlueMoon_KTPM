@@ -1,12 +1,11 @@
 package com.bluemoon.services.impl;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -26,26 +25,22 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
     private static final Logger logger = Logger.getLogger(HoGiaDinhServiceImpl.class.getName());
 
     // SQL Queries - PostgreSQL table names
+    // Lưu ý: Database mới không có maHo, dienTich, ngayTao
+    // maChuHo là VARCHAR(20) tham chiếu đến NhanKhau.soCCCD
     private static final String SELECT_ALL = 
-            "SELECT id, maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao FROM HoGiaDinh ORDER BY id";
+            "SELECT id, soPhong, maChuHo, ghiChu, thoiGianBatDauO, thoiGianKetThucO FROM HoGiaDinh ORDER BY id";
 
     private static final String SELECT_BY_ID = 
-            "SELECT id, maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao FROM HoGiaDinh WHERE id = ?";
+            "SELECT id, soPhong, maChuHo, ghiChu, thoiGianBatDauO, thoiGianKetThucO FROM HoGiaDinh WHERE id = ?";
 
     private static final String INSERT = 
-            "INSERT INTO HoGiaDinh (maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao) VALUES (?, ?, ?, ?, ?, ?)";
+            "INSERT INTO HoGiaDinh (soPhong, maChuHo, ghiChu, thoiGianBatDauO, thoiGianKetThucO) VALUES (?, ?, ?, ?, ?)";
 
     private static final String UPDATE = 
-            "UPDATE HoGiaDinh SET maHo = ?, soPhong = ?, dienTich = ?, maChuHo = ?, ghiChu = ?, ngayTao = ? WHERE id = ?";
+            "UPDATE HoGiaDinh SET soPhong = ?, maChuHo = ?, ghiChu = ?, thoiGianBatDauO = ?, thoiGianKetThucO = ? WHERE id = ?";
 
     private static final String DELETE = 
             "DELETE FROM HoGiaDinh WHERE id = ?";
-
-    private static final String CHECK_MAHO_EXISTS = 
-            "SELECT COUNT(*) FROM HoGiaDinh WHERE maHo = ?";
-
-    private static final String CHECK_MAHO_EXISTS_EXCLUDE_ID = 
-            "SELECT COUNT(*) FROM HoGiaDinh WHERE maHo = ? AND id != ?";
 
     private static final String CHECK_SOPHONG_EXISTS = 
             "SELECT COUNT(*) FROM HoGiaDinh WHERE soPhong = ?";
@@ -60,8 +55,8 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
             "SELECT COUNT(*) FROM PhieuThu WHERE maHo = ?";
 
     private static final String SEARCH = 
-            "SELECT id, maHo, soPhong, dienTich, maChuHo, ghiChu, ngayTao FROM HoGiaDinh " +
-            "WHERE maHo LIKE ? OR ghiChu LIKE ? ORDER BY id";
+            "SELECT id, soPhong, maChuHo, ghiChu, thoiGianBatDauO, thoiGianKetThucO FROM HoGiaDinh " +
+            "WHERE ghiChu LIKE ? ORDER BY id";
 
     @Override
     public List<HoGiaDinh> getAllHoGiaDinh() {
@@ -112,24 +107,6 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
             return false;
         }
 
-        // Validate maHo not empty
-        if (hoGiaDinh.getMaHo() == null || hoGiaDinh.getMaHo().trim().isEmpty()) {
-            logger.log(Level.WARNING, "Cannot add household: maHo is empty");
-            return false;
-        }
-
-        // Validate dienTich >= 0 (allow 0 or null, but if provided must be >= 0)
-        if (hoGiaDinh.getDienTich() != null && hoGiaDinh.getDienTich().compareTo(BigDecimal.ZERO) < 0) {
-            logger.log(Level.WARNING, "Cannot add household: dienTich cannot be negative");
-            return false;
-        }
-
-        // Check if maHo already exists
-        if (checkMaHoExists(hoGiaDinh.getMaHo())) {
-            logger.log(Level.WARNING, "Cannot add household: maHo already exists: " + hoGiaDinh.getMaHo());
-            return false;
-        }
-
         // Check if soPhong already exists (must be unique)
         if (hoGiaDinh.getSoPhong() > 0 && checkSoPhongExists(hoGiaDinh.getSoPhong(), 0)) {
             String errorMsg = "Số phòng " + hoGiaDinh.getSoPhong() + " đã tồn tại. Mỗi số phòng chỉ có thể được sử dụng bởi một hộ gia đình.";
@@ -140,36 +117,39 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(INSERT)) {
 
-            pstmt.setString(1, hoGiaDinh.getMaHo().trim());
-            pstmt.setInt(2, hoGiaDinh.getSoPhong());
-            // Allow null dienTich
-            if (hoGiaDinh.getDienTich() != null) {
-                pstmt.setBigDecimal(3, hoGiaDinh.getDienTich());
+            pstmt.setInt(1, hoGiaDinh.getSoPhong());
+            // maChuHo là VARCHAR(20) - soCCCD của NhanKhau, có thể NULL
+            if (hoGiaDinh.getMaChuHo() != null && !hoGiaDinh.getMaChuHo().trim().isEmpty()) {
+                pstmt.setString(2, hoGiaDinh.getMaChuHo().trim());
             } else {
-                pstmt.setNull(3, java.sql.Types.DECIMAL);
+                pstmt.setNull(2, java.sql.Types.VARCHAR);
             }
-            // Allow null or 0 maChuHo (chủ hộ sẽ được gán sau trong giao diện Cư dân)
-            if (hoGiaDinh.getMaChuHo() > 0) {
-                pstmt.setInt(4, hoGiaDinh.getMaChuHo());
+            pstmt.setString(3, hoGiaDinh.getGhiChu());
+            // thoiGianBatDauO và thoiGianKetThucO là TIMESTAMP
+            if (hoGiaDinh.getThoiGianBatDauO() != null) {
+                pstmt.setTimestamp(4, Timestamp.valueOf(hoGiaDinh.getThoiGianBatDauO()));
             } else {
-                pstmt.setNull(4, java.sql.Types.INTEGER);
+                pstmt.setNull(4, java.sql.Types.TIMESTAMP);
             }
-            pstmt.setString(5, hoGiaDinh.getGhiChu());
-            pstmt.setDate(6, convertToSqlDate(hoGiaDinh.getNgayTao() != null ? hoGiaDinh.getNgayTao() : LocalDate.now()));
+            if (hoGiaDinh.getThoiGianKetThucO() != null) {
+                pstmt.setTimestamp(5, Timestamp.valueOf(hoGiaDinh.getThoiGianKetThucO()));
+            } else {
+                pstmt.setNull(5, java.sql.Types.TIMESTAMP);
+            }
 
             int rowsAffected = pstmt.executeUpdate();
             boolean success = rowsAffected > 0;
 
             if (success) {
-                logger.log(Level.INFO, "Successfully added household: " + hoGiaDinh.getMaHo());
+                logger.log(Level.INFO, "Successfully added household with soPhong: " + hoGiaDinh.getSoPhong());
             } else {
-                logger.log(Level.WARNING, "Failed to add household: " + hoGiaDinh.getMaHo());
+                logger.log(Level.WARNING, "Failed to add household with soPhong: " + hoGiaDinh.getSoPhong());
             }
 
             return success;
 
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error adding household: " + hoGiaDinh.getMaHo(), e);
+            logger.log(Level.SEVERE, "Error adding household with soPhong: " + hoGiaDinh.getSoPhong(), e);
             e.printStackTrace();
             return false;
         }
@@ -181,38 +161,7 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
             return false;
         }
 
-        // Validate maHo not empty
-        if (hoGiaDinh.getMaHo() == null || hoGiaDinh.getMaHo().trim().isEmpty()) {
-            logger.log(Level.WARNING, "Cannot update household: maHo is empty");
-            return false;
-        }
-
-        // Validate dienTich >= 0 (allow 0 or null, but if provided must be >= 0)
-        if (hoGiaDinh.getDienTich() != null && hoGiaDinh.getDienTich().compareTo(BigDecimal.ZERO) < 0) {
-            logger.log(Level.WARNING, "Cannot update household: dienTich cannot be negative");
-            return false;
-        }
-
         try (Connection conn = DatabaseConnector.getConnection()) {
-            // Check maHo uniqueness (exclude current record)
-            boolean maHoExists = false;
-            try (PreparedStatement pstmt = conn.prepareStatement(CHECK_MAHO_EXISTS_EXCLUDE_ID)) {
-                pstmt.setString(1, hoGiaDinh.getMaHo().trim());
-                pstmt.setInt(2, hoGiaDinh.getId());
-
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    if (rs.next() && rs.getInt(1) > 0) {
-                        maHoExists = true;
-                    }
-                }
-            }
-
-            if (maHoExists) {
-                logger.log(Level.WARNING, 
-                        "Cannot update household: maHo already exists: " + hoGiaDinh.getMaHo());
-                return false;
-            }
-
             // Check soPhong uniqueness (exclude current record)
             if (hoGiaDinh.getSoPhong() > 0 && checkSoPhongExists(hoGiaDinh.getSoPhong(), hoGiaDinh.getId())) {
                 String errorMsg = "Số phòng " + hoGiaDinh.getSoPhong() + " đã tồn tại. Mỗi số phòng chỉ có thể được sử dụng bởi một hộ gia đình.";
@@ -221,41 +170,28 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
                 throw new IllegalArgumentException(errorMsg);
             }
 
-            // Get current ngayTao from database to preserve it
-            LocalDate currentNgayTao = null;
-            try (PreparedStatement getCurrentStmt = conn.prepareStatement(SELECT_BY_ID)) {
-                getCurrentStmt.setInt(1, hoGiaDinh.getId());
-                try (ResultSet rs = getCurrentStmt.executeQuery()) {
-                    if (rs.next()) {
-                        Date ngayTaoDate = rs.getDate("ngayTao");
-                        if (ngayTaoDate != null) {
-                            currentNgayTao = ngayTaoDate.toLocalDate();
-                        }
-                    }
-                }
-            }
-
             // Proceed with update
             try (PreparedStatement pstmt = conn.prepareStatement(UPDATE)) {
-                pstmt.setString(1, hoGiaDinh.getMaHo().trim());
-                pstmt.setInt(2, hoGiaDinh.getSoPhong());
-                // Allow null dienTich
-                if (hoGiaDinh.getDienTich() != null) {
-                    pstmt.setBigDecimal(3, hoGiaDinh.getDienTich());
+                pstmt.setInt(1, hoGiaDinh.getSoPhong());
+                // maChuHo là VARCHAR(20) - soCCCD của NhanKhau, có thể NULL
+                if (hoGiaDinh.getMaChuHo() != null && !hoGiaDinh.getMaChuHo().trim().isEmpty()) {
+                    pstmt.setString(2, hoGiaDinh.getMaChuHo().trim());
                 } else {
-                    pstmt.setNull(3, java.sql.Types.DECIMAL);
+                    pstmt.setNull(2, java.sql.Types.VARCHAR);
                 }
-                // Allow null or 0 maChuHo
-                if (hoGiaDinh.getMaChuHo() > 0) {
-                    pstmt.setInt(4, hoGiaDinh.getMaChuHo());
+                pstmt.setString(3, hoGiaDinh.getGhiChu());
+                // thoiGianBatDauO và thoiGianKetThucO là TIMESTAMP
+                if (hoGiaDinh.getThoiGianBatDauO() != null) {
+                    pstmt.setTimestamp(4, Timestamp.valueOf(hoGiaDinh.getThoiGianBatDauO()));
                 } else {
-                    pstmt.setNull(4, java.sql.Types.INTEGER);
+                    pstmt.setNull(4, java.sql.Types.TIMESTAMP);
                 }
-                pstmt.setString(5, hoGiaDinh.getGhiChu());
-                // Preserve existing ngayTao if not provided, otherwise use provided value
-                LocalDate ngayTaoToSet = hoGiaDinh.getNgayTao() != null ? hoGiaDinh.getNgayTao() : currentNgayTao;
-                pstmt.setDate(6, convertToSqlDate(ngayTaoToSet));
-                pstmt.setInt(7, hoGiaDinh.getId());
+                if (hoGiaDinh.getThoiGianKetThucO() != null) {
+                    pstmt.setTimestamp(5, Timestamp.valueOf(hoGiaDinh.getThoiGianKetThucO()));
+                } else {
+                    pstmt.setNull(5, java.sql.Types.TIMESTAMP);
+                }
+                pstmt.setInt(6, hoGiaDinh.getId());
 
                 int rowsAffected = pstmt.executeUpdate();
                 boolean success = rowsAffected > 0;
@@ -357,7 +293,6 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
 
             String searchPattern = "%" + keyword.trim() + "%";
             pstmt.setString(1, searchPattern);
-            pstmt.setString(2, searchPattern);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -377,28 +312,9 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
 
     @Override
     public boolean checkMaHoExists(String maHo) {
-        if (maHo == null || maHo.trim().isEmpty()) {
-            return false;
-        }
-
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(CHECK_MAHO_EXISTS)) {
-
-            pstmt.setString(1, maHo.trim());
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    int count = rs.getInt(1);
-                    return count > 0;
-                }
-                return false;
-            }
-
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error checking maHo existence: " + maHo, e);
-            e.printStackTrace();
-            return false;
-        }
+        // Database mới không có cột maHo, method này không còn cần thiết
+        // Giữ lại để tương thích với interface, nhưng luôn trả về false
+        return false;
     }
 
     /**
@@ -445,31 +361,21 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
     private HoGiaDinh buildHoGiaDinhFromResultSet(ResultSet rs) throws SQLException {
         HoGiaDinh hoGiaDinh = new HoGiaDinh();
         hoGiaDinh.setId(rs.getInt("id"));
-        hoGiaDinh.setMaHo(rs.getString("maHo"));
         hoGiaDinh.setSoPhong(rs.getInt("soPhong"));
-        hoGiaDinh.setDienTich(rs.getBigDecimal("dienTich"));
-        hoGiaDinh.setMaChuHo(rs.getInt("maChuHo"));
+        hoGiaDinh.setMaChuHo(rs.getString("maChuHo")); // VARCHAR(20) - soCCCD
         hoGiaDinh.setGhiChu(rs.getString("ghiChu"));
 
-        // Convert java.sql.Date to LocalDate
-        Date ngayTao = rs.getDate("ngayTao");
-        if (ngayTao != null) {
-            hoGiaDinh.setNgayTao(ngayTao.toLocalDate());
+        // Convert java.sql.Timestamp to LocalDateTime
+        Timestamp thoiGianBatDauO = rs.getTimestamp("thoiGianBatDauO");
+        if (thoiGianBatDauO != null) {
+            hoGiaDinh.setThoiGianBatDauO(thoiGianBatDauO.toLocalDateTime());
+        }
+
+        Timestamp thoiGianKetThucO = rs.getTimestamp("thoiGianKetThucO");
+        if (thoiGianKetThucO != null) {
+            hoGiaDinh.setThoiGianKetThucO(thoiGianKetThucO.toLocalDateTime());
         }
 
         return hoGiaDinh;
-    }
-
-    /**
-     * Chuyển đổi LocalDate sang java.sql.Date.
-     *
-     * @param localDate LocalDate cần chuyển đổi
-     * @return java.sql.Date, null nếu localDate là null
-     */
-    private Date convertToSqlDate(LocalDate localDate) {
-        if (localDate == null) {
-            return null;
-        }
-        return Date.valueOf(localDate);
     }
 }

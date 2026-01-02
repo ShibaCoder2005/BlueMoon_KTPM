@@ -1,27 +1,25 @@
 package com.bluemoon.models;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
- * HoGiaDinh: đại diện bảng ho_khau trong hệ thống quản lý hộ gia đình.
+ * HoGiaDinh: đại diện bảng HoGiaDinh trong hệ thống quản lý hộ gia đình.
+ * Lưu ý: maChuHo tham chiếu đến NhanKhau.soCCCD (VARCHAR) thay vì NhanKhau.id
  */
 public class HoGiaDinh {
 
     /** id: khóa chính. */
     private int id;
-    /** maHo: mã hộ (String). */
-    private String maHo;
-    /** soPhong: số phòng (int). */
+    /** soPhong: số phòng (int) - tham chiếu đến Phong.soPhong. */
     private int soPhong;
-    /** dienTich: diện tích (BigDecimal). */
-    private BigDecimal dienTich;
-    /** maChuHo: mã nhân khẩu là chủ hộ (int). */
-    private int maChuHo;
-    /** ghiChu: ghi chú (String). */
+    /** maChuHo: mã chủ hộ (VARCHAR(20)) - tham chiếu đến NhanKhau.soCCCD. */
+    private String maChuHo;
+    /** ghiChu: ghi chú (TEXT). */
     private String ghiChu;
-    /** ngayTao: ngày tạo (LocalDate). */
-    private LocalDate ngayTao;
+    /** thoiGianBatDauO: thời gian bắt đầu ở (TIMESTAMP). */
+    private LocalDateTime thoiGianBatDauO;
+    /** thoiGianKetThucO: thời gian kết thúc ở (TIMESTAMP, có thể NULL). */
+    private LocalDateTime thoiGianKetThucO;
 
     /** Constructor mặc định. */
     public HoGiaDinh() {
@@ -30,22 +28,21 @@ public class HoGiaDinh {
     /**
      * Constructor đầy đủ.
      *
-     * @param id        ID khóa chính
-     * @param maHo      mã hộ
-     * @param soPhong   số phòng
-     * @param dienTich  diện tích
-     * @param maChuHo   mã chủ hộ (ID của NhanKhau)
-     * @param ghiChu    ghi chú
-     * @param ngayTao   ngày tạo
+     * @param id                  ID khóa chính
+     * @param soPhong             số phòng (tham chiếu đến Phong.soPhong)
+     * @param maChuHo             mã chủ hộ (soCCCD của NhanKhau)
+     * @param ghiChu              ghi chú
+     * @param thoiGianBatDauO     thời gian bắt đầu ở
+     * @param thoiGianKetThucO    thời gian kết thúc ở (có thể null)
      */
-    public HoGiaDinh(int id, String maHo, int soPhong, BigDecimal dienTich, int maChuHo, String ghiChu, LocalDate ngayTao) {
+    public HoGiaDinh(int id, int soPhong, String maChuHo, String ghiChu, 
+                     LocalDateTime thoiGianBatDauO, LocalDateTime thoiGianKetThucO) {
         this.id = id;
-        this.maHo = maHo;
         this.soPhong = soPhong;
-        this.dienTich = dienTich;
         this.maChuHo = maChuHo;
         this.ghiChu = ghiChu;
-        this.ngayTao = ngayTao;
+        this.thoiGianBatDauO = thoiGianBatDauO;
+        this.thoiGianKetThucO = thoiGianKetThucO;
     }
 
     public int getId() {
@@ -56,14 +53,6 @@ public class HoGiaDinh {
         this.id = id;
     }
 
-    public String getMaHo() {
-        return maHo;
-    }
-
-    public void setMaHo(String maHo) {
-        this.maHo = maHo;
-    }
-
     public int getSoPhong() {
         return soPhong;
     }
@@ -72,19 +61,11 @@ public class HoGiaDinh {
         this.soPhong = soPhong;
     }
 
-    public BigDecimal getDienTich() {
-        return dienTich;
-    }
-
-    public void setDienTich(BigDecimal dienTich) {
-        this.dienTich = dienTich;
-    }
-
-    public int getMaChuHo() {
+    public String getMaChuHo() {
         return maChuHo;
     }
 
-    public void setMaChuHo(int maChuHo) {
+    public void setMaChuHo(String maChuHo) {
         this.maChuHo = maChuHo;
     }
 
@@ -96,12 +77,20 @@ public class HoGiaDinh {
         this.ghiChu = ghiChu;
     }
 
-    public LocalDate getNgayTao() {
-        return ngayTao;
+    public LocalDateTime getThoiGianBatDauO() {
+        return thoiGianBatDauO;
     }
 
-    public void setNgayTao(LocalDate ngayTao) {
-        this.ngayTao = ngayTao;
+    public void setThoiGianBatDauO(LocalDateTime thoiGianBatDauO) {
+        this.thoiGianBatDauO = thoiGianBatDauO;
+    }
+
+    public LocalDateTime getThoiGianKetThucO() {
+        return thoiGianKetThucO;
+    }
+
+    public void setThoiGianKetThucO(LocalDateTime thoiGianKetThucO) {
+        this.thoiGianKetThucO = thoiGianKetThucO;
     }
 
     /**

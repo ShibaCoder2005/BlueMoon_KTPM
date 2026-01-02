@@ -2074,7 +2074,7 @@ public class WebServer {
                     chiTiet.setMaKhoan(fee.getId());
                     chiTiet.setSoLuong(BigDecimal.ONE); // Default quantity
                     chiTiet.setDonGia(fee.getDonGia()); // Snapshot current price
-                    chiTiet.setThanhTien(feeAmount);
+                    // thanhTien sẽ được database tự động tính (GENERATED ALWAYS AS (soLuong * donGia))
                     chiTietList.add(chiTiet);
                 }
             }
@@ -2140,10 +2140,14 @@ public class WebServer {
             case "diện tích":
             case "area":
             case "perarea":
-                if (household.getDienTich() == null || household.getDienTich().compareTo(BigDecimal.ZERO) <= 0) {
+                // dienTich bây giờ nằm trong bảng Phong, không phải HoGiaDinh
+                // Lấy dienTich từ Phong theo soPhong
+                BigDecimal dienTich = getDienTichFromPhong(household.getSoPhong());
+                if (dienTich == null || dienTich.compareTo(BigDecimal.ZERO) <= 0) {
+                    logger.warning("Cannot calculate fee per area: dienTich is 0 or null for soPhong: " + household.getSoPhong());
                     return BigDecimal.ZERO;
                 }
-                multiplier = household.getDienTich();
+                multiplier = dienTich;
                 break;
 
             case "xemay":
@@ -2174,6 +2178,29 @@ public class WebServer {
         }
 
         return basePrice.multiply(multiplier);
+    }
+
+    /**
+     * Lấy diện tích từ bảng Phong theo soPhong.
+     * @param soPhong Số phòng
+     * @return Diện tích, hoặc null nếu không tìm thấy
+     */
+    private BigDecimal getDienTichFromPhong(int soPhong) {
+        try {
+            java.sql.Connection conn = com.bluemoon.utils.DatabaseConnector.getConnection();
+            String sql = "SELECT dienTich FROM Phong WHERE soPhong = ?";
+            try (java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, soPhong);
+                try (java.sql.ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getBigDecimal("dienTich");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.warning("Error getting dienTich from Phong for soPhong: " + soPhong + " - " + e.getMessage());
+        }
+        return null;
     }
 
     /**

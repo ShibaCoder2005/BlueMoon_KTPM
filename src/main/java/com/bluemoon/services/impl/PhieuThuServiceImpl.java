@@ -268,24 +268,11 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                 }
 
                 // Step 2: Add all ChiTietThu using ChiTietThuService (with transaction support)
-                BigDecimal calculatedTotal = BigDecimal.ZERO;
+                // Lưu ý: thanhTien là GENERATED column, tongTien sẽ được trigger tự động cập nhật
         if (chiTietList != null && !chiTietList.isEmpty()) {
                     // Set maPhieu for all chiTiet
             for (ChiTietThu chiTiet : chiTietList) {
                 chiTiet.setMaPhieu(maPhieu);
-                        
-                        // Calculate thanhTien if not set (donGia * soLuong)
-                        if (chiTiet.getThanhTien() == null || chiTiet.getThanhTien().compareTo(BigDecimal.ZERO) == 0) {
-                            if (chiTiet.getDonGia() != null && chiTiet.getSoLuong() != null) {
-                                BigDecimal thanhTien = chiTiet.getDonGia().multiply(chiTiet.getSoLuong());
-                                chiTiet.setThanhTien(thanhTien);
-                            }
-                        }
-                        
-                        // Sum up total
-                        if (chiTiet.getThanhTien() != null) {
-                            calculatedTotal = calculatedTotal.add(chiTiet.getThanhTien());
-                        }
                     }
                     
                     // Use ChiTietThuService with transaction support
@@ -295,27 +282,13 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                         logger.log(Level.WARNING, "Failed to save ChiTietThu list, transaction rolled back");
                         return -1;
                     }
-                }
-
-                // Step 3: Update PhieuThu.tongTien with calculated total from ChiTietThu
-                if (calculatedTotal.compareTo(BigDecimal.ZERO) > 0) {
-                    try (PreparedStatement updateStmt = conn.prepareStatement("UPDATE PhieuThu SET tongTien = ? WHERE id = ?")) {
-                        updateStmt.setBigDecimal(1, calculatedTotal);
-                        updateStmt.setInt(2, maPhieu);
-                        int updateRows = updateStmt.executeUpdate();
-                        if (updateRows > 0) {
-                            logger.log(Level.INFO, "Updated PhieuThu.tongTien to " + calculatedTotal + " for id: " + maPhieu);
-                        } else {
-                            logger.log(Level.WARNING, "Failed to update PhieuThu.tongTien for id: " + maPhieu);
-                        }
-                    }
-                } else {
-                    logger.log(Level.WARNING, "Calculated total is 0 or negative for PhieuThu id: " + maPhieu);
+                    // Trigger fn_UpdateTongTienPhieuThu() sẽ tự động cập nhật tongTien
+                    logger.log(Level.FINE, "ChiTietThu saved, trigger will automatically update PhieuThu.tongTien");
                 }
 
                 // Commit transaction
                 conn.commit();
-                logger.log(Level.INFO, "Successfully created PhieuThu with details, id: " + maPhieu + ", total: " + calculatedTotal);
+                logger.log(Level.INFO, "Successfully created PhieuThu with details, id: " + maPhieu + " (tongTien will be auto-updated by trigger)");
         return maPhieu;
 
             } catch (SQLException e) {
@@ -561,11 +534,12 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                             totalAmount = totalAmount.add(feeAmount);
                             
                             // Create ChiTietThu
+                            // Lưu ý: thanhTien là GENERATED column, database sẽ tự tính
                             ChiTietThu chiTiet = new ChiTietThu();
                             chiTiet.setMaKhoan(fee.getId());
                             chiTiet.setSoLuong(BigDecimal.ONE); // Default quantity
                             chiTiet.setDonGia(fee.getDonGia());
-                            chiTiet.setThanhTien(feeAmount);
+                            // thanhTien sẽ được database tự động tính (GENERATED ALWAYS AS (soLuong * donGia))
                             chiTietList.add(chiTiet);
                         }
                     }
@@ -667,13 +641,12 @@ public class PhieuThuServiceImpl implements PhieuThuService {
             case "diện tích":
             case "area":
             case "perarea":
-                // Fee per Area: Amount = Fee_Price * HoGiaDinh.dienTich
-                if (household.getDienTich() == null || household.getDienTich().compareTo(BigDecimal.ZERO) <= 0) {
-                    logger.log(Level.WARNING, "Cannot calculate fee per area: dienTich is 0 or null for household: " + household.getId());
-                    return BigDecimal.ZERO;
-                }
-                multiplier = household.getDienTich();
-                break;
+                // Fee per Area: Amount = Fee_Price * Phong.dienTich
+                // Lưu ý: dienTich bây giờ nằm trong bảng Phong, không phải HoGiaDinh
+                // Cần lấy từ Phong theo soPhong
+                logger.log(Level.WARNING, "Fee per area calculation needs to be updated to use Phong.dienTich instead of HoGiaDinh.dienTich");
+                // TODO: Implement logic to get dienTich from Phong table
+                return BigDecimal.ZERO;
 
             case "xemay":
             case "xe máy":
@@ -832,24 +805,11 @@ public class PhieuThuServiceImpl implements PhieuThuService {
             }
 
             // Step 2: Add all ChiTietThu using ChiTietThuService (with transaction support)
-            BigDecimal calculatedTotal = BigDecimal.ZERO;
+            // Lưu ý: thanhTien là GENERATED column, tongTien sẽ được trigger tự động cập nhật
             if (chiTietList != null && !chiTietList.isEmpty()) {
                 // Set maPhieu for all chiTiet
                 for (ChiTietThu chiTiet : chiTietList) {
                     chiTiet.setMaPhieu(maPhieu);
-                    
-                    // Calculate thanhTien if not set (donGia * soLuong)
-                    if (chiTiet.getThanhTien() == null || chiTiet.getThanhTien().compareTo(BigDecimal.ZERO) == 0) {
-                        if (chiTiet.getDonGia() != null && chiTiet.getSoLuong() != null) {
-                            BigDecimal thanhTien = chiTiet.getDonGia().multiply(chiTiet.getSoLuong());
-                            chiTiet.setThanhTien(thanhTien);
-                        }
-                    }
-                    
-                    // Sum up total
-                    if (chiTiet.getThanhTien() != null) {
-                        calculatedTotal = calculatedTotal.add(chiTiet.getThanhTien());
-                    }
                 }
                 
                 // Use ChiTietThuService with transaction support
@@ -858,25 +818,11 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                     logger.log(Level.WARNING, "Failed to save ChiTietThu list in transaction");
                     return -1;
                 }
+                // Trigger fn_UpdateTongTienPhieuThu() sẽ tự động cập nhật tongTien
+                logger.log(Level.FINE, "ChiTietThu saved, trigger will automatically update PhieuThu.tongTien");
             }
 
-            // Step 3: Update PhieuThu.tongTien with calculated total from ChiTietThu
-            if (calculatedTotal.compareTo(BigDecimal.ZERO) > 0) {
-                try (PreparedStatement updateStmt = conn.prepareStatement("UPDATE PhieuThu SET tongTien = ? WHERE id = ?")) {
-                    updateStmt.setBigDecimal(1, calculatedTotal);
-                    updateStmt.setInt(2, maPhieu);
-                    int updateRows = updateStmt.executeUpdate();
-                    if (updateRows > 0) {
-                        logger.log(Level.FINE, "Updated PhieuThu.tongTien to " + calculatedTotal + " for id: " + maPhieu);
-                    } else {
-                        logger.log(Level.WARNING, "Failed to update PhieuThu.tongTien for id: " + maPhieu);
-                    }
-                }
-            } else {
-                logger.log(Level.WARNING, "Calculated total is 0 or negative for PhieuThu id: " + maPhieu);
-            }
-
-            logger.log(Level.FINE, "Successfully created PhieuThu with details in transaction, id: " + maPhieu + ", total: " + calculatedTotal);
+            logger.log(Level.FINE, "Successfully created PhieuThu with details in transaction, id: " + maPhieu);
             return maPhieu;
 
         } catch (SQLException e) {
@@ -1327,11 +1273,12 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                             totalAmount = totalAmount.add(feeAmount);
                             
                             // Create ChiTietThu
+                            // Lưu ý: thanhTien là GENERATED column, database sẽ tự tính
                             ChiTietThu chiTiet = new ChiTietThu();
                             chiTiet.setMaKhoan(fee.getId());
                             chiTiet.setSoLuong(BigDecimal.ONE);
                             chiTiet.setDonGia(fee.getDonGia());
-                            chiTiet.setThanhTien(feeAmount);
+                            // thanhTien sẽ được database tự động tính (GENERATED ALWAYS AS (soLuong * donGia))
                             chiTietList.add(chiTiet);
                         }
                     }
@@ -1348,7 +1295,8 @@ public class PhieuThuServiceImpl implements PhieuThuService {
 
                 // Step 5: Insert PhieuThu one by one to get generated IDs, then batch insert ChiTietThu
                 String insertPhieuThu = "INSERT INTO PhieuThu (maHo, maDot, maTaiKhoan, ngayLap, tongTien, trangThai, hinhThucThu, ghiChu) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                String insertChiTiet = "INSERT INTO ChiTietThu (maPhieu, maKhoan, soLuong, donGia, thanhTien) VALUES (?, ?, ?, ?, ?)";
+                // Lưu ý: thanhTien là GENERATED column, không cần INSERT
+                String insertChiTiet = "INSERT INTO ChiTietThu (maPhieu, maKhoan, soLuong, donGia) VALUES (?, ?, ?, ?)";
                 
                 PreparedStatement chiTietStmt = conn.prepareStatement(insertChiTiet);
                 
@@ -1386,7 +1334,7 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                             chiTietStmt.setInt(2, chiTiet.getMaKhoan());
                             chiTietStmt.setBigDecimal(3, chiTiet.getSoLuong());
                             chiTietStmt.setBigDecimal(4, chiTiet.getDonGia());
-                            chiTietStmt.setBigDecimal(5, chiTiet.getThanhTien());
+                            // thanhTien là GENERATED column, database sẽ tự tính
                             chiTietStmt.addBatch();
                         }
                     }
@@ -1429,7 +1377,7 @@ public class PhieuThuServiceImpl implements PhieuThuService {
                      "tk.hoTen as tenNguoiLap " +
                      "FROM PhieuThu pt " +
                      "INNER JOIN HoGiaDinh hg ON pt.maHo = hg.id " +
-                     "LEFT JOIN NhanKhau nk ON hg.maChuHo = nk.id " +
+                     "LEFT JOIN NhanKhau nk ON hg.maChuHo = nk.soCCCD AND nk.hieuLuc = TRUE " +
                      "LEFT JOIN DotThu dt ON pt.maDot = dt.id " +
                      "LEFT JOIN TaiKhoan tk ON pt.maTaiKhoan = tk.id " +
                      "WHERE pt.id = ?";

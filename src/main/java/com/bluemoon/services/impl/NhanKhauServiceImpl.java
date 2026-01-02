@@ -24,21 +24,27 @@ public class NhanKhauServiceImpl implements NhanKhauService {
 
     private static final Logger logger = Logger.getLogger(NhanKhauServiceImpl.class.getName());
     
-    // SQL Queries for NhanKhau
+    // SQL Queries for NhanKhau (SCD Type 2)
+    // Database mới có thêm: ngayBatDau, ngayKetThuc, hieuLuc, nguoiGhi, ghiChu
     private static final String SELECT_ALL = 
-            "SELECT id, maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang FROM NhanKhau ORDER BY id";
+            "SELECT id, maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang, " +
+            "ngayBatDau, ngayKetThuc, hieuLuc, nguoiGhi, ghiChu FROM NhanKhau WHERE hieuLuc = TRUE ORDER BY id";
 
     private static final String SELECT_BY_ID = 
-            "SELECT id, maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang FROM NhanKhau WHERE id = ?";
+            "SELECT id, maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang, " +
+            "ngayBatDau, ngayKetThuc, hieuLuc, nguoiGhi, ghiChu FROM NhanKhau WHERE id = ? ORDER BY hieuLuc DESC, ngayBatDau DESC LIMIT 1";
 
     private static final String SELECT_BY_MAHO = 
-            "SELECT id, maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang FROM NhanKhau WHERE maHo = ? ORDER BY id";
+            "SELECT id, maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang, " +
+            "ngayBatDau, ngayKetThuc, hieuLuc, nguoiGhi, ghiChu FROM NhanKhau WHERE maHo = ? AND hieuLuc = TRUE ORDER BY id";
 
     private static final String INSERT = 
-            "INSERT INTO NhanKhau (maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            "INSERT INTO NhanKhau (maHo, hoTen, ngaySinh, gioiTinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang, " +
+            "ngayBatDau, ngayKetThuc, hieuLuc, nguoiGhi, ghiChu) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE = 
-            "UPDATE NhanKhau SET maHo = ?, hoTen = ?, ngaySinh = ?, gioiTinh = ?, soCCCD = ?, ngheNghiep = ?, quanHeVoiChuHo = ?, tinhTrang = ? WHERE id = ?";
+            "UPDATE NhanKhau SET maHo = ?, hoTen = ?, ngaySinh = ?, gioiTinh = ?, soCCCD = ?, ngheNghiep = ?, " +
+            "quanHeVoiChuHo = ?, tinhTrang = ?, ngayBatDau = ?, ngayKetThuc = ?, hieuLuc = ?, nguoiGhi = ?, ghiChu = ? WHERE id = ?";
 
     private static final String UPDATE_STATUS = 
             "UPDATE NhanKhau SET tinhTrang = ? WHERE id = ?";
@@ -153,7 +159,7 @@ public class NhanKhauServiceImpl implements NhanKhauService {
             conn.setAutoCommit(false);
 
             try {
-                // Step 1: Insert new resident
+                // Step 1: Insert new resident (SCD Type 2)
                 int newResidentId = -1;
                 try (PreparedStatement pstmt = conn.prepareStatement(INSERT, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
@@ -165,6 +171,19 @@ public class NhanKhauServiceImpl implements NhanKhauService {
                     pstmt.setString(6, nhanKhau.getNgheNghiep());
                     pstmt.setString(7, nhanKhau.getQuanHeVoiChuHo());
                     pstmt.setString(8, nhanKhau.getTinhTrang() != null ? nhanKhau.getTinhTrang() : "CuTru");
+                    // ngayBatDau, ngayKetThuc, hieuLuc, nguoiGhi, ghiChu
+                    java.sql.Timestamp now = java.sql.Timestamp.valueOf(java.time.LocalDateTime.now());
+                    pstmt.setTimestamp(9, nhanKhau.getNgayBatDau() != null ? 
+                        java.sql.Timestamp.valueOf(nhanKhau.getNgayBatDau()) : now);
+                    pstmt.setTimestamp(10, nhanKhau.getNgayKetThuc() != null ? 
+                        java.sql.Timestamp.valueOf(nhanKhau.getNgayKetThuc()) : null);
+                    pstmt.setBoolean(11, nhanKhau.isHieuLuc());
+                    if (nhanKhau.getNguoiGhi() != null) {
+                        pstmt.setInt(12, nhanKhau.getNguoiGhi());
+                    } else {
+                        pstmt.setNull(12, java.sql.Types.INTEGER);
+                    }
+                    pstmt.setString(13, nhanKhau.getGhiChu());
 
                     int rowsAffected = pstmt.executeUpdate();
                     if (rowsAffected <= 0) {
@@ -212,17 +231,19 @@ public class NhanKhauServiceImpl implements NhanKhauService {
                     }
                     
                     // Step 3: If this resident is "Chủ hộ", update maChuHo in HoGiaDinh
+                    // maChuHo bây giờ là soCCCD (VARCHAR) thay vì id (INT)
                     String quanHe = nhanKhau.getQuanHeVoiChuHo();
-                    if (quanHe != null && quanHe.trim().equalsIgnoreCase("Chủ hộ")) {
+                    if (quanHe != null && quanHe.trim().equalsIgnoreCase("Chủ hộ") && 
+                        nhanKhau.getSoCCCD() != null && !nhanKhau.getSoCCCD().trim().isEmpty()) {
                         try (PreparedStatement updateHoStmt = conn.prepareStatement(
                                 "UPDATE HoGiaDinh SET maChuHo = ? WHERE id = ?")) {
-                            updateHoStmt.setInt(1, newResidentId);
+                            updateHoStmt.setString(1, nhanKhau.getSoCCCD().trim());
                             updateHoStmt.setInt(2, nhanKhau.getMaHo());
                             
                             int updateRows = updateHoStmt.executeUpdate();
                             if (updateRows > 0) {
                                 logger.log(Level.INFO, "Updated maChuHo in HoGiaDinh (id: " + nhanKhau.getMaHo() + 
-                                    ") to resident ID: " + newResidentId);
+                                    ") to soCCCD: " + nhanKhau.getSoCCCD());
                             } else {
                                 logger.log(Level.WARNING, "Failed to update maChuHo in HoGiaDinh (id: " + 
                                     nhanKhau.getMaHo() + ") - household may not exist");
@@ -294,7 +315,7 @@ public class NhanKhauServiceImpl implements NhanKhauService {
                     }
                 }
                 
-                // Update resident
+                // Update resident (SCD Type 2 - chỉ update bản ghi hiện tại với hieuLuc = TRUE)
                 try (PreparedStatement pstmt = conn.prepareStatement(UPDATE)) {
                     pstmt.setInt(1, nhanKhau.getMaHo());
                     pstmt.setString(2, nhanKhau.getHoTen().trim());
@@ -303,8 +324,26 @@ public class NhanKhauServiceImpl implements NhanKhauService {
                     pstmt.setString(5, nhanKhau.getSoCCCD());
                     pstmt.setString(6, nhanKhau.getNgheNghiep());
                     pstmt.setString(7, nhanKhau.getQuanHeVoiChuHo());
-                    pstmt.setString(8, nhanKhau.getTinhTrang());
-                    pstmt.setInt(9, nhanKhau.getId());
+                    pstmt.setString(8, nhanKhau.getTinhTrang() != null ? nhanKhau.getTinhTrang() : "CuTru");
+                    // ngayBatDau, ngayKetThuc, hieuLuc, nguoiGhi, ghiChu
+                    if (nhanKhau.getNgayBatDau() != null) {
+                        pstmt.setTimestamp(9, java.sql.Timestamp.valueOf(nhanKhau.getNgayBatDau()));
+                    } else {
+                        pstmt.setNull(9, java.sql.Types.TIMESTAMP);
+                    }
+                    if (nhanKhau.getNgayKetThuc() != null) {
+                        pstmt.setTimestamp(10, java.sql.Timestamp.valueOf(nhanKhau.getNgayKetThuc()));
+                    } else {
+                        pstmt.setNull(10, java.sql.Types.TIMESTAMP);
+                    }
+                    pstmt.setBoolean(11, nhanKhau.isHieuLuc());
+                    if (nhanKhau.getNguoiGhi() != null) {
+                        pstmt.setInt(12, nhanKhau.getNguoiGhi());
+                    } else {
+                        pstmt.setNull(12, java.sql.Types.INTEGER);
+                    }
+                    pstmt.setString(13, nhanKhau.getGhiChu());
+                    pstmt.setInt(14, nhanKhau.getId());
 
                     int rowsAffected = pstmt.executeUpdate();
                     if (rowsAffected <= 0) {
@@ -315,17 +354,32 @@ public class NhanKhauServiceImpl implements NhanKhauService {
                 }
                 
                 // Update maChuHo in HoGiaDinh if relationship changed
+                // maChuHo bây giờ là soCCCD (VARCHAR) thay vì id (INT)
                 String newQuanHe = nhanKhau.getQuanHeVoiChuHo();
                 boolean wasChuHo = oldQuanHe != null && oldQuanHe.trim().equalsIgnoreCase("Chủ hộ");
                 boolean isChuHo = newQuanHe != null && newQuanHe.trim().equalsIgnoreCase("Chủ hộ");
                 boolean maHoChanged = oldMaHo > 0 && oldMaHo != nhanKhau.getMaHo();
                 
+                // Get old soCCCD to clear maChuHo in old household
+                String oldSoCCCD = null;
+                if (wasChuHo && oldMaHo > 0) {
+                    try (PreparedStatement getOldStmt = conn.prepareStatement(
+                            "SELECT soCCCD FROM NhanKhau WHERE id = ?")) {
+                        getOldStmt.setInt(1, nhanKhau.getId());
+                        try (ResultSet rs = getOldStmt.executeQuery()) {
+                            if (rs.next()) {
+                                oldSoCCCD = rs.getString("soCCCD");
+                            }
+                        }
+                    }
+                }
+                
                 // If was chu ho in old household, clear maChuHo in old household
-                if (wasChuHo && oldMaHo > 0 && (maHoChanged || !isChuHo)) {
+                if (wasChuHo && oldMaHo > 0 && oldSoCCCD != null && (maHoChanged || !isChuHo)) {
                     try (PreparedStatement clearStmt = conn.prepareStatement(
                             "UPDATE HoGiaDinh SET maChuHo = NULL WHERE id = ? AND maChuHo = ?")) {
                         clearStmt.setInt(1, oldMaHo);
-                        clearStmt.setInt(2, nhanKhau.getId());
+                        clearStmt.setString(2, oldSoCCCD);
                         clearStmt.executeUpdate();
                         logger.log(Level.INFO, "Cleared maChuHo in HoGiaDinh (id: " + oldMaHo + 
                             ") - resident no longer is Chủ hộ or moved to different household");
@@ -333,16 +387,17 @@ public class NhanKhauServiceImpl implements NhanKhauService {
                 }
                 
                 // If is now chu ho, update maChuHo in new household
-                if (isChuHo && nhanKhau.getMaHo() > 0) {
+                if (isChuHo && nhanKhau.getMaHo() > 0 && 
+                    nhanKhau.getSoCCCD() != null && !nhanKhau.getSoCCCD().trim().isEmpty()) {
                     try (PreparedStatement updateStmt = conn.prepareStatement(
                             "UPDATE HoGiaDinh SET maChuHo = ? WHERE id = ?")) {
-                        updateStmt.setInt(1, nhanKhau.getId());
+                        updateStmt.setString(1, nhanKhau.getSoCCCD().trim());
                         updateStmt.setInt(2, nhanKhau.getMaHo());
                         
                         int updateRows = updateStmt.executeUpdate();
                         if (updateRows > 0) {
                             logger.log(Level.INFO, "Updated maChuHo in HoGiaDinh (id: " + nhanKhau.getMaHo() + 
-                                ") to resident ID: " + nhanKhau.getId());
+                                ") to soCCCD: " + nhanKhau.getSoCCCD());
                         } else {
                             logger.log(Level.WARNING, "Failed to update maChuHo in HoGiaDinh (id: " + 
                                 nhanKhau.getMaHo() + ") - household may not exist");
@@ -511,14 +566,29 @@ public class NhanKhauServiceImpl implements NhanKhauService {
             conn.setAutoCommit(false);
             
             try {
-                // Step 1: Clear maChuHo in HoGiaDinh if this resident is a household head
-                try (PreparedStatement clearChuHoStmt = conn.prepareStatement(
-                        "UPDATE HoGiaDinh SET maChuHo = NULL WHERE maChuHo = ?")) {
-                    clearChuHoStmt.setInt(1, id);
-                    int clearedRows = clearChuHoStmt.executeUpdate();
-                    if (clearedRows > 0) {
-                        logger.log(Level.INFO, "Cleared maChuHo in " + clearedRows + 
-                            " household(s) before deleting resident id: " + id);
+                // Step 1: Get soCCCD of this resident to clear maChuHo in HoGiaDinh
+                String soCCCD = null;
+                try (PreparedStatement getSoCCCDStmt = conn.prepareStatement(
+                        "SELECT soCCCD FROM NhanKhau WHERE id = ?")) {
+                    getSoCCCDStmt.setInt(1, id);
+                    try (ResultSet rs = getSoCCCDStmt.executeQuery()) {
+                        if (rs.next()) {
+                            soCCCD = rs.getString("soCCCD");
+                        }
+                    }
+                }
+                
+                // Clear maChuHo in HoGiaDinh if this resident is a household head
+                // maChuHo bây giờ là soCCCD (VARCHAR) thay vì id (INT)
+                if (soCCCD != null && !soCCCD.trim().isEmpty()) {
+                    try (PreparedStatement clearChuHoStmt = conn.prepareStatement(
+                            "UPDATE HoGiaDinh SET maChuHo = NULL WHERE maChuHo = ?")) {
+                        clearChuHoStmt.setString(1, soCCCD.trim());
+                        int clearedRows = clearChuHoStmt.executeUpdate();
+                        if (clearedRows > 0) {
+                            logger.log(Level.INFO, "Cleared maChuHo in " + clearedRows + 
+                                " household(s) before deleting resident id: " + id + " (soCCCD: " + soCCCD + ")");
+                        }
                     }
                 }
 
@@ -598,7 +668,7 @@ public class NhanKhauServiceImpl implements NhanKhauService {
     }
 
     /**
-     * Xây dựng đối tượng NhanKhau từ ResultSet.
+     * Xây dựng đối tượng NhanKhau từ ResultSet (SCD Type 2).
      */
     private NhanKhau buildNhanKhauFromResultSet(ResultSet rs) throws SQLException {
         NhanKhau nhanKhau = new NhanKhau();
@@ -616,6 +686,26 @@ public class NhanKhauServiceImpl implements NhanKhauService {
         nhanKhau.setNgheNghiep(rs.getString("ngheNghiep"));
         nhanKhau.setQuanHeVoiChuHo(rs.getString("quanHeVoiChuHo"));
         nhanKhau.setTinhTrang(rs.getString("tinhTrang"));
+        
+        // Các trường mới cho SCD Type 2
+        java.sql.Timestamp ngayBatDau = rs.getTimestamp("ngayBatDau");
+        if (ngayBatDau != null) {
+            nhanKhau.setNgayBatDau(ngayBatDau.toLocalDateTime());
+        }
+        
+        java.sql.Timestamp ngayKetThuc = rs.getTimestamp("ngayKetThuc");
+        if (ngayKetThuc != null) {
+            nhanKhau.setNgayKetThuc(ngayKetThuc.toLocalDateTime());
+        }
+        
+        nhanKhau.setHieuLuc(rs.getBoolean("hieuLuc"));
+        
+        int nguoiGhi = rs.getInt("nguoiGhi");
+        if (!rs.wasNull()) {
+            nhanKhau.setNguoiGhi(nguoiGhi);
+        }
+        
+        nhanKhau.setGhiChu(rs.getString("ghiChu"));
         
         return nhanKhau;
     }
