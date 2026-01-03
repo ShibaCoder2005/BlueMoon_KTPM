@@ -1,7 +1,7 @@
 -- TAIKHOAN
 INSERT INTO taikhoan (tenDangNhap, matKhau, hoTen, vaiTro, email, dienThoai)
 VALUES
-('admin', '123456', 'Nguyễn Quản Trị', 'Admin', 'admin@example.com', '0900000001'),
+('admin', '123456', 'Nguyễn Quản Trị', 'admin', 'admin@example.com', '0900000001'),
 ('user1', '123456', 'Nguyễn Văn A', 'Nhân viên', 'a@example.com', '0900000002'),
 ('user2', '123456', 'Trần Thị B', 'Nhân viên', 'b@example.com', '0900000003'),
 ('user3', '123456', 'Lê Văn C', 'Kế toán', 'c@example.com', '0900000004');
@@ -57,15 +57,6 @@ VALUES
 (3, 2, 3, '2025-02-10 08:30:00', 45000, 'DaThu', 'Tiền mặt'),
 (4, 3, 2, '2025-03-15 10:00:00', 0, 'ChuaThu', 'Tiền mặt');
 
--- CHITIETTHU
-INSERT INTO chitietthu (maPhieu, maKhoan, soLuong, donGia, thanhTien)
-VALUES
-(1, 1, 1, 20000, 20000),
-(1, 3, 3, 10000, 30000),
-(2, 1, 1, 20000, 20000),
-(2, 4, 1, 150000, 150000),
-(3, 2, 1, 50000, 50000);
-
 -- LICHSUNHANKHAU
 INSERT INTO lichsunhankhau (maNhanKhau, loaiBienDong, ngayBatDau, ngayKetThuc, ghiChu, nguoiGhi)
 VALUES
@@ -89,9 +80,5 @@ VALUES
 (2, 'Xe máy', '30B1-67890', 'Lê Văn D', '2021-07-15'),
 (3, 'Ô tô', '31C-99999', 'Phạm Văn F', '2020-11-20');
 
--- THONGKE
-INSERT INTO thongke (thoiGian, kieuThongKe, noiDung, ketQua)
-VALUES
-('2025-01-01 00:00:00', 'Tổng hộ dân', 'Thống kê số hộ dân cư hiện tại', '5'),
-('2025-01-02 00:00:00', 'Tổng thu tháng 1', 'Số tiền đã thu trong tháng 1', '110000'),
-('2025-03-01 00:00:00', 'Tổng nhân khẩu', 'Số nhân khẩu hiện có', '8');
+
+

@@ -89,16 +89,6 @@ CREATE TABLE ChiTietThu (
     donGia DECIMAL(12,2),
     thanhTien DECIMAL(14,2),
     ghiChu TEXT
-
--- Bảng LichSuNopTien
-CREATE TABLE LichSuNopTien (
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    maPhieu INT,
-    ngayNop TIMESTAMP,
-    soTien DECIMAL(14,2),
-    phuongThuc VARCHAR(50),
-    nguoiThu INT,
-    ghiChu TEXT
 );
 
 -- Bảng PhuongTien
@@ -110,15 +100,6 @@ CREATE TABLE PhuongTien (
     tenChuXe VARCHAR(200),
     ngayDangKy DATE,
     ghiChu TEXT
-);
-
--- Bảng ThongKe
-CREATE TABLE ThongKe (
-    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    thoiGian TIMESTAMP,
-    kieuThongKe VARCHAR(100),
-    noiDung TEXT,
-    ketQua TEXT
 );
 
 -- THÊM CÁC KHÓA NGOẠI (FOREIGN KEY)
@@ -141,3 +122,21 @@ ALTER TABLE LichSuNopTien ADD CONSTRAINT fk_lsnt_phieu FOREIGN KEY (maPhieu) REF
 ALTER TABLE LichSuNopTien ADD CONSTRAINT fk_lsnt_tk FOREIGN KEY (nguoiThu) REFERENCES TaiKhoan(id);
 
 ALTER TABLE PhuongTien ADD CONSTRAINT fk_ptien_ho FOREIGN KEY (maHo) REFERENCES HoGiaDinh(id);
+
+-- 1. Bổ sung cột 'trangThai' cho bảng TaiKhoan
+-- Mục đích: Để quản lý trạng thái đăng nhập (Hoạt động/Bị khóa)
+ALTER TABLE TaiKhoan 
+ADD COLUMN trangThai VARCHAR(50) DEFAULT 'Hoạt động';
+
+-- 2. Bổ sung cột 'maHo' cho bảng HoGiaDinh
+-- Mục đích: Để quản lý mã hộ khẩu (ví dụ: "HK001", "P101") thay vì chỉ dùng ID số
+ALTER TABLE HoGiaDinh 
+ADD COLUMN maHo VARCHAR(50) UNIQUE;
+
+-- (Tùy chọn) Cập nhật dữ liệu mẫu cho cột maHo vừa tạo để tránh bị null
+-- Ví dụ: Gán maHo = "HK" + id
+UPDATE HoGiaDinh SET maHo = 'HK' || id WHERE maHo IS NULL;
+
+ALTER TABLE HoGiaDinh ADD COLUMN ngayTao DATE DEFAULT CURRENT_DATE;
+
+SELECT * FROM TaiKhoan;
