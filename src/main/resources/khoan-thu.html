@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Quản Lý - Khoản Thu (v1.0)</title>
+    <title>Bluemoon - Khoản Thu</title>
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
@@ -12,11 +12,16 @@
 <body id="page-top">
     <div id="wrapper">
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-                <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-building"></i></div>
+
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-building"></i>
+                </div>
                 <div class="sidebar-brand-text mx-3">BlueMoon</div>
             </a>
+
             <hr class="sidebar-divider my-0">
+
             <li class="nav-item">
                 <a class="nav-link" href="index.html">
                     <i class="fas fa-fw fa-home"></i>
@@ -38,7 +43,7 @@
                 </a>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="khoan-thu.html">
                     <i class="fas fa-fw fa-file-invoice-dollar"></i>
                     <span>Khoản thu</span>
@@ -72,17 +77,13 @@
                     <span>Thống kê</span>
                 </a>
             </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="bao-cao.html">
                     <i class="fas fa-fw fa-file-alt"></i>
                     <span>Báo cáo</span>
                 </a>
             </li>
-
-
-            <li class="nav-item">
-
-            <li class="nav-item">
 
             <li class="nav-item" id="menuTaiKhoan">
                 <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
@@ -91,7 +92,9 @@
                 </a>
             </li>
 
-            <li class="nav-item"><a class="nav-link collapsed" href="#" style="opacity: 0.6;"><i class="fas fa-car"></i><span>Gửi xe (v2.0)</span></a></li>
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
         </ul>
 
         <div id="content-wrapper" class="d-flex flex-column">

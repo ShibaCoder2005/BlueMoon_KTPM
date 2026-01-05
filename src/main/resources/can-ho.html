@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Quản Lý - Hộ Gia Đình</title>
+    <title>Bluemoon - Hộ Gia Đình</title>
 
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -37,7 +37,7 @@
                 </a>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="can-ho.html">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Hộ gia đình</span>
@@ -92,7 +92,7 @@
                 </a>
             </li>
 
-<li class="nav-item" id="menuTaiKhoan">
+            <li class="nav-item" id="menuTaiKhoan">
                 <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
                     <i class="fas fa-fw fa-user-cog"></i>
                     <span>Tài khoản</span>
@@ -206,8 +206,11 @@
                             <input type="text" class="form-control" id="maHo" placeholder="VD: H001" required>
                         </div>
                         <div class="form-group">
-                            <label>Số phòng</label>
-                            <input type="number" class="form-control" id="soPhong" placeholder="Nhập số phòng" min="0">
+                            <label>Số phòng <span class="text-danger">*</span></label>
+                            <select class="form-control" id="soPhong" required>
+                                <option value="">-- Chọn phòng --</option>
+                            </select>
+                            <small class="form-text text-muted">Danh sách phòng có sẵn kèm trạng thái</small>
                         </div>
                         <div class="form-group">
                             <label>Ghi chú</label>
@@ -269,6 +272,13 @@
         $(document).ready(async function() {
             await loadHouseholds();
             
+            // Load rooms when modal is shown (for adding new household)
+            $('#addHouseholdModal').on('show.bs.modal', async function() {
+                if (!editingHouseholdId) {
+                    await loadRooms();
+                }
+            });
+            
             // Form submission
             $('#saveHouseholdBtn').on('click', async function() {
                 await saveHousehold();
@@ -279,8 +289,46 @@
                 $('#householdForm')[0].reset();
                 editingHouseholdId = null;
                 $('.modal-title').text('Thêm Hộ Gia Đình');
+                $('#soPhong').html('<option value="">-- Chọn phòng --</option>');
             });
         });
+
+        async function loadRooms(currentSoPhong = null) {
+            try {
+                const rooms = await PhongAPI.getAll();
+                const soPhongSelect = $('#soPhong');
+                
+                // Clear existing options except the first one
+                soPhongSelect.html('<option value="">-- Chọn phòng --</option>');
+                
+                rooms.forEach(room => {
+                    const soPhong = room.soPhong;
+                    const dienTich = room.dienTich ? parseFloat(room.dienTich).toLocaleString('vi-VN') : 'N/A';
+                    const trangThaiSuDung = room.trangThaiSuDung || 'Trống';
+                    const isOccupied = trangThaiSuDung === 'Đã có hộ';
+                    // Allow selecting the current room when editing
+                    const isCurrentRoom = currentSoPhong !== null && soPhong === currentSoPhong;
+                    const shouldDisable = isOccupied && !isCurrentRoom;
+                    
+                    const optionText = `Phòng ${soPhong} - ${dienTich} m² - ${trangThaiSuDung}`;
+                    const option = $('<option></option>')
+                        .attr('value', soPhong)
+                        .text(optionText)
+                        .prop('disabled', shouldDisable);
+                    
+                    if (shouldDisable) {
+                        option.css('color', '#999');
+                    }
+                    
+                    soPhongSelect.append(option);
+                });
+            } catch (error) {
+                console.error('Error loading rooms:', error);
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Không thể tải danh sách phòng: ' + error.message);
+                }
+            }
+        }
 
         async function loadHouseholds() {
             try {
@@ -386,7 +434,8 @@
             }
 
             const maHo = $('#maHo').val().trim();
-            const soPhong = parseInt($('#soPhong').val()) || 0;
+            const soPhongStr = $('#soPhong').val();
+            const soPhong = soPhongStr ? parseInt(soPhongStr) : null;
             const ghiChu = $('#ghiChu').val().trim();
 
             if (!maHo) {
@@ -394,6 +443,15 @@
                     APIUtils.showError('Vui lòng nhập mã hộ');
                 } else {
                     alert('Vui lòng nhập mã hộ');
+                }
+                return;
+            }
+
+            if (!soPhong) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Vui lòng chọn số phòng');
+                } else {
+                    alert('Vui lòng chọn số phòng');
                 }
                 return;
             }
@@ -458,6 +516,10 @@
                 }
 
                 editingHouseholdId = id;
+                
+                // Load rooms before showing modal (pass current soPhong to allow selecting it)
+                await loadRooms(household.soPhong);
+                
                 $('#maHo').val(household.maHo || '');
                 $('#soPhong').val(household.soPhong || '');
                 $('#ghiChu').val(household.ghiChu || '');

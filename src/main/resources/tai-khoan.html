@@ -9,7 +9,7 @@
     <meta name="description" content="Quản lý tài khoản cư dân - SB Admin 2">
     <meta name="author" content="">
 
-    <title>Quản lý Tài khoản - SB Admin 2</title>
+    <title>Bluemoon - Tài khoản</title>
 
     <!-- Custom fonts for this template-->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" type="text/css">
@@ -43,15 +43,13 @@
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-            <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-building"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">Bluemoon</div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
             </a>
 
-            <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
             <li class="nav-item">
@@ -109,6 +107,7 @@
                     <span>Thống kê</span>
                 </a>
             </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="bao-cao.html">
                     <i class="fas fa-fw fa-file-alt"></i>
@@ -116,23 +115,16 @@
                 </a>
             </li>
 
-
-            <li class="nav-item">
-
-            <li class="nav-item active">
-
-            <li class="nav-item" id="menuTaiKhoan" style="display: none;">
-                <a class="nav-link" href="tai-khoan.html">
+            <li class="nav-item active" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
                     <i class="fas fa-fw fa-user-cog"></i>
                     <span>Tài khoản</span>
                 </a>
             </li>
 
-            <!-- Sidebar Toggler (Sidebar) -->
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
-
         </ul>
         <!-- End of Sidebar -->
 

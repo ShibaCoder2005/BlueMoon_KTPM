@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -774,6 +775,38 @@ public class WebServer {
                 } else {
                     ctx.status(400).json(createErrorResponse("Failed to delete collection drive (may be in use)"));
                 }
+            } catch (Exception e) {
+                handleException(ctx, e);
+            }
+        });
+
+        // ========== PHONG (Room) ENDPOINTS ==========
+        app.get("/api/phong", ctx -> {
+            try {
+                // Lấy danh sách phòng kèm trạng thái (có hộ gia đình hay không)
+                String sql = "SELECT p.soPhong, p.dienTich, p.giaTien, p.trangThai as trangThaiPhong, p.ghiChu, " +
+                            "CASE WHEN h.id IS NOT NULL THEN 'Đã có hộ' ELSE 'Trống' END as trangThaiSuDung " +
+                            "FROM Phong p " +
+                            "LEFT JOIN HoGiaDinh h ON p.soPhong = h.soPhong " +
+                            "ORDER BY p.soPhong";
+                
+                List<Map<String, Object>> rooms = new ArrayList<>();
+                try (java.sql.Connection conn = com.bluemoon.utils.DatabaseConnector.getConnection();
+                     java.sql.PreparedStatement pstmt = conn.prepareStatement(sql);
+                     java.sql.ResultSet rs = pstmt.executeQuery()) {
+                    
+                    while (rs.next()) {
+                        Map<String, Object> room = new HashMap<>();
+                        room.put("soPhong", rs.getInt("soPhong"));
+                        room.put("dienTich", rs.getBigDecimal("dienTich"));
+                        room.put("giaTien", rs.getBigDecimal("giaTien"));
+                        room.put("trangThaiPhong", rs.getString("trangThaiPhong"));
+                        room.put("trangThaiSuDung", rs.getString("trangThaiSuDung"));
+                        room.put("ghiChu", rs.getString("ghiChu"));
+                        rooms.add(room);
+                    }
+                }
+                ctx.json(rooms);
             } catch (Exception e) {
                 handleException(ctx, e);
             }

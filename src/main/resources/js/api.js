@@ -228,6 +228,10 @@ const PhieuThuAPI = {
     generateForDrive: (maDot) => apiRequest(`/phieu-thu/generate/${maDot}`, 'POST')
 };
 
+const PhongAPI = {
+    getAll: () => apiRequest('/phong', 'GET')
+};
+
 const PhuongTienAPI = {
     getAll: async () => {
         const response = await apiRequest('/phuong-tien', 'GET');
