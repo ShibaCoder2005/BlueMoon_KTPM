@@ -202,10 +202,6 @@
                 <div class="modal-body">
                     <form id="householdForm">
                         <div class="form-group">
-                            <label>Mã hộ <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="maHo" placeholder="VD: H001" required>
-                        </div>
-                        <div class="form-group">
                             <label>Số phòng <span class="text-danger">*</span></label>
                             <select class="form-control" id="soPhong" required>
                                 <option value="">-- Chọn phòng --</option>
@@ -433,19 +429,9 @@
                 return;
             }
 
-            const maHo = $('#maHo').val().trim();
             const soPhongStr = $('#soPhong').val();
             const soPhong = soPhongStr ? parseInt(soPhongStr) : null;
             const ghiChu = $('#ghiChu').val().trim();
-
-            if (!maHo) {
-                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
-                    APIUtils.showError('Vui lòng nhập mã hộ');
-                } else {
-                    alert('Vui lòng nhập mã hộ');
-                }
-                return;
-            }
 
             if (!soPhong) {
                 if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
@@ -457,7 +443,6 @@
             }
 
             const householdData = {
-                maHo: maHo,
                 soPhong: soPhong,
                 ghiChu: ghiChu || null
             };
@@ -520,7 +505,6 @@
                 // Load rooms before showing modal (pass current soPhong to allow selecting it)
                 await loadRooms(household.soPhong);
                 
-                $('#maHo').val(household.maHo || '');
                 $('#soPhong').val(household.soPhong || '');
                 $('#ghiChu').val(household.ghiChu || '');
                 
