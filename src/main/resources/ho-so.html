@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>BlueMoon - Hồ sơ Admin</title>
+    <title>Bluemoon - Hồ Sơ</title>
 
     <!-- CDN CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
@@ -37,22 +37,43 @@
 
             <li class="nav-item">
                 <a class="nav-link" href="can-ho.html">
-                    <i class="fas fa-fw fa-door-open"></i>
-                    <span>Căn hộ</span>
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="cu-dan.html">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Cư dân</span>
                 </a>
             </li>
-
+            
             <li class="nav-item">
                 <a class="nav-link" href="khoan-thu.html">
                     <i class="fas fa-fw fa-file-invoice-dollar"></i>
                     <span>Khoản thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
                 </a>
             </li>
 
@@ -64,32 +85,29 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="thong-bao.html">
+                <a class="nav-link" href="notification_management.html">
                     <i class="fas fa-fw fa-bullhorn"></i>
                     <span>Thông báo</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="phan-anh.html">
+                <a class="nav-link" href="feedback_management.html">
                     <i class="fas fa-fw fa-comments"></i>
                     <span>Phản ánh</span>
                 </a>
             </li>
-
             <li class="nav-item">
-                <a class="nav-link" href="tai-khoan.html">
-                    <i class="fas fa-fw fa-user-cog"></i>
-                    <span>Tài khoản</span>
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
                 </a>
             </li>
 
-            <hr class="sidebar-divider">
-
-            <li class="nav-item">
-                <a class="nav-link" href="cai-dat.html">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Cài đặt</span>
+            <li class="nav-item" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                    <i class="fas fa-fw fa-user-cog"></i>
+                    <span>Tài khoản</span>
                 </a>
             </li>
 
@@ -117,12 +135,12 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Quản Lý</span>
-                                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="ho-so-admin.html">
+                                <a class="dropdown-item" href="ho-so.html">
                                     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ
                                 </a>
                                 <div class="dropdown-divider"></div>
@@ -150,13 +168,19 @@
                                     <h6 class="m-0 font-weight-bold text-primary">Ảnh đại diện</h6>
                                 </div>
                                 <div class="card-body text-center">
-                                    <img class="img-profile rounded-circle mb-3" src="img/undraw_profile.svg" style="width: 150px; height: 150px; border: 3px solid #e3e6f0;">
-                                    <h5 class="font-weight-bold text-gray-800">Nguyễn Văn Quản</h5>
-                                    <p class="text-muted mb-1">Trưởng Ban Quản Lý</p>
-                                    <span class="badge badge-success mb-3">Đang hoạt động</span>
+                                    <div class="position-relative d-inline-block mb-3">
+                                        <img class="img-profile rounded-circle" id="profileImage" src="img/undraw_profile.svg" style="width: 150px; height: 150px; border: 3px solid #e3e6f0; object-fit: cover; cursor: pointer;" alt="Ảnh đại diện">
+                                        <input type="file" id="profileImageInput" accept="image/*" style="display: none;">
+                                        <div class="position-absolute" style="bottom: 0; right: 0; background: #4e73df; color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 3px solid white;" title="Đổi ảnh đại diện">
+                                            <i class="fas fa-camera"></i>
+                                        </div>
+                                    </div>
+                                    <h5 class="font-weight-bold text-gray-800" id="profileName">Đang tải...</h5>
+                                    <p class="text-muted mb-1" id="profileRole">-</p>
+                                    <span class="badge badge-success mb-3" id="profileStatus">Đang hoạt động</span>
                                     
                                     <div class="mt-2">
-                                        <button class="btn btn-primary btn-sm btn-icon-split">
+                                        <button type="button" class="btn btn-primary btn-sm btn-icon-split" id="btnChangeImage">
                                             <span class="icon text-white-50">
                                                 <i class="fas fa-camera"></i>
                                             </span>
@@ -178,28 +202,28 @@
                                         <div class="form-row">
                                             <div class="form-group col-md-6">
                                                 <label class="small mb-1 font-weight-bold" for="username">Tên đăng nhập</label>
-                                                <input type="text" class="form-control" id="username" value="admin_bluemoon" readonly disabled>
+                                                <input type="text" class="form-control" id="username" readonly disabled>
                                             </div>
                                             <div class="form-group col-md-6">
                                                 <label class="small mb-1 font-weight-bold" for="email">Địa chỉ Email</label>
-                                                <input type="email" class="form-control" id="email" value="admin@bluemoon.vn">
+                                                <input type="email" class="form-control" id="email" placeholder="Nhập email">
                                             </div>
                                         </div>
 
                                         <div class="form-row">
                                             <div class="form-group col-md-6">
                                                 <label class="small mb-1 font-weight-bold" for="fullname">Họ và tên</label>
-                                                <input type="text" class="form-control" id="fullname" value="Nguyễn Văn Quản">
+                                                <input type="text" class="form-control" id="fullname" placeholder="Nhập họ tên">
                                             </div>
                                             <div class="form-group col-md-6">
                                                 <label class="small mb-1 font-weight-bold" for="phone">Số điện thoại</label>
-                                                <input type="tel" class="form-control" id="phone" value="0987654321">
+                                                <input type="tel" class="form-control" id="phone" placeholder="Nhập số điện thoại">
                                             </div>
                                         </div>
 
                                         <div class="form-group">
                                             <label class="small mb-1 font-weight-bold" for="address">Địa chỉ liên hệ</label>
-                                            <input type="text" class="form-control" id="address" value="Tòa nhà BlueMoon, Số 1 Đại Cồ Việt, Hà Nội">
+                                            <input type="text" class="form-control" id="address" placeholder="Nhập địa chỉ">
                                         </div>
 
                                         <hr class="my-4">
@@ -221,12 +245,20 @@
                                             </div>
                                         </div>
 
-                                        <button type="submit" class="btn btn-success mt-3">
-                                            <span class="icon text-white-50 mr-2">
-                                                <i class="fas fa-save"></i>
-                                            </span>
-                                            <span class="text">Lưu thay đổi</span>
-                                        </button>
+                                        <div class="d-flex justify-content-between mt-3">
+                                            <button type="button" class="btn btn-warning" onclick="changePassword()">
+                                                <span class="icon text-white-50 mr-2">
+                                                    <i class="fas fa-key"></i>
+                                                </span>
+                                                <span class="text">Đổi mật khẩu</span>
+                                            </button>
+                                            <button type="submit" class="btn btn-success">
+                                                <span class="icon text-white-50 mr-2">
+                                                    <i class="fas fa-save"></i>
+                                                </span>
+                                                <span class="text">Lưu thay đổi</span>
+                                            </button>
+                                        </div>
                                     </form>
                                 </div>
                             </div>
@@ -273,7 +305,7 @@
                 <div class="modal-body">Chọn "Đăng xuất" bên dưới nếu bạn muốn kết thúc phiên làm việc.</div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
-                    <a class="btn btn-primary" href="login.html">Đăng xuất</a>
+                    <button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button>
                 </div>
             </div>
         </div>
@@ -284,7 +316,396 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
+    
+    <script>
+        let currentUser = null;
+        
+        // Load và hiển thị thông tin user
+        $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
 
+            loadUserProfile();
+            loadUserDisplay();
+            
+            // Load profile image from storage
+            loadProfileImage();
+            
+            // Handle form submit
+            $('form').on('submit', async function(e) {
+                e.preventDefault();
+                await saveProfile();
+            });
+            
+            // Handle change image button click
+            $('#btnChangeImage, #profileImage, .position-absolute').on('click', function() {
+                $('#profileImageInput').click();
+            });
+            
+            // Handle file selection
+            $('#profileImageInput').on('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                            APIUtils.showError('Vui lòng chọn file ảnh hợp lệ');
+                        } else {
+                            alert('Vui lòng chọn file ảnh hợp lệ');
+                        }
+                        return;
+                    }
+                    
+                    // Validate file size (max 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                            APIUtils.showError('Kích thước ảnh không được vượt quá 5MB');
+                        } else {
+                            alert('Kích thước ảnh không được vượt quá 5MB');
+                        }
+                        return;
+                    }
+                    
+                    // Read file and preview
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imageData = e.target.result;
+                        // Update preview in profile section
+                        $('#profileImage').attr('src', imageData);
+                        
+                        // Update avatar in navbar (top right)
+                        $('#navbarAvatar').attr('src', imageData);
+                        
+                        // Save to localStorage for this session
+                        if (currentUser && currentUser.id) {
+                            const imageKey = `profileImage_${currentUser.id}`;
+                            localStorage.setItem(imageKey, imageData);
+                            
+                            // Also save to sessionStorage
+                            sessionStorage.setItem(imageKey, imageData);
+                            
+                            if (typeof APIUtils !== 'undefined' && APIUtils.showSuccess) {
+                                APIUtils.showSuccess('Ảnh đã được cập nhật. Nhấn "Lưu thay đổi" để lưu vĩnh viễn.');
+                            } else {
+                                alert('Ảnh đã được cập nhật. Nhấn "Lưu thay đổi" để lưu vĩnh viễn.');
+                            }
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+        
+        /**
+         * Load profile image from storage
+         */
+        function loadProfileImage() {
+            if (currentUser && currentUser.id) {
+                const imageKey = `profileImage_${currentUser.id}`;
+                // Try sessionStorage first, then localStorage
+                let imageData = sessionStorage.getItem(imageKey);
+                if (!imageData) {
+                    imageData = localStorage.getItem(imageKey);
+                }
+                if (imageData) {
+                    // Update both profile image and navbar avatar
+                    $('#profileImage').attr('src', imageData);
+                    $('#navbarAvatar').attr('src', imageData);
+                }
+            }
+        }
+        
+        /**
+         * Load user profile từ sessionStorage và populate form
+         */
+        function loadUserProfile() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (!userStr) {
+                    console.error('[ho-so] No user found in sessionStorage');
+                    alert('Bạn chưa đăng nhập. Vui lòng đăng nhập lại.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                currentUser = JSON.parse(userStr);
+                console.log('[ho-so] Loaded user from sessionStorage:', currentUser);
+                
+                // Populate form fields
+                if (currentUser.tenDangNhap) {
+                    $('#username').val(currentUser.tenDangNhap);
+                }
+                
+                // Map backend fields to frontend
+                // Backend: hoTen, dienThoai, vaiTro, trangThai
+                // Frontend: fullname, phone, email, address
+                
+                if (currentUser.hoTen) {
+                    $('#fullname').val(currentUser.hoTen);
+                    $('#profileName').text(currentUser.hoTen);
+                } else if (currentUser.tenDangNhap) {
+                    $('#profileName').text(currentUser.tenDangNhap);
+                } else {
+                    $('#profileName').text('Người dùng');
+                }
+                
+                if (currentUser.dienThoai) {
+                    $('#phone').val(currentUser.dienThoai);
+                }
+                
+                if (currentUser.vaiTro) {
+                    $('#profileRole').text(currentUser.vaiTro);
+                } else {
+                    $('#profileRole').text('-');
+                }
+                
+                if (currentUser.trangThai) {
+                    const statusBadge = $('#profileStatus');
+                    if (currentUser.trangThai === 'Hoạt động') {
+                        statusBadge.removeClass('badge-danger').addClass('badge-success').text('Đang hoạt động');
+                    } else {
+                        statusBadge.removeClass('badge-success').addClass('badge-danger').text(currentUser.trangThai);
+                    }
+                }
+                
+                // Email và address không có trong backend TaiKhoan model
+                // Có thể để trống hoặc lấy từ nơi khác nếu cần
+                // $('#email').val(currentUser.email || '');
+                // $('#address').val(currentUser.address || '');
+                
+                // Load profile image after user is loaded
+                loadProfileImage();
+                
+            } catch (error) {
+                console.error('[ho-so] Error loading user profile:', error);
+                alert('Lỗi khi tải thông tin người dùng: ' + error.message);
+                window.location.href = 'login.html';
+            }
+        }
+        
+        /**
+         * Load user display name cho navbar
+         */
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                    $('#userDisplayName').text(displayName);
+                } else {
+                    $('#userDisplayName').text('Người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                $('#userDisplayName').text('Người dùng');
+            }
+        }
+        
+        /**
+         * Save profile changes
+         */
+        async function saveProfile() {
+            if (!currentUser || !currentUser.id) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Không tìm thấy thông tin người dùng');
+                } else {
+                    alert('Không tìm thấy thông tin người dùng');
+                }
+                return;
+            }
+            
+            const fullname = $('#fullname').val().trim();
+            const phone = $('#phone').val().trim();
+            const email = $('#email').val().trim();
+            const address = $('#address').val().trim();
+            
+            // Validate
+            if (!fullname) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Vui lòng nhập họ tên');
+                } else {
+                    alert('Vui lòng nhập họ tên');
+                }
+                return;
+            }
+            
+            try {
+                // Update user info
+                const updateData = {
+                    id: currentUser.id,
+                    tenDangNhap: currentUser.tenDangNhap,
+                    hoTen: fullname,
+                    dienThoai: phone,
+                    vaiTro: currentUser.vaiTro,
+                    trangThai: currentUser.trangThai
+                };
+                
+                const result = await TaiKhoanAPI.update(currentUser.id, updateData);
+                
+                if (result && result.success !== false) {
+                    // Save profile image if changed (persist to localStorage)
+                    if (currentUser && currentUser.id) {
+                        const imageKey = `profileImage_${currentUser.id}`;
+                        const imageData = sessionStorage.getItem(imageKey) || localStorage.getItem(imageKey);
+                        if (imageData) {
+                            // Persist image to localStorage for long-term storage
+                            localStorage.setItem(imageKey, imageData);
+                            sessionStorage.setItem(imageKey, imageData);
+                        }
+                    }
+                    
+                    // Update sessionStorage với dữ liệu mới
+                    const updatedUser = {
+                        ...currentUser,
+                        hoTen: fullname,
+                        dienThoai: phone
+                    };
+                    sessionStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                    currentUser = updatedUser;
+                    
+                    // Update UI
+                    $('#profileName').text(fullname);
+                    loadUserDisplay(); // Update navbar
+                    updateNavbarAvatar(); // Update navbar avatar
+                    
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showSuccess) {
+                        APIUtils.showSuccess('Cập nhật thông tin thành công');
+                    } else {
+                        alert('Cập nhật thông tin thành công');
+                    }
+                } else {
+                    const errorMsg = (result && result.message) || 'Cập nhật thông tin thất bại';
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                        APIUtils.showError(errorMsg);
+                    } else {
+                        alert(errorMsg);
+                    }
+                }
+            } catch (error) {
+                console.error('[ho-so] Error saving profile:', error);
+                const errorMsg = 'Lỗi khi cập nhật thông tin: ' + error.message;
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError(errorMsg);
+                } else {
+                    alert(errorMsg);
+                }
+            }
+        }
+        
+        /**
+         * Handle password change
+         */
+        async function changePassword() {
+            const currentPass = $('#currentPass').val();
+            const newPass = $('#newPass').val();
+            const confirmPass = $('#confirmPass').val();
+            
+            if (!currentPass || !newPass || !confirmPass) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Vui lòng điền đầy đủ thông tin mật khẩu');
+                } else {
+                    alert('Vui lòng điền đầy đủ thông tin mật khẩu');
+                }
+                return;
+            }
+            
+            if (newPass !== confirmPass) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Mật khẩu mới và xác nhận không khớp');
+                } else {
+                    alert('Mật khẩu mới và xác nhận không khớp');
+                }
+                return;
+            }
+            
+            if (newPass.length < 6) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Mật khẩu mới phải có ít nhất 6 ký tự');
+                } else {
+                    alert('Mật khẩu mới phải có ít nhất 6 ký tự');
+                }
+                return;
+            }
+            
+            if (!currentUser || !currentUser.id) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Không tìm thấy thông tin người dùng');
+                } else {
+                    alert('Không tìm thấy thông tin người dùng');
+                }
+                return;
+            }
+            
+            try {
+                const result = await AuthAPI.changePassword({
+                    id: currentUser.id,
+                    oldPassword: currentPass,
+                    newPassword: newPass
+                });
+                
+                if (result && result.success !== false) {
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showSuccess) {
+                        APIUtils.showSuccess('Đổi mật khẩu thành công');
+                    } else {
+                        alert('Đổi mật khẩu thành công');
+                    }
+                    $('#currentPass').val('');
+                    $('#newPass').val('');
+                    $('#confirmPass').val('');
+                } else {
+                    const errorMsg = (result && result.message) || 'Đổi mật khẩu thất bại';
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                        APIUtils.showError(errorMsg);
+                    } else {
+                        alert(errorMsg);
+                    }
+                }
+            } catch (error) {
+                console.error('[ho-so] Error changing password:', error);
+                const errorMsg = 'Lỗi khi đổi mật khẩu: ' + error.message;
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError(errorMsg);
+                } else {
+                    alert(errorMsg);
+                }
+            }
+        }
+    </script>
+
+
+    <script>
+        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
+        $(document).ready(function() {
+            try {
+                const userInfo = sessionStorage.getItem('currentUser');
+                if (userInfo) {
+                    const user = JSON.parse(userInfo);
+                    const role = user.vaiTro || user.role || '';
+                
+                // Debug: log để kiểm tra giá trị role
+                console.log('Current user:', user);
+                console.log('Role value:', role);
+                console.log('Role type:', typeof role);
+                
+                // Kiểm tra nhiều giá trị có thể là Admin
+                const isAdmin = role === 'BanQuanLy' || 
+                               role === 'Ban Quản lý' || 
+                               role === 'Admin' ||
+                               role === 'admin' ||
+                               role === 'BANQUANLY' ||
+                               role.toLowerCase() === 'banquanly';
+                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
+                        $('#menuTaiKhoan').show();
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking admin role:', error);
+            }
+        });
+    </script>
 </body>
 
 </html>

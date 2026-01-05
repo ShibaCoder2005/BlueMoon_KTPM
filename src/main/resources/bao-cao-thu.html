@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Bluemoon - Báo Cáo Thu</title>
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div id="wrapper">
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-building"></i></div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
+            </a>
+            <hr class="sidebar-divider my-0">
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="can-ho.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Cư dân</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="khoan-thu.html">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Khoản thu</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="thong-ke.html">
+                    <i class="fas fa-fw fa-chart-bar"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
+                </a>
+            </li>
+            <li class="nav-item" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                    <i class="fas fa-fw fa-user-cog"></i>
+                    <span>Tài khoản</span>
+                </a>
+            </li>
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <ul class="navbar-nav ml-auto">
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="ho-so.html">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="container-fluid">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Báo Cáo Thu</h1>
+                        <div>
+                            <button class="btn btn-success btn-icon-split shadow-sm" onclick="handleExport()">
+                                <span class="icon text-white-50"><i class="fas fa-file-excel"></i></span>
+                                <span class="text">Xuất báo cáo</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Section -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Bộ lọc</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="col-md-3 mb-3">
+                                    <label>Chọn tháng/năm</label>
+                                    <div class="form-row">
+                                        <div class="col-6">
+                                            <select class="form-control" id="monthFilter">
+                                                <option value="">Tháng</option>
+                                                <option value="1">Tháng 1</option>
+                                                <option value="2">Tháng 2</option>
+                                                <option value="3">Tháng 3</option>
+                                                <option value="4">Tháng 4</option>
+                                                <option value="5">Tháng 5</option>
+                                                <option value="6">Tháng 6</option>
+                                                <option value="7">Tháng 7</option>
+                                                <option value="8">Tháng 8</option>
+                                                <option value="9">Tháng 9</option>
+                                                <option value="10">Tháng 10</option>
+                                                <option value="11">Tháng 11</option>
+                                                <option value="12">Tháng 12</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" class="form-control" id="yearFilter" placeholder="Năm" min="2020" max="2099" value="2025">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label>Hoặc chọn khoảng thời gian</label>
+                                    <input type="date" class="form-control" id="fromDateFilter">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label>&nbsp;</label>
+                                    <input type="date" class="form-control" id="toDateFilter">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label>&nbsp;</label>
+                                    <button class="btn btn-primary btn-block" onclick="loadReport()">
+                                        <i class="fas fa-search"></i> Tìm kiếm
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report Table -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách báo cáo thu</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="reportTable" width="100%" cellspacing="0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Mã Hộ</th>
+                                            <th>Số Phòng</th>
+                                            <th>Chủ Hộ</th>
+                                            <th>Ngày Thu</th>
+                                            <th>Số Tiền</th>
+                                            <th>Đợt Thu</th>
+                                            <th>Trạng Thái</th>
+                                            <th>Hình Thức Thu</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reportTableBody">
+                                        <tr><td colspan="9" class="text-center">Vui lòng chọn thời gian và nhấn "Tìm kiếm"</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; Hệ thống Quản lý Chung cư 2025</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal fade" id="exportModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Xuất Báo Cáo</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="exportForm">
+                        <div class="form-group">
+                            <label>Chọn thời gian</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="timeRange" id="monthYearRadio" value="monthYear" checked>
+                                <label class="form-check-label" for="monthYearRadio">Tháng/Năm</label>
+                            </div>
+                            <div class="form-row mb-3" id="monthYearGroup">
+                                <div class="col-6">
+                                    <select class="form-control" id="exportMonth" required>
+                                        <option value="">Tháng</option>
+                                        <option value="1">Tháng 1</option>
+                                        <option value="2">Tháng 2</option>
+                                        <option value="3">Tháng 3</option>
+                                        <option value="4">Tháng 4</option>
+                                        <option value="5">Tháng 5</option>
+                                        <option value="6">Tháng 6</option>
+                                        <option value="7">Tháng 7</option>
+                                        <option value="8">Tháng 8</option>
+                                        <option value="9">Tháng 9</option>
+                                        <option value="10">Tháng 10</option>
+                                        <option value="11">Tháng 11</option>
+                                        <option value="12">Tháng 12</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="exportYear" placeholder="Năm" min="2020" max="2099" value="2025" required>
+                                </div>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="timeRange" id="dateRangeRadio" value="dateRange">
+                                <label class="form-check-label" for="dateRangeRadio">Khoảng thời gian</label>
+                            </div>
+                            <div class="form-row" id="dateRangeGroup" style="display: none;">
+                                <div class="col-6">
+                                    <input type="date" class="form-control" id="exportFromDate">
+                                </div>
+                                <div class="col-6">
+                                    <input type="date" class="form-control" id="exportToDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Định dạng file</label>
+                            <select class="form-control" id="exportFormat">
+                                <option value="xlsx" selected>Excel (.xlsx)</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-success" onclick="confirmExport()">
+                        <i class="fas fa-download"></i> Xuất file
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận đăng xuất</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">Bạn có chắc chắn muốn đăng xuất?</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" onclick="logout()">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
+    <script>
+        let reportData = [];
+        let dataTable = null;
+
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                    $('#userDisplayName').text(displayName);
+                    
+                    if (user && user.id) {
+                        const imageKey = `profileImage_${user.id}`;
+                        let imageData = sessionStorage.getItem(imageKey);
+                        if (!imageData) {
+                            imageData = localStorage.getItem(imageKey);
+                        }
+                        if (imageData) {
+                            $('#navbarAvatar').attr('src', imageData);
+                        }
+                    }
+                } else {
+                    $('#userDisplayName').text('Người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                $('#userDisplayName').text('Người dùng');
+            }
+        }
+
+        function checkAdminBeforeNavigate(event) {
+            try {
+                const userInfo = sessionStorage.getItem('currentUser');
+                if (!userInfo) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                const user = JSON.parse(userInfo);
+                const role = user.vaiTro || user.role || '';
+                const isAdmin = role === 'BanQuanLy' || role === 'Ban Quản lý' || role === 'Admin' ||
+                               role === 'admin' || role === 'BANQUANLY' || role.toLowerCase() === 'banquanly';
+                if (!isAdmin) {
+                    event.preventDefault();
+                    alert('Bạn không có quyền truy cập trang này!');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error checking admin access:', error);
+                return false;
+            }
+            return true;
+        }
+
+        async function loadReport() {
+            try {
+                const month = $('#monthFilter').val();
+                const year = $('#yearFilter').val();
+                const fromDate = $('#fromDateFilter').val();
+                const toDate = $('#toDateFilter').val();
+
+                let params = {};
+                if (month && year) {
+                    params.month = parseInt(month);
+                    params.year = parseInt(year);
+                } else if (fromDate && toDate) {
+                    params.fromDate = fromDate;
+                    params.toDate = toDate;
+                } else {
+                    alert('Vui lòng chọn tháng/năm hoặc khoảng thời gian');
+                    return;
+                }
+
+                const data = await BaoCaoAPI.getRevenueReport(params);
+                reportData = Array.isArray(data) ? data : (data.data || []);
+                renderTable();
+            } catch (error) {
+                console.error('Error loading report:', error);
+                alert('Lỗi khi tải báo cáo: ' + error.message);
+            }
+        }
+
+        function renderTable() {
+            const tbody = $('#reportTableBody');
+            tbody.empty();
+
+            if (reportData.length === 0) {
+                tbody.html('<tr><td colspan="9" class="text-center">Không có dữ liệu</td></tr>');
+                if (dataTable) {
+                    dataTable.destroy();
+                    dataTable = null;
+                }
+                return;
+            }
+
+            reportData.forEach((item, index) => {
+                const row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.maHo || ''}</td>
+                        <td>${item.soPhong || ''}</td>
+                        <td>${item.chuHo || 'N/A'}</td>
+                        <td>${item.ngayThu ? new Date(item.ngayThu).toLocaleString('vi-VN') : 'N/A'}</td>
+                        <td>${item.soTien ? new Intl.NumberFormat('vi-VN').format(item.soTien) : '0'} đ</td>
+                        <td>${item.tenDot || 'N/A'}</td>
+                        <td>${item.trangThai || 'N/A'}</td>
+                        <td>${item.hinhThucThu || 'N/A'}</td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+
+            if (dataTable) {
+                dataTable.destroy();
+            }
+            dataTable = $('#reportTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Vietnamese.json'
+                }
+            });
+        }
+
+        function handleExport() {
+            // Copy current filter values to export modal
+            const month = $('#monthFilter').val();
+            const year = $('#yearFilter').val();
+            const fromDate = $('#fromDateFilter').val();
+            const toDate = $('#toDateFilter').val();
+
+            if (month && year) {
+                $('#monthYearRadio').prop('checked', true);
+                $('#exportMonth').val(month);
+                $('#exportYear').val(year);
+                $('#monthYearGroup').show();
+                $('#dateRangeGroup').hide();
+            } else if (fromDate && toDate) {
+                $('#dateRangeRadio').prop('checked', true);
+                $('#exportFromDate').val(fromDate);
+                $('#exportToDate').val(toDate);
+                $('#monthYearGroup').hide();
+                $('#dateRangeGroup').show();
+            }
+
+            $('#exportModal').modal('show');
+        }
+
+        $('input[name="timeRange"]').change(function() {
+            if ($(this).val() === 'monthYear') {
+                $('#monthYearGroup').show();
+                $('#dateRangeGroup').hide();
+                $('#exportFromDate').removeAttr('required');
+                $('#exportToDate').removeAttr('required');
+                $('#exportMonth').attr('required', true);
+                $('#exportYear').attr('required', true);
+            } else {
+                $('#monthYearGroup').hide();
+                $('#dateRangeGroup').show();
+                $('#exportMonth').removeAttr('required');
+                $('#exportYear').removeAttr('required');
+                $('#exportFromDate').attr('required', true);
+                $('#exportToDate').attr('required', true);
+            }
+        });
+
+        async function confirmExport() {
+            try {
+                const timeRange = $('input[name="timeRange"]:checked').val();
+                let params = {};
+
+                if (timeRange === 'monthYear') {
+                    const month = $('#exportMonth').val();
+                    const year = $('#exportYear').val();
+                    if (!month || !year) {
+                        alert('Vui lòng chọn đầy đủ tháng và năm');
+                        return;
+                    }
+                    params.month = parseInt(month);
+                    params.year = parseInt(year);
+                } else {
+                    const fromDate = $('#exportFromDate').val();
+                    const toDate = $('#exportToDate').val();
+                    if (!fromDate || !toDate) {
+                        alert('Vui lòng chọn đầy đủ khoảng thời gian');
+                        return;
+                    }
+                    params.fromDate = fromDate;
+                    params.toDate = toDate;
+                }
+
+                $('#exportModal').modal('hide');
+                
+                // Show loading
+                const loadingToast = $('<div class="toast" role="alert"><div class="toast-body">Đang xuất file...</div></div>');
+                $('body').append(loadingToast);
+                loadingToast.toast({ autohide: false }).toast('show');
+
+                await BaoCaoAPI.exportRevenue(params);
+
+                loadingToast.toast('hide');
+                loadingToast.remove();
+                
+                // Show success
+                const successToast = $('<div class="toast" role="alert"><div class="toast-body bg-success text-white">Xuất file thành công!</div></div>');
+                $('body').append(successToast);
+                successToast.toast({ delay: 3000 }).toast('show');
+                setTimeout(() => successToast.remove(), 3500);
+            } catch (error) {
+                console.error('Error exporting:', error);
+                alert('Lỗi khi xuất file: ' + error.message);
+            }
+        }
+
+        $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
+            loadUserDisplay();
+            
+            // Set current month/year as default
+            const now = new Date();
+            $('#monthFilter').val(now.getMonth() + 1);
+            $('#yearFilter').val(now.getFullYear());
+        });
+    </script>
+</body>
+</html>
+

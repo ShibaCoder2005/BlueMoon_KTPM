@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Bluemoon - Căn hộ</title>
+    <title>Bluemoon - Hộ Gia Đình</title>
 
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
@@ -24,14 +24,14 @@
     <div id="wrapper">
 
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="trang-chu.html">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
                 <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-building"></i></div>
                 <div class="sidebar-brand-text mx-3">BlueMoon</div>
             </a>
             <hr class="sidebar-divider my-0">
 
             <li class="nav-item">
-                <a class="nav-link" href="trang-chu.html">
+                <a class="nav-link" href="index.html">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Trang chủ</span>
                 </a>
@@ -39,13 +39,13 @@
 
             <li class="nav-item active">
                 <a class="nav-link" href="can-ho.html">
-                    <i class="fas fa-fw fa-door-open"></i>
-                    <span>Căn hộ</span>
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="cu-dan.html">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Cư dân</span>
                 </a>
@@ -59,39 +59,43 @@
             </li>
 
             <li class="nav-item">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link" href="thong-ke.html">
                     <i class="fas fa-fw fa-chart-bar"></i>
                     <span>Thống kê</span>
                 </a>
             </li>
-
             <li class="nav-item">
-                <a class="nav-link" href="thong-bao.html">
-                    <i class="fas fa-fw fa-bullhorn"></i>
-                    <span>Thông báo</span>
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="phan-anh.html">
-                    <i class="fas fa-fw fa-comments"></i>
-                    <span>Phản ánh</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="tai-khoan.html">
+            <li class="nav-item" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
                     <i class="fas fa-fw fa-user-cog"></i>
                     <span>Tài khoản</span>
-                </a>
-            </li>
-
-            <hr class="sidebar-divider">
-
-            <li class="nav-item">
-                <a class="nav-link" href="cai-dat.html">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Cài đặt</span>
                 </a>
             </li>
 
@@ -111,11 +115,11 @@
                         <div class="topbar-divider d-none d-sm-block"></div>
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Admin Quản Lý</span>
-                                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
-                                <a class="dropdown-item" href="#"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ</a>
+                                <a class="dropdown-item" href="ho-so.html"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ</a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Đăng xuất
@@ -126,59 +130,36 @@
                 </nav>
 
                 <div class="container-fluid">
-                    <h1 class="h3 mb-4 text-gray-800">Thông tin Căn hộ & Đóng góp</h1>
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Quản lý Hộ Gia Đình</h1>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#addHouseholdModal">
+                            <i class="fas fa-plus fa-sm text-white-50"></i> Thêm hộ gia đình
+                        </a>
+                    </div>
                     
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
-                                <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tab-1">Phí dịch vụ T11</a></li>
-                                <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tab-2">Phí gửi xe T11</a></li>
-                            </ul>
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách Hộ Gia Đình</h6>
                         </div>
                         <div class="card-body">
-                            <div class="tab-content">
-                                <div class="tab-pane fade show active" id="tab-1">
-                                    <h6 class="m-0 font-weight-bold text-gray-800 mb-3">Đã thanh toán (0 căn)</h6>
-                                    <div class="table-responsive mb-4">
-                                        <table class="table table-bordered" id="dataTable1" width="100%" cellspacing="0">
-                                            <thead class="bg-light text-gray-900">
-                                                <tr><th>STT</th><th>Căn hộ</th><th>Số tiền (VNĐ)</th><th>Ngày thanh toán</th></tr>
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="householdTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Mã hộ</th>
+                                            <th>Số phòng</th>
+                                            <th>Diện tích (m²)</th>
+                                            <th>Chủ hộ</th>
+                                            <th>Ngày tạo</th>
+                                            <th>Ghi chú</th>
+                                            <th>Hành động</th>
+                                        </tr>
                                             </thead>
-                                            <tbody>
-                                                <tr><td colspan="4" class="text-center">Đang tải dữ liệu...</td></tr>
+                                    <tbody id="householdTableBody">
+                                        <tr><td colspan="8" class="text-center">Đang tải dữ liệu...</td></tr>
                                             </tbody>
                                         </table>
-                                    </div>
-                                    <div class="card shadow-none border mb-4">
-                                        <div class="card-header py-3 card-unpaid-header d-flex justify-content-between" data-toggle="collapse" data-target="#collapseUnpaid1">
-                                            <h6 class="m-0 font-weight-bold text-gray-800">Chưa thanh toán (0 căn)</h6>
-                                            <i class="fas fa-chevron-down text-gray-500"></i>
-                                        </div>
-                                        <div id="collapseUnpaid1" class="collapse">
-                                            <div class="card-body">
-                                                <table class="table table-bordered">
-                                                    <thead>
-                                                        <tr><th>STT</th><th>Căn hộ</th><th>Số tiền</th></tr>
-                                                    </thead>
-                                                    <tbody id="unpaidTableBody">
-                                                        <tr><td colspan="3" class="text-center">Đang tải dữ liệu...</td></tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="tab-2">
-                                    <h6 class="mb-3 text-gray-800">Đã thanh toán vé xe</h6>
-                                    <table class="table table-bordered" id="dataTable2" width="100%">
-                                        <thead>
-                                            <tr><th>STT</th><th>Căn hộ</th></tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr><td colspan="2" class="text-center">Chưa có dữ liệu</td></tr>
-                                        </tbody>
-                                    </table>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -196,7 +177,7 @@
             <div class="modal-content">
                 <div class="modal-header"><h5 class="modal-title">Bạn muốn đăng xuất?</h5><button class="close" data-dismiss="modal"><span>×</span></button></div>
                 <div class="modal-body">Chọn "Đăng xuất" để kết thúc phiên làm việc.</div>
-                <div class="modal-footer"><button class="btn btn-secondary" data-dismiss="modal">Hủy</button><a class="btn btn-primary" href="login.html">Đăng xuất</a></div>
+                <div class="modal-footer"><button class="btn btn-secondary" data-dismiss="modal">Hủy</button><button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button></div>
             </div>
         </div>
     </div>
@@ -208,94 +189,360 @@
     <script src="vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
+
+    <!-- Modal Thêm/Sửa Hộ Gia Đình -->
+    <div class="modal fade" id="addHouseholdModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Thêm Hộ Gia Đình</h5>
+                    <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="householdForm">
+                        <div class="form-group">
+                            <label>Mã hộ <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="maHo" placeholder="VD: H001" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Số phòng</label>
+                            <input type="number" class="form-control" id="soPhong" placeholder="Nhập số phòng" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Diện tích (m²)</label>
+                            <input type="number" class="form-control" id="dienTich" placeholder="Nhập diện tích" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Ghi chú</label>
+                            <textarea class="form-control" id="ghiChu" rows="3" placeholder="Ghi chú về hộ gia đình"></textarea>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> <strong>Lưu ý:</strong> Chủ hộ được quản lý trong giao diện <strong>Cư dân</strong>. Khi thêm cư dân, bạn có thể chọn quan hệ "Chủ hộ" để gán chủ hộ cho hộ gia đình.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="saveHouseholdBtn">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let dataTable1, dataTable2;
+        // Load và hiển thị thông tin user
+        $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
+            loadUserDisplay();
+        });
+        
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                    $('#userDisplayName').text(displayName);
+                    
+                    // Load avatar
+                    if (user && user.id) {
+                        const imageKey = `profileImage_${user.id}`;
+                        let imageData = sessionStorage.getItem(imageKey);
+                        if (!imageData) {
+                            imageData = localStorage.getItem(imageKey);
+                        }
+                        if (imageData) {
+                            $('#navbarAvatar').attr('src', imageData);
+                        }
+                    }
+                } else {
+                    $('#userDisplayName').text('Người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                $('#userDisplayName').text('Người dùng');
+            }
+        }
+        
+        let householdTable;
+        let editingHouseholdId = null;
 
         $(document).ready(async function() {
-            await loadHouseholdData();
+            await loadHouseholds();
+            
+            // Form submission
+            $('#saveHouseholdBtn').on('click', async function() {
+                await saveHousehold();
+            });
+
+            // Reset form when modal is closed
+            $('#addHouseholdModal').on('hidden.bs.modal', function() {
+                $('#householdForm')[0].reset();
+                editingHouseholdId = null;
+                $('.modal-title').text('Thêm Hộ Gia Đình');
+            });
         });
 
-        async function loadHouseholdData() {
+        async function loadHouseholds() {
             try {
                 const households = await HoGiaDinhAPI.getAll();
-                const tbody1 = $('#dataTable1 tbody');
-                const tbody2 = $('#dataTable2 tbody');
+                const residents = await NhanKhauAPI.getAll();
                 
-                tbody1.empty();
-                tbody2.empty();
+                console.log('[loadHouseholds] Loaded households:', households);
+                console.log('[loadHouseholds] Loaded residents:', residents);
+                
+                // Build resident map for lookup - maChuHo is the ID of NhanKhau
+                const residentMap = {};
+                residents.forEach(r => {
+                    // Use r.id as key (maChuHo references NhanKhau.id)
+                    // Ensure we use the correct ID field
+                    const residentId = r.id;
+                    if (residentId !== null && residentId !== undefined) {
+                        // Convert to number to ensure consistent key type
+                        const key = parseInt(residentId);
+                        if (!isNaN(key)) {
+                            residentMap[key] = r;
+                        }
+                    }
+                });
+                
+                console.log('[loadHouseholds] Resident map:', residentMap);
+
+                const tbody = $('#householdTableBody');
+                tbody.empty();
 
                 if (!households || households.length === 0) {
-                    tbody1.html('<tr><td colspan="4" class="text-center">Chưa có dữ liệu</td></tr>');
+                    tbody.html('<tr><td colspan="8" class="text-center">Chưa có hộ gia đình nào</td></tr>');
                     return;
                 }
 
-                // Load payment data for each household
-                let paidCount = 0;
-                let unpaidCount = 0;
-                const paidList = [];
-                const unpaidList = [];
-
-                for (const household of households) {
-                    try {
-                        const unpaid = await PhieuThuAPI.hasUnpaidFees(household.maHo);
-                        if (unpaid && unpaid.length > 0) {
-                            unpaidCount++;
-                            unpaidList.push({ household, unpaid });
-                        } else {
-                            paidCount++;
-                            paidList.push(household);
+                // Process each household independently to avoid closure issues
+                const rows = households.map((household, index) => {
+                    // Parse maChuHo to ensure it's a number
+                    const maChuHoValue = household.maChuHo !== null && household.maChuHo !== undefined 
+                        ? parseInt(household.maChuHo) 
+                        : 0;
+                    
+                    // Get chủ hộ for THIS specific household
+                    let tenChuHo = 'Chưa xác định';
+                    if (maChuHoValue > 0) {
+                        const chuHo = residentMap[maChuHoValue];
+                        if (chuHo && chuHo.hoTen) {
+                            tenChuHo = chuHo.hoTen;
                         }
-                    } catch (error) {
-                        console.error('Error checking unpaid fees:', error);
+                    }
+                    
+                    // Log for debugging
+                    console.log(`[loadHouseholds] Household ${household.id} (${household.maHo}): maChuHo=${maChuHoValue}, tenChuHo=${tenChuHo}`);
+                    
+                    // Build row HTML for THIS household
+                    return `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${household.maHo || 'H' + household.id}</strong></td>
+                            <td>${household.soPhong || '-'}</td>
+                            <td>${household.dienTich ? (typeof household.dienTich === 'number' ? household.dienTich.toLocaleString('vi-VN') : household.dienTich) : '-'}</td>
+                            <td>${tenChuHo}</td>
+                            <td>${household.ngayTao ? formatDate(household.ngayTao) : '-'}</td>
+                            <td>${household.ghiChu || '-'}</td>
+                            <td class="text-center">
+                                <button class="btn btn-warning btn-circle btn-sm" onclick="editHousehold(${household.id})" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-circle btn-sm" onclick="deleteHousehold(${household.id})" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                // Append all rows at once
+                tbody.append(rows.join(''));
+
+                // Initialize/reinitialize DataTable
+                if (householdTable) {
+                    householdTable.destroy();
+                }
+                householdTable = $('#householdTable').DataTable({
+                    "language": {
+                        "search": "Tìm kiếm:",
+                        "paginate": { "next": ">", "previous": "<" }
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading households:', error);
+                $('#householdTableBody').html(`<tr><td colspan="8" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Không thể tải danh sách hộ gia đình: ' + error.message);
+                }
+            }
+        }
+
+        async function saveHousehold() {
+            const form = $('#householdForm');
+            if (!form[0].checkValidity()) {
+                form[0].reportValidity();
+                return;
+            }
+
+            const maHo = $('#maHo').val().trim();
+            const soPhong = parseInt($('#soPhong').val()) || 0;
+            const dienTichStr = $('#dienTich').val().trim();
+            const dienTich = dienTichStr ? parseFloat(dienTichStr) : null;
+            const ghiChu = $('#ghiChu').val().trim();
+
+            if (!maHo) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Vui lòng nhập mã hộ');
+                } else {
+                    alert('Vui lòng nhập mã hộ');
+                }
+                return;
+            }
+
+            const householdData = {
+                maHo: maHo,
+                soPhong: soPhong,
+                dienTich: dienTich,
+                ghiChu: ghiChu || null
+            };
+
+            try {
+                const btn = $('#saveHouseholdBtn');
+                const originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang lưu...');
+
+                if (editingHouseholdId) {
+                    await HoGiaDinhAPI.update(editingHouseholdId, householdData);
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showSuccess) {
+                        APIUtils.showSuccess('Cập nhật hộ gia đình thành công');
+                    } else {
+                        alert('Cập nhật hộ gia đình thành công');
+                    }
+                } else {
+                    await HoGiaDinhAPI.create(householdData);
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showSuccess) {
+                        APIUtils.showSuccess('Thêm hộ gia đình thành công');
+                    } else {
+                        alert('Thêm hộ gia đình thành công');
                     }
                 }
 
-                // Display paid households
-                paidList.forEach((household, index) => {
-                    const row = `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td><strong>${household.maCanHo || household.maHo}</strong></td>
-                            <td>${APIUtils.formatCurrency(household.tongTien || 0)}</td>
-                            <td>${household.ngayThanhToan ? APIUtils.formatDate(household.ngayThanhToan) : 'N/A'}</td>
-                        </tr>
-                    `;
-                    tbody1.append(row);
-                });
-
-                // Display unpaid households
-                const unpaidTbody = $('#unpaidTableBody');
-                unpaidTbody.empty();
-                unpaidList.forEach((item, index) => {
-                    const row = `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${item.household.maCanHo || item.household.maHo}</td>
-                            <td>${APIUtils.formatCurrency(item.unpaid.reduce((sum, fee) => sum + (fee.soTien || 0), 0))}</td>
-                        </tr>
-                    `;
-                    unpaidTbody.append(row);
-                });
-
-                // Update counts
-                $('#tab-1 h6').text(`Đã thanh toán (${paidCount} căn)`);
-                $('#collapseUnpaid1 h6').text(`Chưa thanh toán (${unpaidCount} căn)`);
-
-                // Initialize DataTables
-                if (dataTable1) dataTable1.destroy();
-                if (dataTable2) dataTable2.destroy();
+                $('#addHouseholdModal').modal('hide');
+                form[0].reset();
+                editingHouseholdId = null;
                 
-                dataTable1 = $('#dataTable1').DataTable({ 
-                    "language": { "search": "Tìm kiếm:", "paginate": { "next": ">", "previous": "<" } } 
-                });
-                dataTable2 = $('#dataTable2').DataTable({ 
-                    "language": { "search": "Tìm kiếm:", "paginate": { "next": ">", "previous": "<" } } 
-                });
+                // Reload households list to show updated data
+                await loadHouseholds();
             } catch (error) {
-                console.error('Error loading household data:', error);
-                APIUtils.showError('Không thể tải dữ liệu căn hộ: ' + error.message);
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError(error.message);
+                } else {
+                    alert('Lỗi: ' + error.message);
+                }
+            } finally {
+                const btn = $('#saveHouseholdBtn');
+                btn.prop('disabled', false).html('Lưu');
             }
         }
+
+        async function editHousehold(id) {
+            try {
+                const households = await HoGiaDinhAPI.getAll();
+                const household = households.find(h => h.id === id);
+                
+                if (!household) {
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                        APIUtils.showError('Không tìm thấy hộ gia đình');
+                    } else {
+                        alert('Không tìm thấy hộ gia đình');
+                    }
+                    return;
+                }
+
+                editingHouseholdId = id;
+                $('#maHo').val(household.maHo || '');
+                $('#soPhong').val(household.soPhong || '');
+                $('#dienTich').val(household.dienTich || '');
+                $('#ghiChu').val(household.ghiChu || '');
+                
+                $('.modal-title').text('Sửa Hộ Gia Đình');
+                $('#addHouseholdModal').modal('show');
+            } catch (error) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError(error.message);
+                } else {
+                    alert('Lỗi: ' + error.message);
+                }
+            }
+        }
+
+        async function deleteHousehold(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa hộ gia đình này?')) {
+                return;
+            }
+
+            try {
+                await HoGiaDinhAPI.delete(id);
+                if (typeof APIUtils !== 'undefined' && APIUtils.showSuccess) {
+                    APIUtils.showSuccess('Xóa hộ gia đình thành công');
+                } else {
+                    alert('Xóa hộ gia đình thành công');
+                }
+                await loadHouseholds();
+            } catch (error) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError(error.message);
+                } else {
+                    alert('Lỗi: ' + error.message);
+                }
+            }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('vi-VN');
+            } catch (e) {
+                return dateStr;
+            }
+        }
+    </script>
+
+    <script>
+        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
+        $(document).ready(function() {
+            try {
+                const userInfo = sessionStorage.getItem('currentUser');
+                if (userInfo) {
+                    const user = JSON.parse(userInfo);
+                    const role = user.vaiTro || user.role || '';
+                
+                // Debug: log để kiểm tra giá trị role
+                console.log('Current user:', user);
+                console.log('Role value:', role);
+                console.log('Role type:', typeof role);
+                
+                // Kiểm tra nhiều giá trị có thể là Admin
+                const isAdmin = role === 'BanQuanLy' || 
+                               role === 'Ban Quản lý' || 
+                               role === 'Admin' ||
+                               role === 'admin' ||
+                               role === 'BANQUANLY' ||
+                               role.toLowerCase() === 'banquanly';
+                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
+                        $('#menuTaiKhoan').show();
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking admin role:', error);
+            }
+        });
     </script>
 </body>
 </html>

@@ -70,14 +70,15 @@
                                     
                                     <form class="user" id="adminLoginForm">
                                         <div class="form-group">
-                                            <input type="email" class="form-control form-control-user"
-                                                id="exampleInputEmail" aria-describedby="emailHelp"
-                                                placeholder="Email công vụ...">
+                                            <input type="text" class="form-control form-control-user"
+                                                id="username" aria-describedby="usernameHelp"
+                                                placeholder="Tên đăng nhập" required>
                                         </div>
                                         <div class="form-group">
                                             <input type="password" class="form-control form-control-user"
-                                                id="exampleInputPassword" placeholder="Mật khẩu">
+                                                id="password" placeholder="Mật khẩu" required>
                                         </div>
+                                        <div id="loginError" class="alert alert-danger" style="display: none;"></div>
                                         <div class="form-group">
                                             <div class="custom-control custom-checkbox small">
                                                 <input type="checkbox" class="custom-control-input" id="customCheck">
@@ -85,23 +86,12 @@
                                             </div>
                                         </div>
                                         <button type="submit" class="btn btn-admin btn-user btn-block">
-                                            Đăng Nhập Quản Trị
+                                            <span id="loginBtnText">Đăng Nhập Quản Trị</span>
+                                            <span id="loginBtnSpinner" class="spinner-border spinner-border-sm" style="display: none;"></span>
                                         </button>
                                     </form>
                                     
                                     <hr>
-                                    
-                                    <!-- Chỉ có link Quên mật khẩu, KHÔNG CÓ Đăng ký -->
-                                    <div class="text-center">
-                                        <a class="small" href="forgot-password.html">Quên mật khẩu?</a>
-                                    </div>
-                                    
-                                    <!-- Link quay lại trang Cư dân -->
-                                    <div class="text-center mt-3">
-                                        <a class="small text-secondary" href="login_resident.html">
-                                            <i class="fas fa-arrow-left"></i> Quay lại trang Cư dân
-                                        </a>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -116,16 +106,49 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
+    <script src="js/api.js"></script>
 
     <script>
-        $('#adminLoginForm').on('submit', function(e) {
+        $('#adminLoginForm').on('submit', async function(e) {
             e.preventDefault();
-            // Logic kiểm tra đăng nhập Admin
-            // Thêm giả lập kiểm tra email đuôi @bluemoon.vn chẳng hạn
-            const email = $('#exampleInputEmail').val();
+            const username = $('#username').val();
+            const password = $('#password').val();
             
-            // Chuyển hướng vào Dashboard Admin
-            window.location.href = 'admin_dashboard.html';
+            if (!username || !password) {
+                $('#loginError').text('Vui lòng nhập đầy đủ thông tin').show();
+                return;
+            }
+            
+            $('#loginBtnText').hide();
+            $('#loginBtnSpinner').show();
+            $('#loginError').hide();
+            $(this).find('button[type="submit"]').prop('disabled', true);
+            
+            try {
+                const result = await AuthAPI.login({ username: username, password: password });
+                if (result.success && result.data) {
+                    // Store user info in sessionStorage
+                    sessionStorage.setItem('currentUser', JSON.stringify(result.data));
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    
+                    // Store role in localStorage for RBAC (ưu tiên vaiTro từ backend)
+                    const userRole = result.data.vaiTro || result.data.role || null;
+                    if (userRole) {
+                        localStorage.setItem('role', userRole);
+                    }
+                    
+                    // Redirect to dashboard
+                    window.location.href = 'index.html';
+                } else {
+                    $('#loginError').text(result.message || 'Đăng nhập thất bại').show();
+                }
+            } catch (error) {
+                $('#loginError').text(error.message || 'Lỗi kết nối đến server').show();
+            } finally {
+                $('#loginBtnText').show();
+                $('#loginBtnSpinner').hide();
+                $(this).find('button[type="submit"]').prop('disabled', false);
+            }
         });
     </script>
 

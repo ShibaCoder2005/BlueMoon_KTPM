@@ -12,13 +12,16 @@
 <body id="page-top">
     <div id="wrapper">
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-                <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-building"></i></div>
+
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-building"></i>
+                </div>
                 <div class="sidebar-brand-text mx-3">BlueMoon</div>
             </a>
 
             <hr class="sidebar-divider my-0">
-            
+
             <li class="nav-item">
                 <a class="nav-link" href="index.html">
                     <i class="fas fa-fw fa-home"></i>
@@ -28,22 +31,43 @@
 
             <li class="nav-item">
                 <a class="nav-link" href="can-ho.html">
-                    <i class="fas fa-fw fa-door-open"></i>
-                    <span>Căn hộ</span>
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="cu-dan.html">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Cư dân</span>
                 </a>
             </li>
 
-            <li class="nav-item">
+            <li class="nav-item active">
                 <a class="nav-link" href="khoan-thu.html">
                     <i class="fas fa-fw fa-file-invoice-dollar"></i>
                     <span>Khoản thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
                 </a>
             </li>
 
@@ -55,41 +79,50 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="thong-bao.html">
-                    <i class="fas fa-fw fa-bullhorn"></i>
-                    <span>Thông báo</span>
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="phan-anh.html">
-                    <i class="fas fa-fw fa-comments"></i>
-                    <span>Phản ánh</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="tai-khoan.html">
+            <li class="nav-item" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
                     <i class="fas fa-fw fa-user-cog"></i>
                     <span>Tài khoản</span>
                 </a>
             </li>
 
-            <hr class="sidebar-divider">
-
-            <li class="nav-item">
-                <a class="nav-link" href="cai-dat.html">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Cài đặt</span>
-                </a>
-            </li>
-
-            <li class="nav-item"><a class="nav-link collapsed" href="#" style="opacity: 0.6;"><i class="fas fa-car"></i><span>Gửi xe (v2.0)</span></a></li>
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
         </ul>
 
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <ul class="navbar-nav ml-auto">
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="ho-so.html">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
                     </nav>
 
                 <div class="container-fluid">
@@ -97,7 +130,7 @@
                         <h1 class="h3 mb-0 text-gray-800">Quản lý Thu Phí (v1.0)</h1>
                         <a href="#" class="btn btn-primary btn-icon-split shadow-sm" data-toggle="modal" data-target="#addFeeModal">
                             <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
-                            <span class="text">Tạo đợt thu mới</span>
+                            <span class="text">Tạo khoản thu mới</span>
                         </a>
                     </div>
 
@@ -113,7 +146,7 @@
                                             <th>Tên khoản thu</th>
                                             <th>Loại phí</th>
                                             <th>Đơn giá / Mức thu</th>
-                                            <th>Đối tượng</th>
+                                            <th>Tính theo</th>
                                             <th>Tiến độ</th>
                                             <th>Trạng thái</th>
                                             <th>Hành động</th>
@@ -157,10 +190,23 @@
                             </select>
                         </div>
 
+                        <div class="form-group">
+                            <label>Tính theo</label>
+                            <select class="form-control" id="tinhTheoSelect" required>
+                                <option value="">Chọn cách tính</option>
+                                <option value="DienTich">Diện tích</option>
+                                <option value="NhanKhau">Nhân khẩu</option>
+                                <option value="HoKhau">Hộ khẩu (Cố định)</option>
+                                <option value="XeMay">Xe máy</option>
+                                <option value="OTo">Ô tô</option>
+                            </select>
+                            <small class="form-text text-muted">Chọn đơn vị tính cho khoản thu này.</small>
+                        </div>
+
                         <div class="form-group" id="donGiaArea">
-                            <label>Đơn giá (VND/m<sup>2</sup>)</label>
-                            <input type="number" class="form-control" id="donGia" value="7000" placeholder="Nhập số tiền trên 1m2" min="0">
-                            <small class="form-text text-muted">Hệ thống sẽ tự nhân với diện tích căn hộ.</small>
+                            <label id="donGiaLabel">Đơn giá (VNĐ)</label>
+                            <input type="number" class="form-control" id="donGia" value="0" placeholder="Nhập đơn giá" min="0" step="0.01">
+                            <small class="form-text text-muted" id="donGiaHint">Hệ thống sẽ tự động tính dựa trên cách tính đã chọn.</small>
                         </div>
 
                         <div class="form-group">
@@ -189,21 +235,116 @@
     <script src="vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
+    
+    <script>
+        // Load user info and avatar
+        $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
+            // Load user display name
+            loadUserDisplay();
+            
+            // Load profile image for navbar avatar
+            if (typeof updateNavbarAvatar !== 'undefined') {
+                updateNavbarAvatar();
+            } else {
+                // Fallback: load avatar manually
+                try {
+                    const userStr = sessionStorage.getItem('currentUser');
+                    if (userStr) {
+                        const user = JSON.parse(userStr);
+                        if (user && user.id) {
+                            const imageKey = `profileImage_${user.id}`;
+                            let imageData = sessionStorage.getItem(imageKey);
+                            if (!imageData) {
+                                imageData = localStorage.getItem(imageKey);
+                            }
+                            if (imageData) {
+                                $('#navbarAvatar').attr('src', imageData);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('[khoan-thu] Error loading avatar:', error);
+                }
+            }
+        });
+        
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                    $('#userDisplayName').text(displayName);
+                } else {
+                    $('#userDisplayName').text('Người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                $('#userDisplayName').text('Người dùng');
+            }
+        }
+    </script>
     
     <script>
         let dataTable;
         let editingId = null;
 
+        // Function to update donGia label and hint based on tinhTheo selection
+        // Must be defined outside $(document).ready() so it can be accessed from editKhoanThu()
+        function updateDonGiaLabel() {
+            const tinhTheo = $('#tinhTheoSelect').val();
+            const label = $('#donGiaLabel');
+            const hint = $('#donGiaHint');
+            
+            switch(tinhTheo) {
+                case 'DienTich':
+                    label.text('Đơn giá (VNĐ/m²)');
+                    hint.text('Hệ thống sẽ tự nhân với diện tích căn hộ.');
+                    break;
+                case 'NhanKhau':
+                    label.text('Đơn giá (VNĐ/người)');
+                    hint.text('Hệ thống sẽ tự nhân với số nhân khẩu trong hộ.');
+                    break;
+                case 'HoKhau':
+                    label.text('Đơn giá (VNĐ/hộ)');
+                    hint.text('Số tiền cố định cho mỗi hộ gia đình.');
+                    break;
+                case 'XeMay':
+                    label.text('Đơn giá (VNĐ/xe máy)');
+                    hint.text('Hệ thống sẽ tự nhân với số xe máy trong hộ.');
+                    break;
+                case 'OTo':
+                    label.text('Đơn giá (VNĐ/ô tô)');
+                    hint.text('Hệ thống sẽ tự nhân với số ô tô trong hộ.');
+                    break;
+                default:
+                    label.text('Đơn giá (VNĐ)');
+                    hint.text('Hệ thống sẽ tự động tính dựa trên cách tính đã chọn.');
+                    break;
+            }
+        }
+
         // Load data on page load
         $(document).ready(async function() {
             await loadKhoanThu();
+            
+            // Update donGia label and hint based on tinhTheo selection
+            $('#tinhTheoSelect').change(function() {
+                updateDonGiaLabel();
+            });
             
             $('#loaiPhiSelect').change(function() {
                 var selected = $(this).val();
                 if(selected === 'TuNguyen') {
                     $('#donGiaArea').hide();
+                    $('#donGia').removeAttr('required');
                 } else {
                     $('#donGiaArea').show();
+                    $('#donGia').attr('required', 'required');
                 }
             });
 
@@ -215,23 +356,48 @@
                     return;
                 }
 
-                // Validate and prepare payload
-                const tenKhoanThu = $('#tenKhoanThu').val()?.trim();
+                // Validate and prepare payload - lấy giá trị an toàn
+                const tenKhoanThuEl = $('#tenKhoanThu');
+                const loaiPhiEl = $('#loaiPhiSelect');
+                const tinhTheoEl = $('#tinhTheoSelect');
+                const donGiaEl = $('#donGia');
+                const moTaEl = $('#moTa');
+
+                const tenKhoanThu = tenKhoanThuEl.length > 0 ? (tenKhoanThuEl.val() || '').trim() : '';
                 if (!tenKhoanThu) {
                     APIUtils.showError('Vui lòng nhập tên khoản thu');
                     return;
                 }
                 
-                const loaiPhi = $('#loaiPhiSelect').val();
+                const loaiPhi = loaiPhiEl.length > 0 ? (loaiPhiEl.val() || '') : '';
                 if (!loaiPhi) {
                     APIUtils.showError('Vui lòng chọn loại phí');
                     return;
                 }
                 
+                const tinhTheo = tinhTheoEl.length > 0 ? (tinhTheoEl.val() || '') : '';
+                if (!tinhTheo) {
+                    APIUtils.showError('Vui lòng chọn cách tính');
+                    return;
+                }
+                
                 // Parse donGia as number (not string)
                 let donGia = 0;
-                const donGiaStr = $('#donGia').val();
-                if (donGiaStr && donGiaStr.trim() !== '') {
+                const donGiaStr = donGiaEl.length > 0 ? (donGiaEl.val() || '') : '';
+                if (loaiPhi === 'BatBuoc') {
+                    // Bắt buộc phải có đơn giá
+                    if (!donGiaStr || donGiaStr.trim() === '') {
+                        APIUtils.showError('Vui lòng nhập đơn giá cho khoản thu bắt buộc');
+                        return;
+                    }
+                    const parsed = parseFloat(donGiaStr);
+                    if (isNaN(parsed) || parsed < 0) {
+                        APIUtils.showError('Đơn giá phải là số hợp lệ và >= 0');
+                        return;
+                    }
+                    donGia = parsed;
+                } else if (donGiaStr && donGiaStr.trim() !== '') {
+                    // Tự nguyện có thể có hoặc không có đơn giá
                     const parsed = parseFloat(donGiaStr);
                     if (isNaN(parsed) || parsed < 0) {
                         APIUtils.showError('Đơn giá phải là số hợp lệ và >= 0');
@@ -240,28 +406,71 @@
                     donGia = parsed;
                 }
                 
+                const moTa = moTaEl.length > 0 ? (moTaEl.val() || '').trim() : '';
+                
                 const khoanThu = {
                     tenKhoanThu: tenKhoanThu,
                     loaiPhi: loaiPhi,
+                    tinhTheo: tinhTheo,
                     donGia: donGia, // Send as number, not string
-                    moTa: $('#moTa').val()?.trim() || ''
+                    moTa: moTa
                     // Note: hanNop is not sent as it's not in the model
                 };
 
+                // Log payload để debug
+                console.log('[saveKhoanThu] Payload gửi lên backend:', JSON.stringify(khoanThu, null, 2));
+
+                const btn = $('#saveKhoanThuBtn');
+                const originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang lưu...');
+
                 try {
                     if (editingId) {
-                        await KhoanThuAPI.update(editingId, khoanThu);
+                        console.log('[saveKhoanThu] Updating khoanThu with id:', editingId, 'payload:', khoanThu);
+                        const updateResult = await KhoanThuAPI.update(editingId, khoanThu);
+                        console.log('[saveKhoanThu] Update result:', updateResult);
                         APIUtils.showSuccess('Cập nhật khoản thu thành công');
                     } else {
-                        await KhoanThuAPI.create(khoanThu);
+                        console.log('[saveKhoanThu] Creating new khoanThu, payload:', khoanThu);
+                        const result = await KhoanThuAPI.create(khoanThu);
+                        console.log('[saveKhoanThu] Create result:', result);
                         APIUtils.showSuccess('Tạo khoản thu thành công');
+                        
+                        // Lưu timestamp khi tạo khoản thu
+                        // Backend có thể trả về data trong result hoặc result trực tiếp
+                        const responseData = result.data || result;
+                        const feeId = responseData?.id || responseData?.maKhoanThu || result.id || result.maKhoanThu;
+                        if (feeId) {
+                            localStorage.setItem(`fee_${feeId}_created`, Date.now().toString());
+                        }
+                        
+                        // Trigger event để trang chủ cập nhật danh sách
+                        window.dispatchEvent(new Event('khoanThuCreated'));
+                        localStorage.setItem('khoanThuUpdated', Date.now().toString());
                     }
                     $('#addFeeModal').modal('hide');
                     form[0].reset();
                     editingId = null;
+                    // Reset tinhTheo label
+                    $('#donGiaLabel').text('Đơn giá (VNĐ)');
+                    $('#donGiaHint').text('Hệ thống sẽ tự động tính dựa trên cách tính đã chọn.');
                     await loadKhoanThu();
                 } catch (error) {
-                    APIUtils.showError(error.message);
+                    console.error('[saveKhoanThu] Error:', error);
+                    // Xử lý lỗi chi tiết hơn
+                    let errorMessage = error.message || 'Có lỗi xảy ra';
+                    if (error.detail) {
+                        errorMessage = error.detail;
+                    } else if (error.message && error.message.includes('Validation failed')) {
+                        errorMessage = 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.';
+                    } else if (error.message && error.message.includes('NOT_FOUND')) {
+                        errorMessage = 'Không tìm thấy khoản thu để cập nhật.';
+                    } else if (error.message && error.message.includes('UPDATE_FAILED')) {
+                        errorMessage = 'Không thể cập nhật khoản thu. Vui lòng thử lại.';
+                    }
+                    APIUtils.showError(errorMessage);
+                } finally {
+                    btn.prop('disabled', false).html(originalHtml);
                 }
             });
 
@@ -270,6 +479,18 @@
                 $('#khoanThuForm')[0].reset();
                 editingId = null;
                 $('#donGiaArea').show();
+                $('#donGia').attr('required', 'required');
+                // Reset tinhTheo label
+                $('#donGiaLabel').text('Đơn giá (VNĐ)');
+                $('#donGiaHint').text('Hệ thống sẽ tự động tính dựa trên cách tính đã chọn.');
+                $('.modal-title').text('Tạo Khoản Thu Mới');
+            });
+            
+            // Set modal title when opening
+            $('#addFeeModal').on('show.bs.modal', function() {
+                if (!editingId) {
+                    $('.modal-title').text('Tạo Khoản Thu Mới');
+                }
             });
         });
 
@@ -285,24 +506,57 @@
                 }
 
                 data.forEach((item, index) => {
+                    // Map id/maKhoanThu - backend có thể trả về cả hai
+                    const itemId = item.id || item.maKhoanThu;
+                    const tenKhoan = item.tenKhoan || item.tenKhoanThu || '';
+                    
+                    // Map loại phí từ backend (loai, batBuoc, loaiKhoanThu)
+                    let loaiPhiText = 'Tự nguyện';
+                    let loaiPhiValue = 'TuNguyen';
+                    if (item.batBuoc === true || item.loaiKhoanThu === 0 || 
+                        (item.loai && (item.loai.includes('Bắt buộc') || item.loai === 'Bắt buộc'))) {
+                        loaiPhiText = 'Bắt buộc';
+                        loaiPhiValue = 'BatBuoc';
+                    } else if (item.loai) {
+                        loaiPhiText = item.loai;
+                        loaiPhiValue = item.loai.includes('Bắt buộc') ? 'BatBuoc' : 'TuNguyen';
+                    }
+                    
+                    // Format đơn giá với đơn vị tính
+                    let donGiaText = 'Tùy tâm';
+                    if (item.donGia && parseFloat(item.donGia) > 0) {
+                        const donViTinh = item.donViTinh || 'VNĐ/m²';
+                        donGiaText = APIUtils.formatCurrency(item.donGia) + '/' + donViTinh.replace('VNĐ/', '');
+                    }
+                    
+                    // Đối tượng tính theo
+                    const tinhTheo = item.tinhTheo || 'Diện tích';
+                    
                     const row = `
                         <tr>
-                            <td><strong>${item.tenKhoanThu || ''}</strong><br><small class="text-muted">${item.moTa || ''}</small></td>
-                            <td>${item.loaiPhi === 'BatBuoc' ? 'Bắt buộc' : 'Tự nguyện'}</td>
-                            <td>${item.donGia ? APIUtils.formatCurrency(item.donGia) + '/m²' : 'Tùy tâm'}</td>
-                            <td>Toàn bộ căn hộ</td>
+                            <td>
+                                <strong>${tenKhoan}</strong>
+                                ${item.moTa ? '<br><small class="text-muted">' + item.moTa + '</small>' : ''}
+                            </td>
+                            <td>
+                                <span class="badge ${loaiPhiValue === 'BatBuoc' ? 'badge-danger' : 'badge-info'}">
+                                    ${loaiPhiText}
+                                </span>
+                            </td>
+                            <td>${donGiaText}</td>
+                            <td>${tinhTheo}</td>
                             <td>
                                 <div class="progress progress-sm mb-2">
                                     <div class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
                                 </div>
                                 <small>Đang tính toán...</small>
                             </td>
-                            <td><span class="badge badge-success">${item.trangThai || 'Hoạt động'}</span></td>
+                            <td><span class="badge badge-success">Hoạt động</span></td>
                             <td class="text-center">
-                                <button class="btn btn-warning btn-circle btn-sm" onclick="editKhoanThu(${item.maKhoanThu})" title="Sửa">
+                                <button class="btn btn-warning btn-circle btn-sm" onclick="editKhoanThu(${itemId})" title="Sửa">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-danger btn-circle btn-sm" onclick="deleteKhoanThu(${item.maKhoanThu})" title="Xóa">
+                                <button class="btn btn-danger btn-circle btn-sm" onclick="deleteKhoanThu(${itemId})" title="Xóa">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -330,7 +584,8 @@
         async function editKhoanThu(id) {
             try {
                 const data = await KhoanThuAPI.getAll();
-                const item = data.find(k => k.maKhoanThu === id);
+                // Tìm item theo id hoặc maKhoanThu
+                const item = data.find(k => (k.id === id || k.maKhoanThu === id));
                 if (!item) {
                     APIUtils.showError('Không tìm thấy khoản thu');
                     return;
@@ -338,13 +593,51 @@
 
                 editingId = id;
                 $('#khoanThuId').val(id);
-                $('#tenKhoanThu').val(item.tenKhoanThu);
-                $('#loaiPhiSelect').val(item.loaiPhi);
-                $('#donGia').val(item.donGia || '');
-                $('#moTa').val(item.moTa || '');
-                $('#hanNop').val(item.hanNop || '');
                 
-                if (item.loaiPhi === 'TuNguyen') {
+                // Map tenKhoan/tenKhoanThu
+                const tenKhoan = item.tenKhoan || item.tenKhoanThu || '';
+                $('#tenKhoanThu').val(tenKhoan);
+                
+                // Map loại phí từ backend (loai, batBuoc, loaiKhoanThu)
+                let loaiPhiValue = 'TuNguyen';
+                if (item.batBuoc === true || item.loaiKhoanThu === 0 || 
+                    (item.loai && (item.loai.includes('Bắt buộc') || item.loai === 'Bắt buộc'))) {
+                    loaiPhiValue = 'BatBuoc';
+                }
+                $('#loaiPhiSelect').val(loaiPhiValue);
+                
+                // Map tinhTheo - normalize value to match dropdown options
+                let tinhTheoValue = item.tinhTheo || '';
+                // Normalize: convert various formats to dropdown values
+                if (tinhTheoValue) {
+                    const tinhTheoLower = tinhTheoValue.toLowerCase().trim();
+                    if (tinhTheoLower.includes('diện tích') || tinhTheoLower === 'dientich' || tinhTheoLower === 'area') {
+                        tinhTheoValue = 'DienTich';
+                    } else if (tinhTheoLower.includes('nhân khẩu') || tinhTheoLower === 'nhankhau' || tinhTheoLower === 'person') {
+                        tinhTheoValue = 'NhanKhau';
+                    } else if (tinhTheoLower.includes('hộ khẩu') || tinhTheoLower === 'hokhau' || tinhTheoLower === 'codinh' || tinhTheoLower.includes('cố định') || tinhTheoLower === 'fixed') {
+                        tinhTheoValue = 'HoKhau';
+                    } else if (tinhTheoLower.includes('xe máy') || tinhTheoLower === 'xemay' || tinhTheoLower === 'motorbike') {
+                        tinhTheoValue = 'XeMay';
+                    } else if (tinhTheoLower.includes('ô tô') || tinhTheoLower === 'oto' || tinhTheoLower === 'car') {
+                        tinhTheoValue = 'OTo';
+                    }
+                }
+                $('#tinhTheoSelect').val(tinhTheoValue);
+                // Update label based on tinhTheo - call the function directly
+                updateDonGiaLabel();
+                
+                // Map donGia
+                $('#donGia').val(item.donGia || '');
+                
+                // Map moTa
+                $('#moTa').val(item.moTa || '');
+                
+                // hanNop không có trong model, để trống
+                $('#hanNop').val('');
+                
+                // Hiển thị/ẩn đơn giá dựa trên loại phí
+                if (loaiPhiValue === 'TuNguyen') {
                     $('#donGiaArea').hide();
                 } else {
                     $('#donGiaArea').show();
@@ -363,13 +656,79 @@
             }
 
             try {
-                await KhoanThuAPI.delete(id);
+                console.log('[deleteKhoanThu] Deleting khoanThu with id:', id);
+                const result = await KhoanThuAPI.delete(id);
+                console.log('[deleteKhoanThu] Delete result:', result);
                 APIUtils.showSuccess('Xóa khoản thu thành công');
                 await loadKhoanThu();
             } catch (error) {
-                APIUtils.showError(error.message);
+                console.error('[deleteKhoanThu] Error:', error);
+                // Xử lý lỗi khi xóa khoản thu đang được sử dụng
+                let errorMessage = error.message || 'Có lỗi xảy ra khi xóa khoản thu';
+                if (errorMessage && (
+                    errorMessage.includes('đang được sử dụng') ||
+                    errorMessage.includes('is being used') ||
+                    errorMessage.includes('ChiTietThu') ||
+                    errorMessage.includes('receipt detail') ||
+                    errorMessage.includes('may be in use')
+                )) {
+                    errorMessage = 'Không thể xóa khoản thu này vì đang được sử dụng trong các phiếu thu. Vui lòng xóa các phiếu thu liên quan trước.';
+                } else if (errorMessage && errorMessage.includes('NOT_FOUND')) {
+                    errorMessage = 'Không tìm thấy khoản thu để xóa.';
+                }
+                APIUtils.showError(errorMessage);
             }
         }
+    </script>
+    
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Bạn muốn đăng xuất?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Chọn "Đăng xuất" bên dưới nếu bạn muốn kết thúc phiên làm việc.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
+                    <button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
+        $(document).ready(function() {
+            try {
+                const userInfo = sessionStorage.getItem('currentUser');
+                if (userInfo) {
+                    const user = JSON.parse(userInfo);
+                    const role = user.vaiTro || user.role || '';
+                
+                // Debug: log để kiểm tra giá trị role
+                console.log('Current user:', user);
+                console.log('Role value:', role);
+                console.log('Role type:', typeof role);
+                
+                // Kiểm tra nhiều giá trị có thể là Admin
+                const isAdmin = role === 'BanQuanLy' || 
+                               role === 'Ban Quản lý' || 
+                               role === 'Admin' ||
+                               role === 'admin' ||
+                               role === 'BANQUANLY' ||
+                               role.toLowerCase() === 'banquanly';
+                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
+                        $('#menuTaiKhoan').show();
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking admin role:', error);
+            }
+        });
     </script>
 </body>
 </html>

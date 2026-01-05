@@ -43,19 +43,17 @@
         <!-- Sidebar -->
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
-            <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="#">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-building"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">Bluemoon</div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
             </a>
 
-            <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
             <li class="nav-item">
-                <a class="nav-link" href="trang-chu.html">
+                <a class="nav-link" href="index.html">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Trang chủ</span>
                 </a>
@@ -63,13 +61,13 @@
 
             <li class="nav-item">
                 <a class="nav-link" href="can-ho.html">
-                    <i class="fas fa-fw fa-door-open"></i>
-                    <span>Căn hộ</span>
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="cu-dan.html">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
                     <i class="fas fa-fw fa-users"></i>
                     <span>Cư dân</span>
                 </a>
@@ -83,6 +81,27 @@
             </li>
 
             <li class="nav-item">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link" href="thong-ke.html">
                     <i class="fas fa-fw fa-chart-bar"></i>
                     <span>Thống kê</span>
@@ -90,40 +109,22 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="thong-bao.html">
-                    <i class="fas fa-fw fa-bullhorn"></i>
-                    <span>Thông báo</span>
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="phan-anh.html">
-                    <i class="fas fa-fw fa-comments"></i>
-                    <span>Phản ánh</span>
-                </a>
-            </li>
-
-            <li class="nav-item active">
-                <a class="nav-link" href="tai-khoan.html">
+            <li class="nav-item active" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
                     <i class="fas fa-fw fa-user-cog"></i>
                     <span>Tài khoản</span>
                 </a>
             </li>
 
-            <hr class="sidebar-divider">
-
-            <li class="nav-item">
-                <a class="nav-link" href="cai-dat.html">
-                    <i class="fas fa-fw fa-cog"></i>
-                    <span>Cài đặt</span>
-                </a>
-            </li>
-
-            <!-- Sidebar Toggler (Sidebar) -->
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
-
         </ul>
         <!-- End of Sidebar -->
 
@@ -147,9 +148,19 @@
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Ban Quản Lý</span>
-                                <img class="img-profile rounded-circle" src="https://source.unsplash.com/QAB-WJcbgJk/60x60">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="https://source.unsplash.com/QAB-WJcbgJk/60x60" style="object-fit: cover;">
                             </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="ho-so.html">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Đăng xuất
+                                </a>
+                            </div>
                         </li>
                     </ul>
 
@@ -162,9 +173,9 @@
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Quản lý Tài khoản</h1>
-                        <a href="#" onclick="alert('Chức năng đang phát triển!')" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                        <button onclick="handleCreate()" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
                             <i class="fas fa-plus fa-sm text-white-50"></i> Tạo tài khoản mới
-                        </a>
+                        </button>
                     </div>
 
                     <!-- Content Row: Filter -->
@@ -187,18 +198,16 @@
                                     <label for="roleFilter">Vai trò</label>
                                     <select id="roleFilter" onchange="applyFilters()" class="form-control">
                                         <option value="all">Tất cả</option>
-                                        <option value="Ban Quản lý">Ban Quản lý</option>
-                                        <option value="Kế toán">Kế toán</option>
-                                        <option value="Cư dân">Cư dân</option>
-                                        <option value="Nhân viên">Nhân viên</option>
+                                        <option value="BanQuanLy">Ban Quản lý</option>
+                                        <option value="KeToan">Kế toán</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3 mb-3">
                                     <label for="statusFilter">Trạng thái</label>
                                     <select id="statusFilter" onchange="applyFilters()" class="form-control">
                                         <option value="all">Tất cả</option>
-                                        <option value="active">Đang hoạt động</option>
-                                        <option value="locked">Đã khóa</option>
+                                        <option value="Hoạt động">Hoạt động</option>
+                                        <option value="Đã đóng">Đã đóng</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2 mb-3">
@@ -231,10 +240,10 @@
                                     <thead class="thead-light">
                                         <tr>
                                             <th style="width: 5%">#</th>
-                                            <th style="width: 35%">Thông tin tài khoản</th>
+                                            <th style="width: 30%">Thông tin tài khoản</th>
                                             <th style="width: 20%">Vai trò</th>
-                                            <th style="width: 20%">Trạng thái</th>
-                                            <th style="width: 20%" class="text-center">Hành động</th>
+                                            <th style="width: 15%">Trạng thái</th>
+                                            <th style="width: 30%" class="text-center">Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tableBody">
@@ -286,12 +295,81 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
+    <!-- Create/Edit Account Modal -->
+    <div class="modal fade" id="accountModal" tabindex="-1" role="dialog" aria-labelledby="accountModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="accountModalLabel">Tạo tài khoản mới</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="accountForm">
+                        <input type="hidden" id="accountId">
+                        <div class="form-group">
+                            <label for="tenDangNhap">Tên đăng nhập <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="tenDangNhap" required>
+                            <small class="form-text text-muted" id="usernameError"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="matKhau">Mật khẩu <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="matKhau" required>
+                            <small class="form-text text-muted">Tối thiểu 6 ký tự</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="hoTen">Họ tên <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="hoTen" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vaiTro">Vai trò <span class="text-danger">*</span></label>
+                            <select class="form-control" id="vaiTro" required>
+                                <option value="">Chọn vai trò</option>
+                                <option value="BanQuanLy">Ban Quản lý</option>
+                                <option value="KeToan">Kế toán</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="dienThoai">Điện thoại</label>
+                            <input type="text" class="form-control" id="dienThoai">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
+                    <button class="btn btn-primary" type="button" onclick="saveAccount()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Bạn muốn đăng xuất?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Chọn "Đăng xuất" bên dưới nếu bạn muốn kết thúc phiên làm việc.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
+                    <button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap core JavaScript (CDN)-->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
 
     <!-- Custom Script cho logic Quản lý Tài khoản -->
     <script>
@@ -328,21 +406,29 @@
                 // Badge Vai trò
                 const accRole = acc.vaiTro || acc.role || '';
                 let roleBadge = '<span class="badge badge-secondary">Khác</span>';
-                if (accRole === 'BanQuanLy' || accRole === 'Ban Quản lý') roleBadge = '<span class="badge badge-primary">Ban Quản lý</span>';
-                else if (accRole === 'KeToan' || accRole === 'Kế toán') roleBadge = '<span class="badge badge-info">Kế toán</span>';
-                else if (accRole === 'ToTruong' || accRole === 'Cư dân') roleBadge = '<span class="badge badge-success">Cư dân</span>';
-                else if (accRole === 'Nhân viên') roleBadge = '<span class="badge badge-warning text-white">Nhân viên</span>';
+                if (accRole === 'BanQuanLy' || accRole === 'Ban Quản lý' || accRole === 'Admin') {
+                    roleBadge = '<span class="badge badge-primary">Ban Quản lý</span>';
+                } else if (accRole === 'KeToan' || accRole === 'Kế toán') {
+                    roleBadge = '<span class="badge badge-info">Kế toán</span>';
+                }
 
-                // Badge & Nút Trạng thái
-                const accStatus = acc.trangThai || acc.status || '';
-                const isLocked = accStatus === 'Đã khóa' || accStatus === 'locked';
-                const statusBadge = isLocked 
-                    ? '<span class="badge badge-danger"><i class="fas fa-lock mr-1"></i>Đã khóa</span>' 
-                    : '<span class="badge badge-success"><i class="fas fa-check-circle mr-1"></i>Hoạt động</span>';
-                
-                const lockBtnClass = isLocked ? 'btn-success' : 'btn-warning';
-                const lockIcon = isLocked ? 'fa-unlock' : 'fa-lock';
-                const lockTitle = isLocked ? 'Mở khóa' : 'Khóa tài khoản';
+                // Badge Trạng thái
+                const accStatus = acc.trangThai || '';
+                let statusBadge = '';
+                let statusToggleBtn = '';
+                if (accStatus === 'Hoạt động') {
+                    statusBadge = '<span class="badge badge-success">Hoạt động</span>';
+                    statusToggleBtn = `<button onclick="handleToggleStatus(${acc.id || acc.maTaiKhoan}, 'Đã đóng')" class="btn btn-warning btn-sm action-btn mr-1" title="Đóng tài khoản">
+                                <i class="fas fa-lock"></i>
+                            </button>`;
+                } else if (accStatus === 'Đã đóng') {
+                    statusBadge = '<span class="badge badge-danger">Đã đóng</span>';
+                    statusToggleBtn = `<button onclick="handleToggleStatus(${acc.id || acc.maTaiKhoan}, 'Hoạt động')" class="btn btn-success btn-sm action-btn mr-1" title="Mở tài khoản">
+                                <i class="fas fa-unlock"></i>
+                            </button>`;
+                } else {
+                    statusBadge = '<span class="badge badge-secondary">' + (accStatus || 'N/A') + '</span>';
+                }
 
                 const row = `
                     <tr>
@@ -361,13 +447,11 @@
                         <td class="align-middle">${roleBadge}</td>
                         <td class="align-middle">${statusBadge}</td>
                         <td class="align-middle text-center">
-                            <button onclick="handleEdit(${acc.maTaiKhoan || acc.id})" class="btn btn-primary btn-sm action-btn mr-1" title="Sửa">
+                            ${statusToggleBtn}
+                            <button onclick="handleEdit(${acc.id || acc.maTaiKhoan})" class="btn btn-primary btn-sm action-btn mr-1" title="Sửa">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="handleLockUnlock(${acc.maTaiKhoan || acc.id})" class="btn ${lockBtnClass} btn-sm action-btn mr-1" title="${lockTitle}">
-                                <i class="fas ${lockIcon}"></i>
-                            </button>
-                            <button onclick="handleDelete(${acc.maTaiKhoan || acc.id})" class="btn btn-danger btn-sm action-btn" title="Xóa">
+                            <button onclick="handleDelete(${acc.id || acc.maTaiKhoan})" class="btn btn-danger btn-sm action-btn" title="Xóa tài khoản ${acc.tenDangNhap || acc.username || ''}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -436,11 +520,14 @@
                 const matchKeyword = username.includes(keyword) || fullName.includes(keyword) || email.includes(keyword);
                 
                 const accRole = acc.vaiTro || acc.role || '';
-                const matchRole = role === 'all' || accRole === role;
-                
-                const accStatus = acc.trangThai || acc.status || '';
-                const statusValue = accStatus === 'Hoạt động' || accStatus === 'active' ? 'active' : 'locked';
-                const matchStatus = status === 'all' || statusValue === status;
+                // Match role với nhiều giá trị có thể (BanQuanLy/Ban Quản lý/Admin, KeToan/Kế toán)
+                const matchRole = role === 'all' || 
+                                 accRole === role ||
+                                 (role === 'BanQuanLy' && (accRole === 'Ban Quản lý' || accRole === 'Admin')) ||
+                                 (role === 'KeToan' && accRole === 'Kế toán');
+
+                const accStatus = acc.trangThai || '';
+                const matchStatus = status === 'all' || accStatus === status;
 
                 return matchKeyword && matchRole && matchStatus;
             });
@@ -456,45 +543,217 @@
             applyFilters();
         }
 
-        // 5. Các hành động
+        // 5. Kiểm tra quyền Admin
+        function checkAdminAccess() {
+            try {
+                const userInfo = sessionStorage.getItem('currentUser');
+                if (!userInfo) {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                const user = JSON.parse(userInfo);
+                const role = user.vaiTro || user.role || '';
+                
+                // Debug: log để kiểm tra giá trị role
+                console.log('Current user:', user);
+                console.log('Role value:', role);
+                console.log('Role type:', typeof role);
+                
+                // Kiểm tra nhiều giá trị có thể là Admin
+                const isAdmin = role === 'BanQuanLy' || 
+                               role === 'Ban Quản lý' || 
+                               role === 'Admin' ||
+                               role === 'admin' ||
+                               role === 'BANQUANLY' ||
+                               role.toLowerCase() === 'banquanly';
+                
+                if (!isAdmin) {
+                    alert('Bạn không có quyền truy cập trang này! (Role: ' + role + ')');
+                    window.location.href = 'index.html';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Error checking admin access:', error);
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+
+        // 6. Các hành động
+        function handleCreate() {
+            $('#accountForm')[0].reset();
+            $('#accountId').val('');
+            $('#accountModalLabel').text('Tạo tài khoản mới');
+            $('#matKhau').prop('required', true);
+            $('#accountModal').modal('show');
+        }
+
+        async function handleEdit(id) {
+            try {
+                // Convert id to number for consistent comparison
+                const accountId = parseInt(id);
+                if (isNaN(accountId)) {
+                    APIUtils.showError('ID tài khoản không hợp lệ');
+                    return;
+                }
+                
+                const account = accounts.find(acc => {
+                    const accId = acc.id || acc.maTaiKhoan;
+                    return parseInt(accId) === accountId;
+                });
+                
+                if (!account) {
+                    APIUtils.showError('Không tìm thấy tài khoản');
+                    return;
+                }
+                
+                $('#accountForm')[0].reset();
+                $('#accountId').val(account.id || account.maTaiKhoan);
+                $('#tenDangNhap').val(account.tenDangNhap || account.username);
+                $('#matKhau').val('').prop('required', false);
+                $('#hoTen').val(account.hoTen || account.fullName);
+                $('#vaiTro').val(account.vaiTro || account.role);
+                $('#dienThoai').val(account.dienThoai || account.email);
+                $('#accountModalLabel').text('Sửa tài khoản');
+                $('#accountModal').modal('show');
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
+        async function saveAccount() {
+            const form = $('#accountForm')[0];
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const accountId = $('#accountId').val();
+            const accountData = {
+                tenDangNhap: $('#tenDangNhap').val().trim(),
+                matKhau: $('#matKhau').val(),
+                hoTen: $('#hoTen').val().trim(),
+                vaiTro: $('#vaiTro').val(),
+                dienThoai: $('#dienThoai').val().trim() || null
+            };
+
+            // Validate mật khẩu khi tạo mới
+            if (!accountId && (!accountData.matKhau || accountData.matKhau.length < 6)) {
+                APIUtils.showError('Mật khẩu phải có ít nhất 6 ký tự');
+                return;
+            }
+
+            try {
+                if (accountId) {
+                    // Update - không gửi mật khẩu nếu để trống
+                    if (!accountData.matKhau) {
+                        delete accountData.matKhau;
+                    }
+                    await TaiKhoanAPI.update(accountId, accountData);
+                    APIUtils.showSuccess('Cập nhật tài khoản thành công');
+                } else {
+                    // Create
+                    await TaiKhoanAPI.create(accountData);
+                    APIUtils.showSuccess('Tạo tài khoản thành công');
+                }
+                $('#accountModal').modal('hide');
+                await loadAccounts();
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
+        async function handleToggleStatus(id, newStatus) {
+            try {
+                // Convert id to number for consistent comparison
+                const accountId = parseInt(id);
+                if (isNaN(accountId)) {
+                    APIUtils.showError('ID tài khoản không hợp lệ');
+                    return;
+                }
+
+                // Get current user to check if trying to change own status
+                const userStr = sessionStorage.getItem('currentUser');
+                let currentUserId = null;
+                if (userStr) {
+                    try {
+                        const currentUser = JSON.parse(userStr);
+                        currentUserId = currentUser.id || currentUser.maTaiKhoan;
+                    } catch (e) {
+                        console.error('Error parsing currentUser:', e);
+                    }
+                }
+
+                // Check if trying to change own status
+                if (currentUserId && parseInt(currentUserId) === accountId) {
+                    APIUtils.showError('Không thể thay đổi trạng thái của chính tài khoản đang đăng nhập');
+                    return;
+                }
+
+                // Find account for confirmation message
+                const account = accounts.find(acc => {
+                    const accId = acc.id || acc.maTaiKhoan;
+                    return parseInt(accId) === accountId;
+                });
+
+                if (!account) {
+                    APIUtils.showError('Không tìm thấy tài khoản');
+                    return;
+                }
+
+                const username = account.tenDangNhap || account.username || 'này';
+                const action = newStatus === 'Hoạt động' ? 'mở' : 'đóng';
+                const confirmMessage = `Bạn có chắc muốn ${action} tài khoản "${username}"?`;
+                
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+
+                await TaiKhoanAPI.updateStatus(accountId, newStatus, currentUserId);
+                APIUtils.showSuccess(`Đã ${action} tài khoản "${username}" thành công`);
+                await loadAccounts();
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
         async function handleDelete(id) {
-            if (!confirm(`Bạn có chắc muốn xóa tài khoản này không?`)) {
+            // Convert id to number for consistent comparison
+            const accountId = parseInt(id);
+            if (isNaN(accountId)) {
+                APIUtils.showError('ID tài khoản không hợp lệ');
                 return;
             }
+
+            // Find account with proper comparison
+            // Try both maTaiKhoan and id fields, and handle both string and number types
+            const account = accounts.find(acc => {
+                const accId = acc.maTaiKhoan || acc.id;
+                // Convert both to numbers for comparison
+                const accIdNum = parseInt(accId);
+                return !isNaN(accIdNum) && accIdNum === accountId;
+            });
+            
+            if (!account) {
+                console.error('Account not found for id:', accountId, 'Available accounts:', accounts.map(a => ({id: a.maTaiKhoan || a.id, username: a.tenDangNhap || a.username})));
+                APIUtils.showError('Không tìm thấy tài khoản với ID: ' + accountId);
+                return;
+            }
+
+            const username = account.tenDangNhap || account.username || 'này';
+            console.log('Deleting account:', {id: accountId, username: username, account: account});
+            if (!confirm(`Bạn có chắc muốn xóa tài khoản "${username}"?`)) {
+                return;
+            }
+
             try {
-                // Note: Delete endpoint may not exist, using update to disable instead
-                await TaiKhoanAPI.updateStatus(id, 'Đã khóa');
-                APIUtils.showSuccess('Xóa tài khoản thành công');
+                await TaiKhoanAPI.delete(accountId);
+                APIUtils.showSuccess(`Xóa tài khoản "${username}" thành công`);
                 await loadAccounts();
             } catch (error) {
                 APIUtils.showError(error.message);
             }
-        }
-
-        async function handleLockUnlock(id) {
-            const account = accounts.find(acc => (acc.maTaiKhoan || acc.id) == id);
-            if (!account) return;
-
-            const currentStatus = account.trangThai || account.status || '';
-            const isCurrentlyLocked = currentStatus === 'Đã khóa' || currentStatus === 'locked';
-            const newStatus = isCurrentlyLocked ? 'Hoạt động' : 'Đã khóa';
-            const actionName = isCurrentlyLocked ? 'Mở khóa' : 'Khóa';
-
-            if (!confirm(`Bạn muốn ${actionName} tài khoản này?`)) {
-                return;
-            }
-
-            try {
-                await TaiKhoanAPI.updateStatus(id, newStatus);
-                APIUtils.showSuccess(`${actionName} tài khoản thành công`);
-                await loadAccounts();
-            } catch (error) {
-                APIUtils.showError(error.message);
-            }
-        }
-
-        function handleEdit(id) {
-            alert(`Chức năng Sửa cho tài khoản ${id} đang phát triển!`);
         }
 
         // Load accounts from API
@@ -504,12 +763,14 @@
                 // Map API data to expected format
                 accounts = accounts.map(acc => ({
                     ...acc,
-                    id: acc.maTaiKhoan,
+                    // Backend trả về 'id', không phải 'maTaiKhoan'
+                    // Giữ nguyên id từ backend, chỉ thêm alias nếu cần
+                    id: acc.id || acc.maTaiKhoan,
+                    maTaiKhoan: acc.id || acc.maTaiKhoan, // Đảm bảo có cả hai field
                     username: acc.tenDangNhap,
                     fullName: acc.hoTen,
                     email: acc.dienThoai,
-                    role: acc.vaiTro,
-                    status: acc.trangThai === 'Hoạt động' ? 'active' : 'locked'
+                    role: acc.vaiTro
                 }));
                 filteredAccounts = [...accounts];
                 currentPage = 1;
@@ -521,8 +782,44 @@
             }
         }
 
+        // Load và hiển thị thông tin user
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                    $('#userDisplayName').text(displayName);
+                    
+                    // Load avatar
+                    if (user && user.id) {
+                        const imageKey = `profileImage_${user.id}`;
+                        let imageData = sessionStorage.getItem(imageKey);
+                        if (!imageData) {
+                            imageData = localStorage.getItem(imageKey);
+                        }
+                        if (imageData) {
+                            $('#navbarAvatar').attr('src', imageData);
+                        }
+                    }
+                } else {
+                    $('#userDisplayName').text('Người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                $('#userDisplayName').text('Người dùng');
+            }
+        }
+
         // Init
         $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
+            if (!checkAdminAccess()) {
+                return;
+            }
+            loadUserDisplay();
             loadAccounts();
         });
 
