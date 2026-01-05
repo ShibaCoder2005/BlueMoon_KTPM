@@ -12,7 +12,7 @@ INSERT INTO TaiKhoan (tenDangNhap, matKhau, hoTen, vaiTro, email, dienThoai, tra
 ('ketoan2', '123456', 'Trần Văn Chi', 'KeToan', 'chi.tv@bluemoon.vn', '0901000003', 'Hoạt động'),
 ('totruong', '123456', 'Lê Văn Tổ', 'BanQuanLy', 'to.lv@bluemoon.vn', '0901000004', 'Hoạt động');
 
--- 2> BẢNG PHÒNG
+-- 2. BẢNG PHÒNG
 INSERT INTO Phong (soPhong, dienTich, giaTien) VALUES
 ('501', 50, 1200000000),  
 ('502', 50, 1000000000), 
@@ -33,7 +33,7 @@ INSERT INTO Phong (soPhong, dienTich, giaTien) VALUES
 ('608', 50, 1000000000), 
 ('609', 50, 1200000000);
 
--- 2. BẢNG HỘ GIA ĐÌNH (8 hộ)
+-- 3. BẢNG HỘ GIA ĐÌNH (8 hộ)
 -- Lưu ý: maChuHo để NULL trước, update sau khi có NhanKhau
 INSERT INTO HoGiaDinh (soPhong, trangThai, thoiGianBatDauO) VALUES
 (501, 'DangO', '2025-01-01'),
@@ -47,7 +47,7 @@ INSERT INTO HoGiaDinh (soPhong, trangThai, thoiGianBatDauO) VALUES
 
 SELECT * FROM HoGiaDinh;
 
--- 3. BẢNG NHÂN KHẨU (16 người)
+-- 4. BẢNG NHÂN KHẨU (16 người)
 INSERT INTO NhanKhau (maHo, hoTen, ngaySinh, gioitinh, soCCCD, ngheNghiep, quanHeVoiChuHo, tinhTrang, ngayBatDau, nguoiGhi) VALUES
 -- Hộ 501
 (1, 'Phạm Văn Nhất', '1980-01-01', 'Nam', '001080000001', 'Tự do', 'Chủ hộ', 'CuTru', '2025-01-01', 1),
@@ -76,7 +76,7 @@ INSERT INTO NhanKhau (maHo, hoTen, ngaySinh, gioitinh, soCCCD, ngheNghiep, quanH
 
 -- Cập nhật maChuHo cho bảng HoGiaDinh (trigger)
 
--- 4. BẢNG KHOẢN THU (5 khoản)
+-- 5. BẢNG KHOẢN THU (5 khoản)
 -- Lưu ý: tinhTheo phải khớp với các giá trị trong frontend: "Diện tích", "Nhân khẩu", "Hộ khẩu", "Xe máy", "Ô tô"
 INSERT INTO KhoanThu (tenKhoan, loai, donGia, donViTinh, tinhTheo, batBuoc, moTa) VALUES
 ('Phí quản lý chung cư', 'PhiDichVu', 7000, 'VNĐ/m²', 'Diện tích', TRUE, 'Phí vận hành, vệ sinh, an ninh'),
@@ -85,16 +85,13 @@ INSERT INTO KhoanThu (tenKhoan, loai, donGia, donViTinh, tinhTheo, batBuoc, moTa
 ('Quỹ vì người nghèo', 'TuNguyen', 0, 'VNĐ/hộ', 'Hộ khẩu', FALSE, 'Ủng hộ tự nguyện'),
 ('Tiền nước sinh hoạt', 'DienNuoc', 0, 'VNĐ/người', 'Nhân khẩu', TRUE, 'Theo chỉ số đồng hồ');
 
--- 5. BẢNG ĐỢT THU (3 đợt)
+-- 6. BẢNG ĐỢT THU (3 đợt)
 INSERT INTO DotThu (tenDot, ngayBatDau, ngayKetThuc, trangThai) VALUES
 ('Thu phí tháng 01/2025', '2025-01-01', '2025-01-31', 'Dong'),
 ('Thu phí tháng 02/2025', '2025-02-01', '2025-02-28', 'Dong'),
 ('Thu phí tháng 03/2025', '2025-03-01', '2025-03-31', 'Mo');
 
--- 6, 7. BẢNG PHIẾU THU & CHI TIẾT THU
-CALL pr_TaoHoaDonHangLoat(3, 2);
-
--- 8. BẢNG PHƯƠNG TIỆN (7 xe)
+-- 9. BẢNG PHƯƠNG TIỆN (7 xe)
 INSERT INTO PhuongTien (maHo, loaiXe, bienSo, tenChuXe, ngayDangKy) VALUES
 (1, 'XeMay', '29-H1 123.45', 'Phạm Văn Nhất', '2025-01-10'),
 (1, 'XeMay', '29-H1 543.21', 'Nguyễn Thị A', '2025-01-10'),
@@ -103,3 +100,6 @@ INSERT INTO PhuongTien (maHo, loaiXe, bienSo, tenChuXe, ngayDangKy) VALUES
 (5, 'Oto', '30F-555.66', 'Vũ Văn Ngũ', '2025-02-01'),
 (7, 'XeMay', '29-C1 222.33', 'Bùi Văn Thất', '2025-02-10'),
 (7, 'XeMay', '29-C1 444.55', 'Phạm Thị F', '2025-02-10');
+
+-- 7, 8. BẢNG PHIẾU THU & CHI TIẾT THU
+CALL pr_TaoHoaDonHangLoat(3, 2);

@@ -17,7 +17,7 @@ CREATE TABLE HoGiaDinh (
     maChuHo VARCHAR(20) NULL, -- Cho phép NULL để nhập sau
     trangThai VARCHAR(10) DEFAULT 'DangO',
     thoiGianBatDauO TIMESTAMP,
-    thoiGianKetThucO TIMESTAMP,
+    thoiGianKetThucO TIMESTAMP DEFAULT NULL,
     ghiChu TEXT
 );
 
