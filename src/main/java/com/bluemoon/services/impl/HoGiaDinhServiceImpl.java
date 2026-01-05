@@ -27,17 +27,20 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
     // SQL Queries - PostgreSQL table names
     // Lưu ý: Database mới không có maHo, dienTich, ngayTao
     // maChuHo là VARCHAR(20) tham chiếu đến NhanKhau.soCCCD
+    // JOIN với Phong để lấy diện tích
     private static final String SELECT_ALL = 
-            "SELECT id, soPhong, maChuHo, ghiChu, thoiGianBatDauO, thoiGianKetThucO FROM HoGiaDinh ORDER BY id";
+            "SELECT h.id, h.soPhong, h.maChuHo, h.trangThai, h.ghiChu, h.thoiGianBatDauO, h.thoiGianKetThucO, p.dienTich " +
+            "FROM HoGiaDinh h LEFT JOIN Phong p ON h.soPhong = p.soPhong ORDER BY h.id";
 
     private static final String SELECT_BY_ID = 
-            "SELECT id, soPhong, maChuHo, ghiChu, thoiGianBatDauO, thoiGianKetThucO FROM HoGiaDinh WHERE id = ?";
+            "SELECT h.id, h.soPhong, h.maChuHo, h.trangThai, h.ghiChu, h.thoiGianBatDauO, h.thoiGianKetThucO, p.dienTich " +
+            "FROM HoGiaDinh h LEFT JOIN Phong p ON h.soPhong = p.soPhong WHERE h.id = ?";
 
     private static final String INSERT = 
-            "INSERT INTO HoGiaDinh (soPhong, maChuHo, ghiChu, thoiGianBatDauO, thoiGianKetThucO) VALUES (?, ?, ?, ?, ?)";
+            "INSERT INTO HoGiaDinh (soPhong, maChuHo, trangThai, ghiChu, thoiGianBatDauO, thoiGianKetThucO) VALUES (?, ?, ?, ?, ?, ?)";
 
     private static final String UPDATE = 
-            "UPDATE HoGiaDinh SET soPhong = ?, maChuHo = ?, ghiChu = ?, thoiGianBatDauO = ?, thoiGianKetThucO = ? WHERE id = ?";
+            "UPDATE HoGiaDinh SET soPhong = ?, maChuHo = ?, trangThai = ?, ghiChu = ?, thoiGianBatDauO = ?, thoiGianKetThucO = ? WHERE id = ?";
 
     private static final String DELETE = 
             "DELETE FROM HoGiaDinh WHERE id = ?";
@@ -55,8 +58,9 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
             "SELECT COUNT(*) FROM PhieuThu WHERE maHo = ?";
 
     private static final String SEARCH = 
-            "SELECT id, soPhong, maChuHo, ghiChu, thoiGianBatDauO, thoiGianKetThucO FROM HoGiaDinh " +
-            "WHERE ghiChu LIKE ? ORDER BY id";
+            "SELECT h.id, h.soPhong, h.maChuHo, h.trangThai, h.ghiChu, h.thoiGianBatDauO, h.thoiGianKetThucO, p.dienTich " +
+            "FROM HoGiaDinh h LEFT JOIN Phong p ON h.soPhong = p.soPhong " +
+            "WHERE h.ghiChu LIKE ? ORDER BY h.id";
 
     @Override
     public List<HoGiaDinh> getAllHoGiaDinh() {
@@ -124,17 +128,19 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
             } else {
                 pstmt.setNull(2, java.sql.Types.VARCHAR);
             }
-            pstmt.setString(3, hoGiaDinh.getGhiChu());
+            // trangThai có DEFAULT 'DangO' trong database
+            pstmt.setString(3, hoGiaDinh.getTrangThai() != null ? hoGiaDinh.getTrangThai() : "DangO");
+            pstmt.setString(4, hoGiaDinh.getGhiChu());
             // thoiGianBatDauO và thoiGianKetThucO là TIMESTAMP
             if (hoGiaDinh.getThoiGianBatDauO() != null) {
-                pstmt.setTimestamp(4, Timestamp.valueOf(hoGiaDinh.getThoiGianBatDauO()));
-            } else {
-                pstmt.setNull(4, java.sql.Types.TIMESTAMP);
-            }
-            if (hoGiaDinh.getThoiGianKetThucO() != null) {
-                pstmt.setTimestamp(5, Timestamp.valueOf(hoGiaDinh.getThoiGianKetThucO()));
+                pstmt.setTimestamp(5, Timestamp.valueOf(hoGiaDinh.getThoiGianBatDauO()));
             } else {
                 pstmt.setNull(5, java.sql.Types.TIMESTAMP);
+            }
+            if (hoGiaDinh.getThoiGianKetThucO() != null) {
+                pstmt.setTimestamp(6, Timestamp.valueOf(hoGiaDinh.getThoiGianKetThucO()));
+            } else {
+                pstmt.setNull(6, java.sql.Types.TIMESTAMP);
             }
 
             int rowsAffected = pstmt.executeUpdate();
@@ -179,19 +185,21 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
                 } else {
                     pstmt.setNull(2, java.sql.Types.VARCHAR);
                 }
-                pstmt.setString(3, hoGiaDinh.getGhiChu());
+                // trangThai có DEFAULT 'DangO' trong database
+                pstmt.setString(3, hoGiaDinh.getTrangThai() != null ? hoGiaDinh.getTrangThai() : "DangO");
+                pstmt.setString(4, hoGiaDinh.getGhiChu());
                 // thoiGianBatDauO và thoiGianKetThucO là TIMESTAMP
                 if (hoGiaDinh.getThoiGianBatDauO() != null) {
-                    pstmt.setTimestamp(4, Timestamp.valueOf(hoGiaDinh.getThoiGianBatDauO()));
-                } else {
-                    pstmt.setNull(4, java.sql.Types.TIMESTAMP);
-                }
-                if (hoGiaDinh.getThoiGianKetThucO() != null) {
-                    pstmt.setTimestamp(5, Timestamp.valueOf(hoGiaDinh.getThoiGianKetThucO()));
+                    pstmt.setTimestamp(5, Timestamp.valueOf(hoGiaDinh.getThoiGianBatDauO()));
                 } else {
                     pstmt.setNull(5, java.sql.Types.TIMESTAMP);
                 }
-                pstmt.setInt(6, hoGiaDinh.getId());
+                if (hoGiaDinh.getThoiGianKetThucO() != null) {
+                    pstmt.setTimestamp(6, Timestamp.valueOf(hoGiaDinh.getThoiGianKetThucO()));
+                } else {
+                    pstmt.setNull(6, java.sql.Types.TIMESTAMP);
+                }
+                pstmt.setInt(7, hoGiaDinh.getId());
 
                 int rowsAffected = pstmt.executeUpdate();
                 boolean success = rowsAffected > 0;
@@ -363,7 +371,12 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
         hoGiaDinh.setId(rs.getInt("id"));
         hoGiaDinh.setSoPhong(rs.getInt("soPhong"));
         hoGiaDinh.setMaChuHo(rs.getString("maChuHo")); // VARCHAR(20) - soCCCD
+        hoGiaDinh.setTrangThai(rs.getString("trangThai")); // trangThai có DEFAULT 'DangO'
         hoGiaDinh.setGhiChu(rs.getString("ghiChu"));
+        
+        // Lấy diện tích từ bảng Phong (JOIN)
+        java.math.BigDecimal dienTich = rs.getBigDecimal("dienTich");
+        hoGiaDinh.setDienTich(dienTich);
 
         // Convert java.sql.Timestamp to LocalDateTime
         Timestamp thoiGianBatDauO = rs.getTimestamp("thoiGianBatDauO");

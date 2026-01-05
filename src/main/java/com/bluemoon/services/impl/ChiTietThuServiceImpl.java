@@ -29,9 +29,9 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
             "LEFT JOIN KhoanThu kt ON ct.maKhoan = kt.id " +
             "WHERE ct.maPhieu = ? ORDER BY ct.id";
 
-    // Lưu ý: thanhTien là GENERATED ALWAYS AS (soLuong * donGia) STORED, không cần INSERT
+    // Lưu ý: thanhTien cần được tính = soLuong * donGia và set khi INSERT
     private static final String INSERT = 
-            "INSERT INTO ChiTietThu (maPhieu, maKhoan, soLuong, donGia, ghiChu) VALUES (?, ?, ?, ?, ?)";
+            "INSERT INTO ChiTietThu (maPhieu, maKhoan, soLuong, donGia, thanhTien, ghiChu) VALUES (?, ?, ?, ?, ?, ?)";
 
     private static final String DELETE_BY_MAPHIEU = 
             "DELETE FROM ChiTietThu WHERE maPhieu = ?";
@@ -79,11 +79,14 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
             return false;
         }
 
-        // Validate donGia and soLuong (thanhTien sẽ được database tự động tính - GENERATED column)
+        // Validate donGia and soLuong (thanhTien sẽ được tính = soLuong * donGia)
         if (chiTiet.getDonGia() == null || chiTiet.getSoLuong() == null) {
             logger.log(Level.WARNING, "Cannot save ChiTietThu: donGia or soLuong is null");
             return false;
         }
+
+        // Tính thanhTien = soLuong * donGia
+        BigDecimal thanhTien = chiTiet.getSoLuong().multiply(chiTiet.getDonGia());
 
         try (Connection conn = DatabaseConnector.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(INSERT)) {
@@ -92,7 +95,8 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
             pstmt.setInt(2, chiTiet.getMaKhoan());
             pstmt.setBigDecimal(3, chiTiet.getSoLuong());
             pstmt.setBigDecimal(4, chiTiet.getDonGia());
-            pstmt.setString(5, null); // ghiChu (field not in model)
+            pstmt.setBigDecimal(5, thanhTien);
+            pstmt.setString(6, chiTiet.getGhiChu()); // ghiChu từ model
 
             int rowsAffected = pstmt.executeUpdate();
             boolean success = rowsAffected > 0;
@@ -135,17 +139,21 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
                     continue;
                 }
 
-                // Validate donGia and soLuong (thanhTien sẽ được database tự động tính - GENERATED column)
+                // Validate donGia and soLuong (thanhTien sẽ được tính = soLuong * donGia)
                 if (chiTiet.getDonGia() == null || chiTiet.getSoLuong() == null) {
                     logger.log(Level.WARNING, "Skipping ChiTietThu with invalid donGia or soLuong");
                     continue;
                 }
 
+                // Tính thanhTien = soLuong * donGia
+                BigDecimal thanhTien = chiTiet.getSoLuong().multiply(chiTiet.getDonGia());
+
                 pstmt.setInt(1, chiTiet.getMaPhieu());
                 pstmt.setInt(2, chiTiet.getMaKhoan());
                 pstmt.setBigDecimal(3, chiTiet.getSoLuong());
                 pstmt.setBigDecimal(4, chiTiet.getDonGia());
-                pstmt.setString(5, null); // ghiChu (field not in model)
+                pstmt.setBigDecimal(5, thanhTien);
+                pstmt.setString(6, null); // ghiChu
 
                 pstmt.addBatch();
                 batchCount++;
@@ -206,17 +214,21 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
                     continue;
                 }
 
-                // Validate donGia and soLuong (thanhTien sẽ được database tự động tính - GENERATED column)
+                // Validate donGia and soLuong (thanhTien sẽ được tính = soLuong * donGia)
                 if (chiTiet.getDonGia() == null || chiTiet.getSoLuong() == null) {
                     logger.log(Level.WARNING, "Skipping ChiTietThu with invalid donGia or soLuong");
                     continue;
                 }
 
+                // Tính thanhTien = soLuong * donGia
+                BigDecimal thanhTien = chiTiet.getSoLuong().multiply(chiTiet.getDonGia());
+
                 pstmt.setInt(1, chiTiet.getMaPhieu());
                 pstmt.setInt(2, chiTiet.getMaKhoan());
                 pstmt.setBigDecimal(3, chiTiet.getSoLuong());
                 pstmt.setBigDecimal(4, chiTiet.getDonGia());
-                pstmt.setString(5, null); // ghiChu (field not in model)
+                pstmt.setBigDecimal(5, thanhTien);
+                pstmt.setString(6, null); // ghiChu
 
                 pstmt.addBatch();
                 batchCount++;
@@ -328,6 +340,7 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
         chiTiet.setSoLuong(rs.getBigDecimal("soLuong"));
         chiTiet.setDonGia(rs.getBigDecimal("donGia"));
         chiTiet.setThanhTien(rs.getBigDecimal("thanhTien"));
+        chiTiet.setGhiChu(rs.getString("ghiChu"));
         
         // Set tenKhoan if available from JOIN
         try {

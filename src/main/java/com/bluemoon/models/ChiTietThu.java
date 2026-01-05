@@ -21,18 +21,21 @@ public class ChiTietThu {
      * Lưu ý: Trong database mới, thanhTien là generated column, không cần set khi insert/update.
      */
     private BigDecimal thanhTien;
+    /** ghiChu: ghi chú (TEXT). */
+    private String ghiChu;
 
     /** Constructor mặc định. */
     public ChiTietThu() {}
 
     /** Constructor đầy đủ. */
-    public ChiTietThu(int id, int maPhieu, int maKhoan, BigDecimal soLuong, BigDecimal donGia, BigDecimal thanhTien) {
+    public ChiTietThu(int id, int maPhieu, int maKhoan, BigDecimal soLuong, BigDecimal donGia, BigDecimal thanhTien, String ghiChu) {
         this.id = id;
         this.maPhieu = maPhieu;
         this.maKhoan = maKhoan;
         this.soLuong = soLuong;
         this.donGia = donGia;
         this.thanhTien = thanhTien;
+        this.ghiChu = ghiChu;
     }
 
     public int getId() { return id; }
@@ -52,6 +55,9 @@ public class ChiTietThu {
 
     public BigDecimal getThanhTien() { return thanhTien; }
     public void setThanhTien(BigDecimal thanhTien) { this.thanhTien = thanhTien; }
+
+    public String getGhiChu() { return ghiChu; }
+    public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
 
     /** Helper field để lưu tên khoản thu (String) cho hiển thị. */
     private String tenKhoan;

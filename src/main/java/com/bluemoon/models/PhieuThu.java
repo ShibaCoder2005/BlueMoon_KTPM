@@ -24,13 +24,15 @@ public class PhieuThu {
     private String trangThai;
     /** hinhThucThu: hình thức thu (varchar(50)). */
     private String hinhThucThu;
+    /** ghiChu: ghi chú (TEXT). */
+    private String ghiChu;
 
     /** Constructor mặc định. */
     public PhieuThu() {}
 
     /** Constructor đầy đủ. */
     public PhieuThu(int id, int maHo, int maDot, int maTaiKhoan, LocalDateTime ngayLap, BigDecimal tongTien,
-                    String trangThai, String hinhThucThu) {
+                    String trangThai, String hinhThucThu, String ghiChu) {
         this.id = id;
         this.maHo = maHo;
         this.maDot = maDot;
@@ -39,6 +41,7 @@ public class PhieuThu {
         this.tongTien = tongTien;
         this.trangThai = trangThai;
         this.hinhThucThu = hinhThucThu;
+        this.ghiChu = ghiChu;
     }
 
     public int getId() { return id; }
@@ -64,4 +67,7 @@ public class PhieuThu {
 
     public String getHinhThucThu() { return hinhThucThu; }
     public void setHinhThucThu(String hinhThucThu) { this.hinhThucThu = hinhThucThu; }
+
+    public String getGhiChu() { return ghiChu; }
+    public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
 }

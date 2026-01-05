@@ -145,6 +145,24 @@ public class NhanKhauServiceImpl implements NhanKhauService {
             logger.log(Level.WARNING, "Cannot add resident: hoTen is empty");
             return false;
         }
+        
+        // Validate maHo
+        if (nhanKhau.getMaHo() <= 0) {
+            logger.log(Level.WARNING, "Cannot add resident: maHo is invalid: " + nhanKhau.getMaHo());
+            return false;
+        }
+        
+        // Validate ngaySinh
+        if (nhanKhau.getNgaySinh() == null) {
+            logger.log(Level.WARNING, "Cannot add resident: ngaySinh is null");
+            return false;
+        }
+        
+        // Validate gioiTinh
+        if (nhanKhau.getGioiTinh() == null || nhanKhau.getGioiTinh().trim().isEmpty()) {
+            logger.log(Level.WARNING, "Cannot add resident: gioiTinh is empty");
+            return false;
+        }
 
         // Check CCCD uniqueness if provided
         if (nhanKhau.getSoCCCD() != null && !nhanKhau.getSoCCCD().trim().isEmpty()) {
@@ -172,18 +190,18 @@ public class NhanKhauServiceImpl implements NhanKhauService {
                     pstmt.setString(7, nhanKhau.getQuanHeVoiChuHo());
                     pstmt.setString(8, nhanKhau.getTinhTrang() != null ? nhanKhau.getTinhTrang() : "CuTru");
                     // ngayBatDau, ngayKetThuc, hieuLuc, nguoiGhi, ghiChu
+                    // Lưu ý: Trigger fn_UpdateNhanKhau() sẽ tự động set ngayBatDau = CURRENT_TIMESTAMP và hieuLuc = TRUE
+                    // Nhưng vẫn cần set giá trị để tránh lỗi NOT NULL constraint (nếu có)
                     java.sql.Timestamp now = java.sql.Timestamp.valueOf(java.time.LocalDateTime.now());
-                    pstmt.setTimestamp(9, nhanKhau.getNgayBatDau() != null ? 
-                        java.sql.Timestamp.valueOf(nhanKhau.getNgayBatDau()) : now);
-                    pstmt.setTimestamp(10, nhanKhau.getNgayKetThuc() != null ? 
-                        java.sql.Timestamp.valueOf(nhanKhau.getNgayKetThuc()) : null);
-                    pstmt.setBoolean(11, nhanKhau.isHieuLuc());
+                    pstmt.setTimestamp(9, now); // Trigger sẽ override thành CURRENT_TIMESTAMP, nhưng set để an toàn
+                    pstmt.setTimestamp(10, null); // ngayKetThuc = NULL cho bản ghi mới
+                    pstmt.setBoolean(11, true); // Trigger sẽ set hieuLuc = TRUE, nhưng set true để đảm bảo
                     if (nhanKhau.getNguoiGhi() != null) {
                         pstmt.setInt(12, nhanKhau.getNguoiGhi());
                     } else {
                         pstmt.setNull(12, java.sql.Types.INTEGER);
                     }
-                    pstmt.setString(13, nhanKhau.getGhiChu());
+                    pstmt.setString(13, nhanKhau.getGhiChu() != null ? nhanKhau.getGhiChu() : null);
 
                     int rowsAffected = pstmt.executeUpdate();
                     if (rowsAffected <= 0) {
@@ -213,23 +231,10 @@ public class NhanKhauServiceImpl implements NhanKhauService {
                     }
                 }
 
-                // Step 2: Automatically create history record for new resident (inline to use same connection)
+                // Step 2: If this resident is "Chủ hộ", update maChuHo in HoGiaDinh
+                // Lưu ý: Trigger trigger_update_chu_ho_after_insert sẽ tự động cập nhật maChuHo
+                // Nhưng vẫn giữ logic này để đảm bảo
                 if (newResidentId > 0) {
-                    try (PreparedStatement historyStmt = conn.prepareStatement(INSERT_LICHSU)) {
-                        historyStmt.setInt(1, newResidentId);
-                        historyStmt.setString(2, "Đăng ký cư trú");
-                        historyStmt.setDate(3, convertToSqlDate(LocalDate.now()));
-                        historyStmt.setDate(4, null); // ngayKetThuc
-                        historyStmt.setInt(5, 1); // Default admin ID, có thể lấy từ session sau
-
-                        int historyRowsAffected = historyStmt.executeUpdate();
-                        if (historyRowsAffected <= 0) {
-                            conn.rollback();
-                            logger.log(Level.WARNING, "Resident added but failed to create history record for ID: " + newResidentId + ", transaction rolled back");
-                            return false;
-                        }
-                    }
-                    
                     // Step 3: If this resident is "Chủ hộ", update maChuHo in HoGiaDinh
                     // maChuHo bây giờ là soCCCD (VARCHAR) thay vì id (INT)
                     String quanHe = nhanKhau.getQuanHeVoiChuHo();
@@ -258,7 +263,7 @@ public class NhanKhauServiceImpl implements NhanKhauService {
 
                 // Commit transaction
                 conn.commit();
-                logger.log(Level.INFO, "Successfully added resident: " + nhanKhau.getHoTen() + " (ID: " + newResidentId + ") with history record");
+                logger.log(Level.INFO, "Successfully added resident: " + nhanKhau.getHoTen() + " (ID: " + newResidentId + ")");
                 return true;
 
             } catch (SQLException e) {
@@ -270,6 +275,12 @@ public class NhanKhauServiceImpl implements NhanKhauService {
 
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error adding resident: " + nhanKhau.getHoTen(), e);
+            logger.log(Level.SEVERE, "SQL State: " + e.getSQLState() + ", Error Code: " + e.getErrorCode());
+            logger.log(Level.SEVERE, "Error Message: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Unexpected error adding resident: " + nhanKhau.getHoTen(), e);
             e.printStackTrace();
             return false;
         }

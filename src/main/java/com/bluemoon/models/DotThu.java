@@ -17,23 +17,23 @@ public class DotThu {
     private LocalDate ngayKetThuc;
     /** trangThai: trạng thái (varchar(50)). */
     private String trangThai;
-    /** moTa: mô tả (text). */
-    private String moTa;
+    /** ghiChu: ghi chú (TEXT). */
+    private String ghiChu;
 
     /** Constructor mặc định. */
     public DotThu() {}
 
     /** Constructor đầy đủ. */
-    public DotThu(int id, String tenDot, LocalDate ngayBatDau, LocalDate ngayKetThuc, String trangThai, String moTa) {
+    public DotThu(int id, String tenDot, LocalDate ngayBatDau, LocalDate ngayKetThuc, String trangThai, String ghiChu) {
         this.id = id;
         this.tenDot = tenDot;
         this.ngayBatDau = ngayBatDau;
         this.ngayKetThuc = ngayKetThuc;
         this.trangThai = trangThai;
-        this.moTa = moTa;
+        this.ghiChu = ghiChu;
     }
 
-    /** Constructor không có mô tả (backward compatibility). */
+    /** Constructor không có ghi chú (backward compatibility). */
     public DotThu(int id, String tenDot, LocalDate ngayBatDau, LocalDate ngayKetThuc, String trangThai) {
         this(id, tenDot, ngayBatDau, ngayKetThuc, trangThai, null);
     }
@@ -53,8 +53,13 @@ public class DotThu {
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
 
-    public String getMoTa() { return moTa; }
-    public void setMoTa(String moTa) { this.moTa = moTa; }
+    public String getGhiChu() { return ghiChu; }
+    public void setGhiChu(String ghiChu) { this.ghiChu = ghiChu; }
+    
+    /** Getter cho moTa (alias của ghiChu - backward compatibility). */
+    public String getMoTa() { return ghiChu; }
+    /** Setter cho moTa (alias của ghiChu - backward compatibility). */
+    public void setMoTa(String moTa) { this.ghiChu = moTa; }
 
     /** Getter cho maDot (alias của id). */
     public int getMaDot() { return id; }

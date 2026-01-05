@@ -14,6 +14,8 @@ public class HoGiaDinh {
     private int soPhong;
     /** maChuHo: mã chủ hộ (VARCHAR(20)) - tham chiếu đến NhanKhau.soCCCD. */
     private String maChuHo;
+    /** trangThai: trạng thái hộ (VARCHAR(10)) - DEFAULT 'DangO'. */
+    private String trangThai;
     /** ghiChu: ghi chú (TEXT). */
     private String ghiChu;
     /** thoiGianBatDauO: thời gian bắt đầu ở (TIMESTAMP). */
@@ -31,15 +33,17 @@ public class HoGiaDinh {
      * @param id                  ID khóa chính
      * @param soPhong             số phòng (tham chiếu đến Phong.soPhong)
      * @param maChuHo             mã chủ hộ (soCCCD của NhanKhau)
+     * @param trangThai           trạng thái hộ
      * @param ghiChu              ghi chú
      * @param thoiGianBatDauO     thời gian bắt đầu ở
      * @param thoiGianKetThucO    thời gian kết thúc ở (có thể null)
      */
-    public HoGiaDinh(int id, int soPhong, String maChuHo, String ghiChu, 
+    public HoGiaDinh(int id, int soPhong, String maChuHo, String trangThai, String ghiChu, 
                      LocalDateTime thoiGianBatDauO, LocalDateTime thoiGianKetThucO) {
         this.id = id;
         this.soPhong = soPhong;
         this.maChuHo = maChuHo;
+        this.trangThai = trangThai;
         this.ghiChu = ghiChu;
         this.thoiGianBatDauO = thoiGianBatDauO;
         this.thoiGianKetThucO = thoiGianKetThucO;
@@ -67,6 +71,14 @@ public class HoGiaDinh {
 
     public void setMaChuHo(String maChuHo) {
         this.maChuHo = maChuHo;
+    }
+
+    public String getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(String trangThai) {
+        this.trangThai = trangThai;
     }
 
     public String getGhiChu() {
@@ -115,6 +127,30 @@ public class HoGiaDinh {
      */
     public void setTenChuHo(String tenChuHo) {
         this.tenChuHo = tenChuHo;
+    }
+
+    /**
+     * Helper field để lưu diện tích phòng (lấy từ bảng Phong theo soPhong).
+     * Trả về null nếu chưa được set.
+     */
+    private java.math.BigDecimal dienTich;
+
+    /**
+     * Lấy diện tích phòng (được resolve từ Phong theo soPhong).
+     *
+     * @return diện tích phòng
+     */
+    public java.math.BigDecimal getDienTich() {
+        return dienTich;
+    }
+
+    /**
+     * Set diện tích phòng (thường được resolve từ PhongService).
+     *
+     * @param dienTich diện tích phòng
+     */
+    public void setDienTich(java.math.BigDecimal dienTich) {
+        this.dienTich = dienTich;
     }
 }
 
