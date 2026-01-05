@@ -112,12 +112,11 @@
                     </button>
 
                     <ul class="navbar-nav ml-auto">
-                        <div class="topbar-divider d-none d-sm-block"></div>
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
-                                <img class="img-profile rounded-circle" id="navbarAvatar" src="https://source.unsplash.com/QAB-WJcbgJk/60x60" style="object-fit: cover;">
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
                             </a>
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
@@ -1108,14 +1107,22 @@
                         }
                         if (imageData) {
                             $('#navbarAvatar').attr('src', imageData);
+                        } else {
+                            // Fallback to default avatar if no custom image
+                            $('#navbarAvatar').attr('src', 'img/undraw_profile.svg');
                         }
+                    } else {
+                        // Fallback to default avatar if no user id
+                        $('#navbarAvatar').attr('src', 'img/undraw_profile.svg');
                     }
                 } else {
                     $('#userDisplayName').text('Người dùng');
+                    $('#navbarAvatar').attr('src', 'img/undraw_profile.svg');
                 }
             } catch (error) {
                 console.error('Error loading user:', error);
                 $('#userDisplayName').text('Người dùng');
+                $('#navbarAvatar').attr('src', 'img/undraw_profile.svg');
             }
         }
     </script>
