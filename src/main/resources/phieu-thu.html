@@ -212,10 +212,8 @@
                                 <div class="form-group">
                                     <label>Trạng thái</label>
                                     <select class="form-control" id="trangThai">
-                                        <option value="ChuaThu">Chưa thu</option>
-                                        <option value="DaThu">Đã thu</option>
-                                        <option value="DaThanhToan">Đã thanh toán</option>
-                                        <option value="ChuaDu">Chưa đủ</option>
+                                        <option value="ChuaThu">Chưa nộp</option>
+                                        <option value="DaThu">Đã nộp</option>
                                     </select>
                                 </div>
                             </div>
@@ -670,10 +668,8 @@
         function getStatusBadge(trangThai) {
             if (!trangThai) return '<span class="badge badge-secondary">-</span>';
             const statusMap = {
-                'ChuaThu': { text: 'Chưa thu', class: 'badge-warning' },
-                'DaThu': { text: 'Đã thu', class: 'badge-success' },
-                'DaThanhToan': { text: 'Đã thanh toán', class: 'badge-success' },
-                'ChuaDu': { text: 'Chưa đủ', class: 'badge-info' }
+                'ChuaThu': { text: 'Chưa nộp', class: 'badge-warning' },
+                'DaThu': { text: 'Đã nộp', class: 'badge-success' }
             };
             const status = statusMap[trangThai] || { text: trangThai, class: 'badge-secondary' };
             return `<span class="badge ${status.class}">${status.text}</span>`;
@@ -983,13 +979,9 @@
                     return;
                 }
 
-                // Check if can modify
-                if (phieuThu.trangThai && (
-                    phieuThu.trangThai.includes('Đã thu') ||
-                    phieuThu.trangThai.includes('Đã thanh toán') ||
-                    phieuThu.trangThai === 'DaThanhToan'
-                )) {
-                    APIUtils.showError('Không thể sửa phiếu thu đã thanh toán');
+                // Check if can modify - chỉ cho phép sửa khi trạng thái là ChuaThu
+                if (phieuThu.trangThai && phieuThu.trangThai === 'DaThu') {
+                    APIUtils.showError('Không thể sửa phiếu thu đã nộp');
                     return;
                 }
 

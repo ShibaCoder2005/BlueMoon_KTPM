@@ -153,8 +153,8 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                   "CASE WHEN pt.trangThai = 'DaThu' THEN pt.tongTien ELSE 0 END as daThu, " +
                   "CASE WHEN pt.trangThai != 'DaThu' OR pt.id IS NULL THEN COALESCE(pt.tongTien, 0) ELSE 0 END as conNo, " +
                   "CASE WHEN pt.id IS NULL THEN 'Chưa có phiếu thu' " +
-                  "     WHEN pt.trangThai = 'DaThu' THEN 'Đã thanh toán' " +
-                  "     ELSE 'Chưa thanh toán' END as trangThai " +
+                  "     WHEN pt.trangThai = 'DaThu' THEN 'Đã nộp' " +
+                  "     ELSE 'Chưa nộp' END as trangThai " +
                   "FROM HoGiaDinh hg " +
                   "CROSS JOIN DotThu dt " +
                   "LEFT JOIN PhieuThu pt ON pt.maHo = hg.id AND pt.maDot = dt.id " +
@@ -169,8 +169,8 @@ public class BaoCaoServiceImpl implements BaoCaoService {
                   "CASE WHEN pt.trangThai = 'DaThu' THEN pt.tongTien ELSE 0 END as daThu, " +
                   "CASE WHEN pt.trangThai != 'DaThu' OR pt.id IS NULL THEN COALESCE(pt.tongTien, 0) ELSE 0 END as conNo, " +
                   "CASE WHEN pt.id IS NULL THEN 'Chưa có phiếu thu' " +
-                  "     WHEN pt.trangThai = 'DaThu' THEN 'Đã thanh toán' " +
-                  "     ELSE 'Chưa thanh toán' END as trangThai " +
+                  "     WHEN pt.trangThai = 'DaThu' THEN 'Đã nộp' " +
+                  "     ELSE 'Chưa nộp' END as trangThai " +
                   "FROM HoGiaDinh hg " +
                   "CROSS JOIN DotThu dt " +
                   "LEFT JOIN PhieuThu pt ON pt.maHo = hg.id AND pt.maDot = dt.id " +

@@ -984,25 +984,10 @@ public class PhieuThuServiceImpl implements PhieuThuService {
             return true; // No status means can modify
         }
         
-        // Use normalized status comparison instead of fragile string matching
-        String normalizedStatus = trangThai.trim().toLowerCase();
-        
-        // Define paid status values (case-insensitive)
-        final String[] PAID_STATUSES = {
-            "dathu", "đã thu", "đãthu",
-            "dathanhtoan", "đã thanh toán", "đãthanhtoan",
-            "hoanthanh", "hoàn thành", "hoànthành",
-            "paid", "completed"
-        };
-        
-        // Check if status matches any paid status
-        for (String paidStatus : PAID_STATUSES) {
-            if (normalizedStatus.equals(paidStatus) || normalizedStatus.contains(paidStatus)) {
-                return false;
-            }
-        }
-        
-        return true;
+        // Chỉ có 2 trạng thái: ChuaThu (chưa nộp) và DaThu (đã nộp)
+        // Chỉ cho phép chỉnh sửa khi trạng thái là ChuaThu
+        String normalizedStatus = trangThai.trim();
+        return normalizedStatus.equalsIgnoreCase("ChuaThu");
     }
 
     /**

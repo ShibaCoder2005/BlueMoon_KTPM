@@ -82,7 +82,7 @@ CREATE TABLE PhieuThu (
     maTaiKhoan INT,
     ngayLap TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     tongTien DECIMAL(14,2) DEFAULT 0,
-    trangThai VARCHAR(50) DEFAULT 'ChuaThu',
+    trangThai VARCHAR(50) DEFAULT 'ChuaThu' CHECK (trangThai IN ('ChuaThu', 'DaThu')),
     hinhThucThu VARCHAR(50),
     ghiChu TEXT
 );

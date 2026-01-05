@@ -210,10 +210,6 @@
                             <input type="number" class="form-control" id="soPhong" placeholder="Nhập số phòng" min="0">
                         </div>
                         <div class="form-group">
-                            <label>Diện tích (m²)</label>
-                            <input type="number" class="form-control" id="dienTich" placeholder="Nhập diện tích" min="0" step="0.01">
-                        </div>
-                        <div class="form-group">
                             <label>Ghi chú</label>
                             <textarea class="form-control" id="ghiChu" rows="3" placeholder="Ghi chú về hộ gia đình"></textarea>
                         </div>
@@ -391,8 +387,6 @@
 
             const maHo = $('#maHo').val().trim();
             const soPhong = parseInt($('#soPhong').val()) || 0;
-            const dienTichStr = $('#dienTich').val().trim();
-            const dienTich = dienTichStr ? parseFloat(dienTichStr) : null;
             const ghiChu = $('#ghiChu').val().trim();
 
             if (!maHo) {
@@ -407,7 +401,6 @@
             const householdData = {
                 maHo: maHo,
                 soPhong: soPhong,
-                dienTich: dienTich,
                 ghiChu: ghiChu || null
             };
 
@@ -467,7 +460,6 @@
                 editingHouseholdId = id;
                 $('#maHo').val(household.maHo || '');
                 $('#soPhong').val(household.soPhong || '');
-                $('#dienTich').val(household.dienTich || '');
                 $('#ghiChu').val(household.ghiChu || '');
                 
                 $('.modal-title').text('Sửa Hộ Gia Đình');

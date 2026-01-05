@@ -78,15 +78,15 @@ public class ThongKeServiceImpl implements ThongKeService {
                 continue;
             }
             String trangThai = phieuThu.getTrangThai();
-            if (trangThai != null && (trangThai.equalsIgnoreCase("Đã thu") || trangThai.equalsIgnoreCase("Đã thanh toán"))) {
+            if (trangThai != null && trangThai.equalsIgnoreCase("DaThu")) {
                 paidAmount = paidAmount.add(phieuThu.getTongTien());
             } else {
                 unpaidAmount = unpaidAmount.add(phieuThu.getTongTien());
             }
         }
 
-        stats.put("Đã thanh toán", paidAmount);
-        stats.put("Chưa thanh toán", unpaidAmount);
+        stats.put("Đã nộp", paidAmount);
+        stats.put("Chưa nộp", unpaidAmount);
 
         return stats;
     }
@@ -139,8 +139,7 @@ public class ThongKeServiceImpl implements ThongKeService {
 
         long paidCount = phieuThuList.stream()
                 .filter(p -> p.getTrangThai() != null && 
-                        (p.getTrangThai().equalsIgnoreCase("Đã thu") || 
-                         p.getTrangThai().equalsIgnoreCase("Đã thanh toán")))
+                        p.getTrangThai().equalsIgnoreCase("DaThu"))
                 .count();
 
         report.put("totalAmount", totalAmount);
@@ -195,9 +194,7 @@ public class ThongKeServiceImpl implements ThongKeService {
         List<PhieuThu> unpaidPhieuThu = allPhieuThu.stream()
                 .filter(p -> {
                     String trangThai = p.getTrangThai();
-                    return trangThai == null || 
-                           (!trangThai.equalsIgnoreCase("Đã thu") && 
-                            !trangThai.equalsIgnoreCase("Đã thanh toán"));
+                    return trangThai == null || !trangThai.equalsIgnoreCase("DaThu");
                 })
                 .collect(Collectors.toList());
 
