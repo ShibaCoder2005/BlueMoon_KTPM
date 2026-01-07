@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Bluemoon - Đợt Thu</title>
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div id="wrapper">
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
+            </a>
+
+            <hr class="sidebar-divider my-0">
+
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="can-ho.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Cư dân</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="khoan-thu.html">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Khoản thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="thong-ke.html">
+                    <i class="fas fa-fw fa-chart-bar"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
+                </a>
+            </li>
+
+            <li class="nav-item" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                    <i class="fas fa-fw fa-user-cog"></i>
+                    <span>Tài khoản</span>
+                </a>
+            </li>
+
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <ul class="navbar-nav ml-auto">
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="ho-so.html">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                    </nav>
+
+                <div class="container-fluid">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Quản lý Đợt Thu</h1>
+                        <a href="#" class="btn btn-primary btn-icon-split shadow-sm" data-toggle="modal" data-target="#addDotThuModal">
+                            <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
+                            <span class="text">Tạo đợt thu mới</span>
+                        </a>
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách đợt thu</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Tên đợt thu</th>
+                                            <th>Ngày bắt đầu</th>
+                                            <th>Ngày kết thúc</th>
+                                            <th>Trạng thái</th>
+                                            <th>Mô tả</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dotThuTableBody">
+                                        <tr><td colspan="7" class="text-center">Đang tải dữ liệu...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto"><div class="copyright text-center my-auto"><span>Copyright &copy; BlueMoon 2025</span></div></div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addDotThuModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Tạo Đợt Thu Mới</h5>
+                    <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="dotThuForm">
+                        <input type="hidden" id="dotThuId">
+                        <div class="form-group">
+                            <label>Tên đợt thu <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="tenDot" placeholder="VD: Đợt thu tháng 12/2025" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Ngày bắt đầu <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="ngayBatDau" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Ngày kết thúc <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="ngayKetThuc" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Trạng thái</label>
+                            <select class="form-control" id="trangThai">
+                                <option value="Mo">Mở</option>
+                                <option value="Dong">Đóng</option>
+                                <option value="HoanThanh">Hoàn thành</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mô tả</label>
+                            <textarea class="form-control" id="moTa" rows="3" placeholder="Mô tả đợt thu"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="saveDotThuBtn">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
+    
+    <script>
+        // Load user info and avatar
+        $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
+            loadUserDisplay();
+            if (typeof updateNavbarAvatar !== 'undefined') {
+                updateNavbarAvatar();
+            } else {
+                try {
+                    const userStr = sessionStorage.getItem('currentUser');
+                    if (userStr) {
+                        const user = JSON.parse(userStr);
+                        if (user && user.id) {
+                            const imageKey = `profileImage_${user.id}`;
+                            let imageData = sessionStorage.getItem(imageKey);
+                            if (!imageData) {
+                                imageData = localStorage.getItem(imageKey);
+                            }
+                            if (imageData) {
+                                $('#navbarAvatar').attr('src', imageData);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('[dot-thu] Error loading avatar:', error);
+                }
+            }
+        });
+        
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                    $('#userDisplayName').text(displayName);
+                } else {
+                    $('#userDisplayName').text('Người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                $('#userDisplayName').text('Người dùng');
+            }
+        }
+    </script>
+    
+    <script>
+        let dataTable;
+        let editingId = null;
+
+        $(document).ready(async function() {
+            await loadDotThu();
+
+            // Validate date range
+            $('#ngayBatDau, #ngayKetThuc').on('change', function() {
+                validateDateRange();
+            });
+
+            // Form submission
+            $('#saveDotThuBtn').on('click', async function() {
+                const form = $('#dotThuForm');
+                if (!form[0].checkValidity()) {
+                    form[0].reportValidity();
+                    return;
+                }
+
+                if (!validateDateRange()) {
+                    return;
+                }
+
+                const tenDot = $('#tenDot').val().trim();
+                const ngayBatDau = $('#ngayBatDau').val();
+                const ngayKetThuc = $('#ngayKetThuc').val();
+                const trangThai = $('#trangThai').val();
+                const moTa = $('#moTa').val().trim();
+
+                if (!tenDot) {
+                    APIUtils.showError('Vui lòng nhập tên đợt thu');
+                    return;
+                }
+
+                // Lấy ID người dùng để gửi về Backend
+                const userStr = sessionStorage.getItem('currentUser');
+                const currentUser = userStr ? JSON.parse(userStr) : null;
+                const currentUserId = currentUser ? currentUser.id : null;
+
+                const dotThu = {
+                    tenDot: tenDot,
+                    ngayBatDau: ngayBatDau,
+                    ngayKetThuc: ngayKetThuc,
+                    trangThai: trangThai || 'Mo',
+                    moTa: moTa || null,
+                    nguoiTaoId: currentUserId // <--- Gửi kèm ID người tạo vào đây
+                };
+
+                const btn = $('#saveDotThuBtn');
+                const originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang lưu...');
+
+                try {
+                    if (editingId) {
+                        dotThu.id = editingId;
+                        await DotThuAPI.update(editingId, dotThu);
+                        APIUtils.showSuccess('Cập nhật đợt thu thành công');
+                    } else {
+                        await DotThuAPI.create(dotThu);
+                        APIUtils.showSuccess('Tạo đợt thu và sinh phiếu thu thành công');
+                    }
+                    $('#addDotThuModal').modal('hide');
+                    form[0].reset();
+                    editingId = null;
+                    await loadDotThu();
+                } catch (error) {
+                    let errorMessage = error.message || 'Có lỗi xảy ra';
+                    if (error.detail) {
+                        errorMessage = error.detail;
+                    }
+                    APIUtils.showError(errorMessage);
+                } finally {
+                    btn.prop('disabled', false).html(originalHtml);
+                }
+            });
+
+            // Reset form when modal is closed
+            $('#addDotThuModal').on('hidden.bs.modal', function() {
+                $('#dotThuForm')[0].reset();
+                editingId = null;
+                $('.modal-title').text('Tạo Đợt Thu Mới');
+            });
+        });
+
+        function validateDateRange() {
+            const ngayBatDau = $('#ngayBatDau').val();
+            const ngayKetThuc = $('#ngayKetThuc').val();
+            
+            if (ngayBatDau && ngayKetThuc) {
+                if (new Date(ngayKetThuc) < new Date(ngayBatDau)) {
+                    APIUtils.showError('Ngày kết thúc phải sau ngày bắt đầu');
+                    $('#ngayKetThuc').focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        function getStatusBadge(trangThai) {
+            if (!trangThai) return '<span class="badge badge-secondary">-</span>';
+            const statusMap = {
+                'Mo': { text: 'Mở', class: 'badge-success' },
+                'Dong': { text: 'Đóng', class: 'badge-danger' },
+                'HoanThanh': { text: 'Hoàn thành', class: 'badge-info' }
+            };
+            const status = statusMap[trangThai] || { text: trangThai, class: 'badge-secondary' };
+            return `<span class="badge ${status.class}">${status.text}</span>`;
+        }
+
+        async function loadDotThu() {
+            try {
+                const data = await DotThuAPI.getAll();
+                const tbody = $('#dotThuTableBody');
+                tbody.empty();
+
+                if (!data || data.length === 0) {
+                    tbody.html('<tr><td colspan="7" class="text-center">Chưa có đợt thu nào</td></tr>');
+                    if (dataTable) {
+                        dataTable.destroy();
+                    }
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    const itemId = item.id || item.maDot;
+                    const row = `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${item.tenDot || ''}</strong></td>
+                            <td>${formatDate(item.ngayBatDau)}</td>
+                            <td>${formatDate(item.ngayKetThuc)}</td>
+                            <td>${getStatusBadge(item.trangThai)}</td>
+                            <td>${item.moTa || '-'}</td>
+                            <td class="text-center">
+                                <button class="btn btn-warning btn-circle btn-sm" onclick="editDotThu(${itemId})" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-circle btn-sm" onclick="deleteDotThu(${itemId})" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+
+                if (dataTable) {
+                    dataTable.destroy();
+                }
+                dataTable = $('#dataTable').DataTable({
+                    "language": {
+                        "search": "Tìm kiếm:",
+                        "paginate": { "next": ">", "previous": "<" }
+                    }
+                });
+            } catch (error) {
+                $('#dotThuTableBody').html(`<tr><td colspan="7" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
+                APIUtils.showError('Không thể tải danh sách đợt thu: ' + error.message);
+            }
+        }
+
+        async function editDotThu(id) {
+            try {
+                const data = await DotThuAPI.getAll();
+                const item = data.find(d => (d.id === id || d.maDot === id));
+                if (!item) {
+                    APIUtils.showError('Không tìm thấy đợt thu');
+                    return;
+                }
+
+                editingId = id;
+                $('#dotThuId').val(id);
+                $('#tenDot').val(item.tenDot || '');
+                $('#ngayBatDau').val(item.ngayBatDau || '');
+                $('#ngayKetThuc').val(item.ngayKetThuc || '');
+                $('#trangThai').val(item.trangThai || 'Mo');
+                $('#moTa').val(item.moTa || '');
+
+                $('.modal-title').text('Sửa Đợt Thu');
+                $('#addDotThuModal').modal('show');
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
+        async function deleteDotThu(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa đợt thu này?')) {
+                return;
+            }
+
+            try {
+                await DotThuAPI.delete(id);
+                APIUtils.showSuccess('Xóa đợt thu thành công');
+                await loadDotThu();
+            } catch (error) {
+                let errorMessage = error.message;
+                if (errorMessage && (
+                    errorMessage.includes('đang được sử dụng') ||
+                    errorMessage.includes('is being used') ||
+                    errorMessage.includes('PhieuThu') ||
+                    errorMessage.includes('receipt')
+                )) {
+                    errorMessage = 'Không thể xóa đợt thu này vì đang có phiếu thu liên quan. Vui lòng xóa các phiếu thu trước.';
+                }
+                APIUtils.showError(errorMessage);
+            }
+        }
+    </script>
+    
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Bạn muốn đăng xuất?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Chọn "Đăng xuất" bên dưới nếu bạn muốn kết thúc phiên làm việc.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
+                    <button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
+        $(document).ready(function() {
+            try {
+                const userInfo = sessionStorage.getItem('currentUser');
+                if (userInfo) {
+                    const user = JSON.parse(userInfo);
+                    const role = user.vaiTro || user.role || '';
+                
+                // Debug: log để kiểm tra giá trị role
+                console.log('Current user:', user);
+                console.log('Role value:', role);
+                console.log('Role type:', typeof role);
+                
+                // Kiểm tra nhiều giá trị có thể là Admin
+                const isAdmin = role === 'BanQuanLy' || 
+                               role === 'Ban Quản lý' || 
+                               role === 'Admin' ||
+                               role === 'admin' ||
+                               role === 'BANQUANLY' ||
+                               role.toLowerCase() === 'banquanly';
+                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
+                        $('#menuTaiKhoan').show();
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking admin role:', error);
+            }
+        });
+    </script>
+</body>
+</html>

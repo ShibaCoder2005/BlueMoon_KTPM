@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Bluemoon - Phiếu Thu</title>
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div id="wrapper">
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
+            </a>
+
+            <hr class="sidebar-divider my-0">
+
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="can-ho.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Cư dân</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="khoan-thu.html">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Khoản thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="thong-ke.html">
+                    <i class="fas fa-fw fa-chart-bar"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
+                </a>
+            </li>
+
+            <li class="nav-item" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                    <i class="fas fa-fw fa-user-cog"></i>
+                    <span>Tài khoản</span>
+                </a>
+            </li>
+
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <ul class="navbar-nav ml-auto">
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="ho-so.html">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                    </nav>
+
+                <div class="container-fluid">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Quản lý Phiếu Thu</h1>
+                        <a href="#" class="btn btn-primary btn-icon-split shadow-sm" data-toggle="modal" data-target="#addPhieuThuModal">
+                            <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
+                            <span class="text">Tạo phiếu thu mới</span>
+                        </a>
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách phiếu thu</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Mã phiếu</th>
+                                            <th>Mã hộ</th>
+                                            <th>Đợt thu</th>
+                                            <th>Người lập</th>
+                                            <th>Ngày lập</th>
+                                            <th>Tổng tiền</th>
+                                            <th>Trạng thái</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="phieuThuTableBody">
+                                        <tr><td colspan="8" class="text-center">Đang tải dữ liệu...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto"><div class="copyright text-center my-auto"><span>Copyright &copy; BlueMoon 2025</span></div></div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addPhieuThuModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Tạo Phiếu Thu Mới</h5>
+                    <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="phieuThuForm">
+                        <input type="hidden" id="phieuThuId">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Mã hộ gia đình <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="maHo" required min="1">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Đợt thu <span class="text-danger">*</span></label>
+                                    <select class="form-control" id="maDot" required>
+                                        <option value="">-- Chọn đợt thu --</option>
+                                    </select>
+                                    <small class="form-text text-muted">Chỉ hiển thị các đợt thu đang mở</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Ngày lập</label>
+                                    <input type="datetime-local" class="form-control" id="ngayLap">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Tổng tiền (VNĐ)</label>
+                                    <input type="number" class="form-control" id="tongTien" min="0" step="0.01" readonly>
+                                    <small class="form-text text-muted">Tự động tính dựa trên hộ gia đình và đợt thu</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Trạng thái</label>
+                                    <select class="form-control" id="trangThai">
+                                        <option value="ChuaThu">Chưa thu</option>
+                                        <option value="DaThu">Đã thu</option>
+                                        <option value="DaThanhToan">Đã thanh toán</option>
+                                        <option value="ChuaDu">Chưa đủ</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Hình thức thu</label>
+                                    <input type="text" class="form-control" id="hinhThucThu" placeholder="VD: Tiền mặt, Chuyển khoản">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="savePhieuThuBtn">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice View Modal -->
+    <div class="modal fade" id="invoiceModal" tabindex="-1" role="dialog" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="invoiceModalLabel">
+                        <i class="fas fa-file-invoice"></i> HÓA ĐƠN / PHIẾU THU
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="invoiceModalBody">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Đang tải...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" id="exportPdfBtn" onclick="exportInvoicePdf()">
+                        <i class="fas fa-file-pdf"></i> Xuất PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
+    
+    <script>
+        // Load user info and avatar
+        $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
+            loadUserDisplay();
+            if (typeof updateNavbarAvatar !== 'undefined') {
+                updateNavbarAvatar();
+            } else {
+                try {
+                    const userStr = sessionStorage.getItem('currentUser');
+                    if (userStr) {
+                        const user = JSON.parse(userStr);
+                        if (user && user.id) {
+                            const imageKey = `profileImage_${user.id}`;
+                            let imageData = sessionStorage.getItem(imageKey);
+                            if (!imageData) {
+                                imageData = localStorage.getItem(imageKey);
+                            }
+                            if (imageData) {
+                                $('#navbarAvatar').attr('src', imageData);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('[phieu-thu] Error loading avatar:', error);
+                }
+            }
+        });
+        
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                    $('#userDisplayName').text(displayName);
+                } else {
+                    $('#userDisplayName').text('Người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                $('#userDisplayName').text('Người dùng');
+            }
+        }
+    </script>
+    
+    <script>
+        let dataTable;
+        let editingId = null;
+        let dotThuMap = {};
+        let hoGiaDinhMap = {};
+
+        $(document).ready(async function() {
+            await loadDotThu();
+            await loadHoGiaDinh();
+            await loadPhieuThu();
+
+            // Auto-calculate total amount when maHo or maDot changes
+            $('#maHo, #maDot').on('change', async function() {
+                await calculateTotalAmount();
+            });
+
+            // Form submission
+            $('#savePhieuThuBtn').on('click', async function() {
+                const form = $('#phieuThuForm');
+                if (!form[0].checkValidity()) {
+                    form[0].reportValidity();
+                    return;
+                }
+
+                const maHo = parseInt($('#maHo').val());
+                const maDot = parseInt($('#maDot').val());
+                const ngayLapStr = $('#ngayLap').val();
+                const tongTienStr = $('#tongTien').val();
+                const trangThai = $('#trangThai').val();
+                const hinhThucThu = $('#hinhThucThu').val().trim();
+
+                if (!maHo || maHo <= 0) {
+                    APIUtils.showError('Vui lòng nhập mã hộ gia đình hợp lệ');
+                    return;
+                }
+
+                if (!maDot || maDot <= 0) {
+                    APIUtils.showError('Vui lòng chọn đợt thu');
+                    return;
+                }
+
+                // Get current user ID for maTaiKhoan
+                let maTaiKhoan = 1; // Default
+                try {
+                    const userStr = sessionStorage.getItem('currentUser');
+                    if (userStr) {
+                        const user = JSON.parse(userStr);
+                        if (user && user.id) {
+                            maTaiKhoan = user.id;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not get user ID, using default');
+                }
+
+                const phieuThu = {
+                    maHo: maHo,
+                    maDot: maDot,
+                    maTaiKhoan: maTaiKhoan,
+                    ngayLap: ngayLapStr || new Date().toISOString().slice(0, 16),
+                    tongTien: tongTienStr ? parseFloat(tongTienStr) : 0,
+                    trangThai: trangThai || 'ChuaThu',
+                    hinhThucThu: hinhThucThu || null
+                };
+
+                const btn = $('#savePhieuThuBtn');
+                const originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang lưu...');
+
+                try {
+                    if (editingId) {
+                        phieuThu.id = editingId;
+                        await PhieuThuAPI.update(editingId, { phieuThu: phieuThu });
+                        APIUtils.showSuccess('Cập nhật phiếu thu thành công');
+                    } else {
+                        await PhieuThuAPI.create(phieuThu);
+                        APIUtils.showSuccess('Tạo phiếu thu thành công');
+                    }
+                    $('#addPhieuThuModal').modal('hide');
+                    form[0].reset();
+                    editingId = null;
+                    await loadPhieuThu();
+                } catch (error) {
+                    let errorMessage = error.message || 'Có lỗi xảy ra';
+                    if (error.detail) {
+                        errorMessage = error.detail;
+                    }
+                    APIUtils.showError(errorMessage);
+                } finally {
+                    btn.prop('disabled', false).html(originalHtml);
+                }
+            });
+
+            // Load open DotThu when modal is opened
+            $('#addPhieuThuModal').on('show.bs.modal', async function() {
+                await loadOpenDotThu();
+            });
+
+            // Reset form when modal is closed
+            $('#addPhieuThuModal').on('hidden.bs.modal', function() {
+                $('#phieuThuForm')[0].reset();
+                editingId = null;
+                $('.modal-title').text('Tạo Phiếu Thu Mới');
+                // Reset dropdown
+                $('#maDot').find('option:not(:first)').remove();
+            });
+        });
+
+        async function loadDotThu() {
+            try {
+                const data = await DotThuAPI.getAll();
+                dotThuMap = {};
+                data.forEach(dot => {
+                    const id = dot.id || dot.maDot;
+                    dotThuMap[id] = dot.tenDot || `Đợt ${id}`;
+                });
+            } catch (error) {
+                console.error('Error loading DotThu:', error);
+            }
+        }
+
+        /**
+         * Load danh sách đợt thu đang mở vào dropdown
+         * @param {number} currentMaDot - Mã đợt thu hiện tại (để hiển thị khi edit, ngay cả khi đã đóng)
+         */
+        async function loadOpenDotThu(currentMaDot = null) {
+            try {
+                const data = await DotThuAPI.getAll();
+                const select = $('#maDot');
+                
+                // Clear existing options except the first one
+                select.find('option:not(:first)').remove();
+                
+                // Filter chỉ lấy các đợt thu đang mở
+                const openDotThu = data.filter(dot => {
+                    const id = dot.id || dot.maDot;
+                    // Nếu đang edit và đây là đợt thu hiện tại, luôn include
+                    if (currentMaDot && id === currentMaDot) {
+                        return true;
+                    }
+                    
+                    const trangThai = dot.trangThai;
+                    if (!trangThai) {
+                        // Không có trạng thái = đang mở
+                        return true;
+                    }
+                    
+                    // Kiểm tra các trạng thái đóng (case-insensitive)
+                    const trangThaiLower = trangThai.toLowerCase().trim();
+                    const isClosed = trangThaiLower === 'đóng' || 
+                                    trangThaiLower === 'dong' || 
+                                    trangThaiLower === 'closed' || 
+                                    trangThaiLower === 'đã đóng' ||
+                                    trangThaiLower === 'da dong';
+                    
+                    return !isClosed; // Chỉ lấy các đợt thu không đóng
+                });
+                
+                // Sort by id descending (mới nhất trước)
+                openDotThu.sort((a, b) => {
+                    const idA = a.id || a.maDot || 0;
+                    const idB = b.id || b.maDot || 0;
+                    return idB - idA;
+                });
+                
+                // Populate dropdown
+                openDotThu.forEach(dot => {
+                    const id = dot.id || dot.maDot;
+                    const tenDot = dot.tenDot || `Đợt ${id}`;
+                    const trangThai = dot.trangThai;
+                    
+                    // Kiểm tra nếu đợt thu này đã đóng (để hiển thị cảnh báo)
+                    let displayText = tenDot;
+                    if (currentMaDot && id === currentMaDot && trangThai) {
+                        const trangThaiLower = trangThai.toLowerCase().trim();
+                        const isClosed = trangThaiLower === 'đóng' || 
+                                        trangThaiLower === 'dong' || 
+                                        trangThaiLower === 'closed' || 
+                                        trangThaiLower === 'đã đóng' ||
+                                        trangThaiLower === 'da dong';
+                        if (isClosed) {
+                            displayText = `${tenDot} (Đã đóng - chỉ xem)`;
+                        }
+                    }
+                    
+                    const option = $('<option></option>')
+                        .attr('value', id)
+                        .text(displayText);
+                    select.append(option);
+                });
+                
+                if (openDotThu.length === 0) {
+                    select.append($('<option></option>')
+                        .attr('value', '')
+                        .text('Không có đợt thu nào đang mở'));
+                    select.prop('disabled', true);
+                } else {
+                    select.prop('disabled', false);
+                }
+                
+                console.log(`Loaded ${openDotThu.length} collection drives (including current if editing)`);
+            } catch (error) {
+                console.error('Error loading open DotThu:', error);
+                const select = $('#maDot');
+                select.find('option:not(:first)').remove();
+                select.append($('<option></option>')
+                    .attr('value', '')
+                    .text('Lỗi khi tải danh sách đợt thu'));
+                select.prop('disabled', true);
+            }
+        }
+
+        async function loadHoGiaDinh() {
+            try {
+                const data = await HoGiaDinhAPI.getAll();
+                hoGiaDinhMap = {};
+                data.forEach(ho => {
+                    const id = ho.id;
+                    hoGiaDinhMap[id] = ho.maHo || `Hộ ${id}`;
+                });
+            } catch (error) {
+                console.error('Error loading HoGiaDinh:', error);
+            }
+        }
+
+        async function calculateTotalAmount() {
+            const maHo = parseInt($('#maHo').val());
+            const maDot = parseInt($('#maDot').val());
+            
+            if (!maHo || maHo <= 0 || !maDot || maDot <= 0) {
+                // Clear total if inputs are invalid
+                $('#tongTien').val('');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/phieu-thu/calculate-total?maHo=${maHo}&maDot=${maDot}`);
+                const text = await response.text();
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    throw new Error(`Invalid JSON response: ${text.substring(0, 100)}`);
+                }
+
+                if (!response.ok || result.success === false) {
+                    const errorMsg = result.message || result.details || `HTTP ${response.status}`;
+                    console.warn('Could not calculate total amount:', errorMsg);
+                    // Don't show error to user, just leave field empty
+                    $('#tongTien').val('');
+                    return;
+                }
+
+                const totalAmount = result.data?.tongTien || result.tongTien;
+                if (totalAmount != null) {
+                    $('#tongTien').val(totalAmount);
+                    console.log('Auto-calculated total amount:', totalAmount);
+                } else {
+                    $('#tongTien').val('');
+                }
+            } catch (error) {
+                console.error('Error calculating total amount:', error);
+                // Don't show error to user, just leave field empty
+                $('#tongTien').val('');
+            }
+        }
+
+        function formatDateTime(dateTimeStr) {
+            if (!dateTimeStr) return '-';
+            
+            // Handle null or undefined
+            if (dateTimeStr === null || dateTimeStr === undefined) {
+                return '-';
+            }
+            
+            // If it's already a formatted string, return it
+            if (typeof dateTimeStr === 'string' && dateTimeStr.trim() === '') {
+                return '-';
+            }
+            
+            try {
+                let date;
+                
+                // If it's an object (LocalDateTime serialized as object)
+                if (typeof dateTimeStr === 'object') {
+                    // Handle LocalDateTime object format: {year: 2025, month: 1, day: 15, hour: 10, minute: 30, ...}
+                    if (dateTimeStr.year && dateTimeStr.month !== undefined && dateTimeStr.day !== undefined) {
+                        const year = dateTimeStr.year;
+                        const month = (dateTimeStr.monthValue !== undefined ? dateTimeStr.monthValue : dateTimeStr.month) - 1; // JS months are 0-indexed
+                        const day = dateTimeStr.dayOfMonth !== undefined ? dateTimeStr.dayOfMonth : dateTimeStr.day;
+                        const hour = dateTimeStr.hour || 0;
+                        const minute = dateTimeStr.minute || 0;
+                        const second = dateTimeStr.second || 0;
+                        date = new Date(year, month, day, hour, minute, second);
+                    } else {
+                        // Try to parse as ISO string
+                        date = new Date(dateTimeStr);
+                    }
+                } else if (typeof dateTimeStr === 'string') {
+                    // Handle string formats
+                    let dateStr = dateTimeStr.trim();
+                    
+                    // If it's already in ISO format (with T)
+                    if (dateStr.includes('T')) {
+                        date = new Date(dateStr);
+                    } else if (dateStr.includes(' ')) {
+                        // Format: "2025-01-15 10:30:00" -> convert to ISO
+                        dateStr = dateStr.replace(' ', 'T');
+                        date = new Date(dateStr);
+                    } else if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                        // Format: "2025-01-15" (date only)
+                        date = new Date(dateStr + 'T00:00:00');
+                    } else {
+                        // Try standard Date parsing
+                        date = new Date(dateStr);
+                    }
+                } else if (typeof dateTimeStr === 'number') {
+                    // Unix timestamp
+                    date = new Date(dateTimeStr);
+                } else {
+                    // Fallback: try to parse as-is
+                    date = new Date(dateTimeStr);
+                }
+                
+                // Check if date is valid
+                if (isNaN(date.getTime())) {
+                    console.warn('Invalid date value:', dateTimeStr);
+                    return '-';
+                }
+                
+                // Format to Vietnamese locale
+                return date.toLocaleString('vi-VN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } catch (e) {
+                console.warn('Error formatting date:', dateTimeStr, e);
+                return '-';
+            }
+        }
+
+        function getStatusBadge(trangThai) {
+            if (!trangThai) return '<span class="badge badge-secondary">-</span>';
+            const statusMap = {
+                'ChuaThu': { text: 'Chưa thu', class: 'badge-warning' },
+                'DaThu': { text: 'Đã thu', class: 'badge-success' },
+                'DaThanhToan': { text: 'Đã thanh toán', class: 'badge-success' },
+                'ChuaDu': { text: 'Chưa đủ', class: 'badge-info' }
+            };
+            const status = statusMap[trangThai] || { text: trangThai, class: 'badge-secondary' };
+            return `<span class="badge ${status.class}">${status.text}</span>`;
+        }
+
+        async function loadPhieuThu() {
+            try {
+                const data = await PhieuThuAPI.getAll();
+                const tbody = $('#phieuThuTableBody');
+                tbody.empty();
+
+                if (!data || data.length === 0) {
+                    tbody.html('<tr><td colspan="8" class="text-center">Chưa có phiếu thu nào</td></tr>');
+                    if (dataTable) {
+                        dataTable.destroy();
+                    }
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    const itemId = item.id;
+                    const tenDot = dotThuMap[item.maDot] || `Đợt ${item.maDot}`;
+                    const maHo = hoGiaDinhMap[item.maHo] || `Hộ ${item.maHo}`;
+                    
+                    const row = `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>#${itemId}</strong></td>
+                            <td>${maHo}</td>
+                            <td>${tenDot}</td>
+                            <td>${item.tenNguoiLap || '-'}</td>
+                            <td>${formatDateTime(item.ngayLap)}</td>
+                            <td>${item.tongTien ? APIUtils.formatCurrency(item.tongTien) : '0 đ'}</td>
+                            <td>${getStatusBadge(item.trangThai)}</td>
+                            <td class="text-center">
+                                <button class="btn btn-primary btn-circle btn-sm" onclick="viewInvoice(${itemId})" title="Xem hóa đơn">
+                                    <i class="fas fa-file-invoice"></i>
+                                </button>
+                                <button class="btn btn-info btn-circle btn-sm" onclick="viewPhieuThu(${itemId})" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-warning btn-circle btn-sm" onclick="editPhieuThu(${itemId})" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-circle btn-sm" onclick="deletePhieuThu(${itemId})" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+
+                if (dataTable) {
+                    dataTable.destroy();
+                }
+                dataTable = $('#dataTable').DataTable({
+                    "language": {
+                        "search": "Tìm kiếm:",
+                        "paginate": { "next": ">", "previous": "<" }
+                    }
+                });
+            } catch (error) {
+                $('#phieuThuTableBody').html(`<tr><td colspan="8" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
+                APIUtils.showError('Không thể tải danh sách phiếu thu: ' + error.message);
+            }
+        }
+
+        let currentInvoiceId = null;
+
+        async function viewInvoice(id) {
+            currentInvoiceId = id;
+            $('#invoiceModal').modal('show');
+            $('#invoiceModalBody').html(`
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Đang tải...</span>
+                    </div>
+                    <p class="mt-2">Đang tải thông tin hóa đơn...</p>
+                </div>
+            `);
+
+            try {
+                const detail = await PhieuThuAPI.getDetail(id);
+                renderInvoice(detail);
+            } catch (error) {
+                console.error('Error loading invoice:', error);
+                $('#invoiceModalBody').html(`
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Lỗi khi tải hóa đơn: ${error.message}
+                    </div>
+                `);
+            }
+        }
+
+        function renderInvoice(detail) {
+            if (!detail) {
+                $('#invoiceModalBody').html('<div class="alert alert-warning">Không tìm thấy thông tin hóa đơn</div>');
+                return;
+            }
+
+            // Format date
+            const ngayLap = detail.ngayLap ? new Date(detail.ngayLap).toLocaleString('vi-VN') : 'N/A';
+            
+            // Format currency
+            const formatCurrency = (amount) => {
+                if (!amount) return '0 đ';
+                return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
+            };
+
+            // Build chi tiết table
+            const chiTietList = detail.chiTietList || [];
+            let chiTietTable = '';
+            if (chiTietList.length > 0) {
+                chiTietTable = `
+                    <table class="table table-bordered table-sm">
+                        <thead class="thead-light">
+                            <tr>
+                                <th style="width: 5%">STT</th>
+                                <th style="width: 40%">Tên khoản thu</th>
+                                <th style="width: 15%" class="text-center">Số lượng</th>
+                                <th style="width: 20%" class="text-right">Đơn giá</th>
+                                <th style="width: 20%" class="text-right">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                chiTietList.forEach((ct, index) => {
+                    chiTietTable += `
+                        <tr>
+                            <td class="text-center">${index + 1}</td>
+                            <td>${ct.tenKhoan || 'N/A'}</td>
+                            <td class="text-center">${ct.soLuong || 1}</td>
+                            <td class="text-right">${formatCurrency(ct.donGia)}</td>
+                            <td class="text-right font-weight-bold">${formatCurrency(ct.thanhTien)}</td>
+                        </tr>
+                    `;
+                });
+                chiTietTable += `
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                chiTietTable = '<div class="alert alert-info">Chưa có chi tiết</div>';
+            }
+
+            // Get status badge
+            const trangThai = detail.trangThai || 'N/A';
+            const statusBadge = getStatusBadge(trangThai);
+
+            const invoiceHtml = `
+                <div class="invoice-container" style="background: white; padding: 30px; font-family: Arial, sans-serif;">
+                    <!-- Header -->
+                    <div class="text-center mb-4" style="border-bottom: 3px solid #4e73df; padding-bottom: 20px;">
+                        <h2 class="mb-2" style="color: #4e73df; font-weight: bold;">CHUNG CƯ BLUEMOON</h2>
+                        <h3 class="mb-0" style="color: #5a5c69; font-weight: bold;">PHIẾU THU</h3>
+                    </div>
+
+                    <!-- Invoice Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-2">
+                                <strong>Mã phiếu:</strong> <span class="text-primary">#${detail.id}</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Ngày lập:</strong> ${ngayLap}
+                            </div>
+                            <div class="mb-2">
+                                <strong>Đợt thu:</strong> ${detail.tenDot || 'N/A'}
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <div class="mb-2">
+                                <strong>Trạng thái:</strong> ${statusBadge}
+                            </div>
+                            <div class="mb-2">
+                                <strong>Hình thức thu:</strong> ${detail.hinhThucThu || 'N/A'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Info -->
+                    <div class="card mb-4" style="border: 1px solid #e3e6f0;">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0 font-weight-bold">Thông tin hộ gia đình</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <strong>Mã hộ:</strong> ${detail.maHo || 'N/A'}
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Số phòng:</strong> ${detail.soPhong || 'N/A'}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <strong>Chủ hộ:</strong> ${detail.tenChuHo || 'N/A'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Items Table -->
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold mb-3">Chi tiết các khoản thu:</h6>
+                        ${chiTietTable}
+                    </div>
+
+                    <!-- Total -->
+                    <div class="row mb-4">
+                        <div class="col-md-8"></div>
+                        <div class="col-md-4">
+                            <div class="card" style="border: 2px solid #4e73df;">
+                                <div class="card-body text-right">
+                                    <h5 class="mb-0">
+                                        <strong>TỔNG CỘNG:</strong> 
+                                        <span class="text-primary" style="font-size: 1.5em;">${formatCurrency(detail.tongTien)}</span>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signature -->
+                    <div class="row mt-5">
+                        <div class="col-md-6"></div>
+                        <div class="col-md-6 text-right">
+                            <div style="border-top: 1px solid #000; padding-top: 10px; width: 200px; margin-left: auto;">
+                                <div class="mb-2"><strong>Người lập</strong></div>
+                                <div style="min-height: 50px;">${detail.tenNguoiLap || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            $('#invoiceModalBody').html(invoiceHtml);
+        }
+
+        async function exportInvoicePdf() {
+            if (!currentInvoiceId) {
+                APIUtils.showError('Không có hóa đơn để xuất');
+                return;
+            }
+
+            try {
+                $('#exportPdfBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang xuất...');
+                await PhieuThuAPI.exportPdf(currentInvoiceId);
+                APIUtils.showSuccess('Xuất PDF thành công!');
+            } catch (error) {
+                console.error('Error exporting PDF:', error);
+                APIUtils.showError('Lỗi khi xuất PDF: ' + error.message);
+            } finally {
+                $('#exportPdfBtn').prop('disabled', false).html('<i class="fas fa-file-pdf"></i> Xuất PDF');
+            }
+        }
+
+        async function viewPhieuThu(id) {
+            try {
+                const phieuThu = await PhieuThuAPI.getById(id);
+                const chiTiet = await PhieuThuAPI.getChiTiet(id);
+                
+                let chiTietHtml = '<table class="table table-sm"><thead><tr><th>Khoản thu</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead><tbody>';
+                if (chiTiet && chiTiet.length > 0) {
+                    chiTiet.forEach(ct => {
+                        chiTietHtml += `<tr>
+                            <td>${ct.tenKhoan || `Khoản ${ct.maKhoan}`}</td>
+                            <td>${ct.soLuong || 1}</td>
+                            <td>${ct.donGia ? APIUtils.formatCurrency(ct.donGia) : '-'}</td>
+                            <td>${ct.thanhTien ? APIUtils.formatCurrency(ct.thanhTien) : '-'}</td>
+                        </tr>`;
+                    });
+                } else {
+                    chiTietHtml += '<tr><td colspan="4" class="text-center">Chưa có chi tiết</td></tr>';
+                }
+                chiTietHtml += '</tbody></table>';
+
+                const info = `
+                    <div class="mb-3">
+                        <strong>Mã phiếu:</strong> #${phieuThu.id}<br>
+                        <strong>Mã hộ:</strong> ${hoGiaDinhMap[phieuThu.maHo] || phieuThu.maHo}<br>
+                        <strong>Đợt thu:</strong> ${dotThuMap[phieuThu.maDot] || phieuThu.maDot}<br>
+                        <strong>Ngày lập:</strong> ${formatDateTime(phieuThu.ngayLap)}<br>
+                        <strong>Tổng tiền:</strong> ${phieuThu.tongTien ? APIUtils.formatCurrency(phieuThu.tongTien) : '0 đ'}<br>
+                        <strong>Trạng thái:</strong> ${getStatusBadge(phieuThu.trangThai)}<br>
+                        <strong>Hình thức thu:</strong> ${phieuThu.hinhThucThu || '-'}
+                    </div>
+                    <div>
+                        <strong>Chi tiết:</strong>
+                        ${chiTietHtml}
+                    </div>
+                `;
+                alert(info.replace(/<[^>]*>/g, '')); // Simple alert, can be replaced with modal
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
+        async function editPhieuThu(id) {
+            try {
+                const phieuThu = await PhieuThuAPI.getById(id);
+                if (!phieuThu) {
+                    APIUtils.showError('Không tìm thấy phiếu thu');
+                    return;
+                }
+
+                // Check if can modify
+                if (phieuThu.trangThai && (
+                    phieuThu.trangThai.includes('Đã thu') ||
+                    phieuThu.trangThai.includes('Đã thanh toán') ||
+                    phieuThu.trangThai === 'DaThanhToan'
+                )) {
+                    APIUtils.showError('Không thể sửa phiếu thu đã thanh toán');
+                    return;
+                }
+
+                editingId = id;
+                $('#phieuThuId').val(id);
+                $('#maHo').val(phieuThu.maHo);
+                
+                // Load open DotThu first (include current one even if closed), then set selected value
+                await loadOpenDotThu(phieuThu.maDot);
+                $('#maDot').val(phieuThu.maDot);
+                
+                if (phieuThu.ngayLap) {
+                    const date = new Date(phieuThu.ngayLap);
+                    const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                    $('#ngayLap').val(localDateTime);
+                }
+                
+                $('#tongTien').val(phieuThu.tongTien || '');
+                $('#trangThai').val(phieuThu.trangThai || 'ChuaThu');
+                $('#hinhThucThu').val(phieuThu.hinhThucThu || '');
+
+                $('.modal-title').text('Sửa Phiếu Thu');
+                $('#addPhieuThuModal').modal('show');
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
+        async function deletePhieuThu(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa phiếu thu này?')) {
+                return;
+            }
+
+            try {
+                await PhieuThuAPI.delete(id);
+                APIUtils.showSuccess('Xóa phiếu thu thành công');
+                await loadPhieuThu();
+            } catch (error) {
+                let errorMessage = error.message;
+                if (errorMessage && (
+                    errorMessage.includes('đã thanh toán') ||
+                    errorMessage.includes('already paid') ||
+                    errorMessage.includes('may be paid')
+                )) {
+                    errorMessage = 'Không thể xóa phiếu thu đã thanh toán.';
+                }
+                APIUtils.showError(errorMessage);
+            }
+        }
+    </script>
+    
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Bạn muốn đăng xuất?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Chọn "Đăng xuất" bên dưới nếu bạn muốn kết thúc phiên làm việc.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
+                    <button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
+        $(document).ready(function() {
+            try {
+                const userInfo = sessionStorage.getItem('currentUser');
+                if (userInfo) {
+                    const user = JSON.parse(userInfo);
+                    const role = user.vaiTro || user.role || '';
+                
+                // Debug: log để kiểm tra giá trị role
+                console.log('Current user:', user);
+                console.log('Role value:', role);
+                console.log('Role type:', typeof role);
+                
+                // Kiểm tra nhiều giá trị có thể là Admin
+                const isAdmin = role === 'BanQuanLy' || 
+                               role === 'Ban Quản lý' || 
+                               role === 'Admin' ||
+                               role === 'admin' ||
+                               role === 'BANQUANLY' ||
+                               role.toLowerCase() === 'banquanly';
+                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
+                        $('#menuTaiKhoan').show();
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking admin role:', error);
+            }
+        });
+    </script>
+</body>
+</html>

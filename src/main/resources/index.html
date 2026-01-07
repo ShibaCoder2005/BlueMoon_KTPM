@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Bluemoon - Trang Chủ</title>
+
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+
+    <div id="wrapper">
+
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
+            </a>
+
+            <hr class="sidebar-divider my-0">
+
+            <li class="nav-item active">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="can-ho.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Cư dân</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="khoan-thu.html">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Khoản thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="thong-ke.html">
+                    <i class="fas fa-fw fa-chart-bar"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
+                </a>
+            </li>
+
+            <li class="nav-item" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                    <i class="fas fa-fw fa-user-cog"></i>
+                    <span>Tài khoản</span>
+                </a>
+            </li>
+
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <div id="content">
+
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    
+                    <ul class="navbar-nav ml-auto">
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
+                            </a>
+                            
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="ho-so.html">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Hồ sơ
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+
+                    </ul>
+                </nav>
+
+                <div class="container-fluid">
+
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Tổng quan tòa nhà</h1>
+                        <a href="#" id="btnExportMonthlyReport" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+                            <i class="fas fa-download fa-sm text-white-50"></i> Xuất báo cáo tháng
+                        </a>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <a href="can-ho.html" style="text-decoration: none;">
+                                <div class="card border-left-primary shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                    Tổng số hộ gia đình</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalHouseholdsCard">Đang tải...</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-building fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <a href="danh-sach-dan-cu.html" style="text-decoration: none;">
+                                <div class="card border-left-success shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                    Tổng cư dân</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalResidentsCard">Đang tải...</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-users fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <a href="khoan-thu.html" style="text-decoration: none;">
+                                <div class="card border-left-warning shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                    Tổng thu tháng này</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalRevenueThisMonthCard">Đang tải...</div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Biến động tháng</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="monthlyChangeCard">Đang tải...</div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-exchange-alt fa-2x text-gray-300"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-xl-8 col-lg-7">
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Lịch sử thu phí (6 tháng gần nhất)</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-bar">
+                                        <canvas id="myBarChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-4 col-lg-5">
+                            
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3">
+                                    <h6 class="m-0 font-weight-bold text-primary">Tác vụ nhanh</h6>
+                                </div>
+                                <div class="card-body">
+                                    <a href="#" id="btnQuickCreateFee" class="btn btn-primary btn-block text-left mb-3" data-toggle="modal" data-target="#addFeeModal">
+                                        <i class="fas fa-plus-circle mr-2"></i> Tạo khoản thu mới
+                                    </a>
+                                    <a href="#" id="btnQuickExportResidents" class="btn btn-info btn-block text-left">
+                                        <i class="fas fa-file-export mr-2"></i> Xuất danh sách cư dân
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="card shadow mb-4">
+                                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                                    <h6 class="m-0 font-weight-bold text-primary">Khoản thu mới cập nhật</h6>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="loadRecentFees()" title="Làm mới">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </div>
+                                <div class="card-body p-0">
+                                    <ul class="list-group list-group-flush" id="recentFeesList">
+                                        <li class="list-group-item text-center text-muted">Đang tải...</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                </div>
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Copyright &copy; BlueMoon Management 2024</span>
+                    </div>
+                </div>
+            </footer>
+
+        </div>
+    </div>
+
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="js/rbac.js"></script>
+    
+    <script src="vendor/chart.js/Chart.min.js"></script>
+
+    <script>
+        // Xử lý Tác vụ nhanh - đảm bảo chạy sau DOM ready
+        $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+            applyDashboardRBAC();
+            // Nút "Xuất danh sách cư dân" - xuất file CSV
+            $('#btnQuickExportResidents').on('click', async function(e) {
+                e.preventDefault();
+                await exportResidentsList();
+            });
+
+            // Nút "Xuất báo cáo tháng" - xuất báo cáo doanh thu tháng hiện tại
+            $('#btnExportMonthlyReport').on('click', async function(e) {
+                e.preventDefault();
+                await exportMonthlyReport();
+            });
+
+            // Load danh sách khoản thu mới cập nhật
+            loadRecentFees();
+
+            // Bắt đầu cập nhật thời gian định kỳ
+            startTimeUpdater();
+
+            // Lắng nghe sự kiện khi khoản thu được thêm từ trang khác
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'khoanThuUpdated') {
+                    loadRecentFees();
+                }
+            });
+
+            // Lắng nghe custom event từ cùng trang
+            window.addEventListener('khoanThuCreated', function() {
+                loadRecentFees();
+            });
+
+            console.log('[index.html] Đã gắn event cho các nút tác vụ nhanh');
+        });
+
+        /**
+         * Xuất báo cáo doanh thu tháng hiện tại
+         */
+        async function exportMonthlyReport() {
+            try {
+                // Lấy tháng/năm hiện tại
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth() + 1; // 0-11 -> 1-12
+                
+                // Tính fromDate (ngày đầu tháng) và toDate (ngày cuối tháng)
+                const fromDate = `${year}-${String(month).padStart(2, '0')}-01`;
+                const lastDay = new Date(year, month, 0).getDate();
+                const toDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+                console.log('[exportMonthlyReport] Đang tải báo cáo:', { fromDate, toDate });
+
+                // Disable nút và hiển thị loading
+                const btn = $('#btnExportMonthlyReport');
+                const originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin fa-sm text-white-50"></i> Đang tải...');
+
+                // Gọi API lấy dữ liệu báo cáo
+                const response = await fetch(`/api/thong-ke/revenue?fromDate=${fromDate}&toDate=${toDate}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    let errorMessage = 'Không thể tải báo cáo';
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        errorMessage = errorJson.message || errorJson.detail || errorMessage;
+                    } catch (e) {
+                        errorMessage = errorText || errorMessage;
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const data = await response.json();
+                console.log('[exportMonthlyReport] Dữ liệu nhận được:', data);
+
+                // Tạo file CSV từ dữ liệu
+                const csvContent = convertToCSV(data, month, year);
+                
+                // Tạo blob và download
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `BaoCaoDoanhThu_Thang${month}_${year}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                // Hiển thị thông báo thành công
+                alert(`Đã xuất báo cáo tháng ${month}/${year} thành công!`);
+
+            } catch (error) {
+                console.error('[exportMonthlyReport] Lỗi:', error);
+                alert('Lỗi khi xuất báo cáo: ' + error.message);
+            } finally {
+                // Khôi phục nút
+                const btn = $('#btnExportMonthlyReport');
+                btn.prop('disabled', false).html('<i class="fas fa-download fa-sm text-white-50"></i> Xuất báo cáo tháng');
+            }
+        }
+
+        /**
+         * Chuyển đổi dữ liệu JSON thành CSV
+         */
+        function convertToCSV(data, month, year) {
+            let csv = `BÁO CÁO DOANH THU THÁNG ${month}/${year}\n`;
+            csv += `Ngày xuất: ${new Date().toLocaleString('vi-VN')}\n\n`;
+
+            // Xử lý dữ liệu từ API
+            // API có thể trả về dạng: { success: true, data: {...} } hoặc trực tiếp Map
+            let revenueData = data;
+            if (data.data) {
+                revenueData = data.data;
+            }
+            if (data.success && data.data) {
+                revenueData = data.data;
+            }
+
+            // Nếu là object, chuyển thành array
+            if (typeof revenueData === 'object' && !Array.isArray(revenueData)) {
+                csv += 'Khoản thu,Tổng thu (VNĐ)\n';
+                for (const [key, value] of Object.entries(revenueData)) {
+                    const amount = typeof value === 'number' ? value.toLocaleString('vi-VN') : value;
+                    csv += `"${key}","${amount}"\n`;
+                }
+            } else if (Array.isArray(revenueData)) {
+                // Nếu là array, lấy header từ object đầu tiên
+                if (revenueData.length > 0) {
+                    const headers = Object.keys(revenueData[0]);
+                    csv += headers.join(',') + '\n';
+                    revenueData.forEach(row => {
+                        const values = headers.map(h => {
+                            const val = row[h];
+                            return typeof val === 'string' ? `"${val}"` : val;
+                        });
+                        csv += values.join(',') + '\n';
+                    });
+                }
+            } else {
+                csv += 'Không có dữ liệu\n';
+            }
+
+            return csv;
+        }
+
+        // Cấu hình Font chữ cho biểu đồ
+        Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+        Chart.defaults.global.defaultFontColor = '#858796';
+
+        // Load và hiển thị thông tin user
+        $(document).ready(function() {
+            // Update user display name
+            if (typeof UserUtils !== 'undefined') {
+                UserUtils.updateUserDisplay();
+            } else {
+                // Fallback: load user from sessionStorage
+                try {
+                    const userStr = sessionStorage.getItem('currentUser');
+                    if (userStr) {
+                        const user = JSON.parse(userStr);
+                        const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                        $('#userDisplayName').text(displayName);
+                    } else {
+                        $('#userDisplayName').text('Người dùng');
+                    }
+                } catch (error) {
+                    console.error('Error loading user:', error);
+                    $('#userDisplayName').text('Người dùng');
+                }
+            }
+            
+            // Load profile image for navbar avatar
+            if (typeof updateNavbarAvatar !== 'undefined') {
+                updateNavbarAvatar();
+            } else {
+                // Fallback: load avatar manually
+                try {
+                    const userStr = sessionStorage.getItem('currentUser');
+                    if (userStr) {
+                        const user = JSON.parse(userStr);
+                        if (user && user.id) {
+                            const imageKey = `profileImage_${user.id}`;
+                            let imageData = sessionStorage.getItem(imageKey);
+                            if (!imageData) {
+                                imageData = localStorage.getItem(imageKey);
+                            }
+                            if (imageData) {
+                                $('#navbarAvatar').attr('src', imageData);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('[index] Error loading avatar:', error);
+                }
+            }
+            
+            // Check auth and redirect if needed
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            if (!isLoggedIn || isLoggedIn !== 'true') {
+                // Not logged in, redirect to login
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Load dashboard statistics
+            loadDashboardStats();
+        });
+
+        /**
+         * Load và hiển thị thống kê dashboard
+         */
+        async function loadDashboardStats() {
+            try {
+                // Load dashboard stats từ API
+                const dashboard = await ThongKeAPI.getDashboard();
+                
+                // Tổng số hộ gia đình
+                const totalHouseholds = dashboard.totalHouseholds || 0;
+                $('#totalHouseholdsCard').text(totalHouseholds + ' Hộ');
+
+                // Tổng cư dân - lấy từ demographics hoặc đếm trực tiếp
+                try {
+                    const demographics = await ThongKeAPI.demographics();
+                    const totalResidents = demographics.totalResidents || 0;
+                    $('#totalResidentsCard').text(totalResidents + ' Người');
+                    
+                    // Tính biến động tháng
+                    await calculateMonthlyChange(totalResidents);
+                } catch (error) {
+                    console.warn('Could not load demographics, using residents API:', error);
+                    // Fallback: đếm từ danh sách cư dân
+                    const residents = await NhanKhauAPI.getAll();
+                    const totalResidents = residents.length;
+                    $('#totalResidentsCard').text(totalResidents + ' Người');
+                    await calculateMonthlyChange(totalResidents);
+                }
+
+                // Tổng thu tháng này
+                await loadMonthlyRevenue();
+
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+                $('#totalHouseholdsCard').text('Lỗi');
+                $('#totalResidentsCard').text('Lỗi');
+                $('#totalRevenueThisMonthCard').text('Lỗi');
+                $('#monthlyChangeCard').text('Lỗi');
+            }
+        }
+
+        /**
+         * Tính tổng thu tháng này
+         */
+        async function loadMonthlyRevenue() {
+            try {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth() + 1; // 0-11 -> 1-12
+                
+                // Tính fromDate (ngày đầu tháng) và toDate (ngày cuối tháng)
+                const fromDate = `${year}-${String(month).padStart(2, '0')}-01`;
+                const lastDay = new Date(year, month, 0).getDate();
+                const toDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+                const result = await ThongKeAPI.revenueTotal({ fromDate, toDate });
+                
+                // API có thể trả về { success: true, data: ... } hoặc trực tiếp số
+                let totalRevenue = 0;
+                if (result && typeof result === 'object') {
+                    if (result.data !== undefined) {
+                        totalRevenue = result.data;
+                    } else if (result.totalRevenue !== undefined) {
+                        totalRevenue = result.totalRevenue;
+                    } else if (typeof result === 'number') {
+                        totalRevenue = result;
+                    }
+                } else if (typeof result === 'number') {
+                    totalRevenue = result;
+                }
+
+                // Format tiền tệ
+                const formatted = new Intl.NumberFormat('vi-VN', { 
+                    style: 'currency', 
+                    currency: 'VND',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                }).format(totalRevenue);
+
+                $('#totalRevenueThisMonthCard').text(formatted);
+            } catch (error) {
+                console.error('Error loading monthly revenue:', error);
+                $('#totalRevenueThisMonthCard').text('Lỗi');
+            }
+        }
+
+        /**
+         * Tính biến động tháng (số cư dân mới trong tháng này)
+         */
+        async function calculateMonthlyChange(currentTotal) {
+            try {
+                // Lấy danh sách cư dân
+                const residents = await NhanKhauAPI.getAll();
+                
+                // Lấy tháng hiện tại
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth(); // 0-11
+                
+                // Đếm số cư dân được tạo trong tháng này
+                // Sử dụng lịch sử nhân khẩu nếu có, hoặc ước tính từ ID
+                let newResidentsThisMonth = 0;
+                
+                try {
+                    // Thử lấy từ lịch sử nhân khẩu
+                    const history = await LichSuNhanKhauAPI.getAll();
+                    const thisMonthHistory = history.filter(h => {
+                        if (!h.ngayBatDau) return false;
+                        const date = new Date(h.ngayBatDau);
+                        return date.getFullYear() === currentYear && 
+                               date.getMonth() === currentMonth &&
+                               h.loaiBienDong === 'Đăng ký cư trú';
+                    });
+                    newResidentsThisMonth = thisMonthHistory.length;
+                } catch (error) {
+                    console.warn('Could not load resident history, estimating from localStorage:', error);
+                    // Fallback: ước tính từ localStorage (lưu khi tạo cư dân)
+                    residents.forEach(resident => {
+                        const residentId = resident.id || resident.maNhanKhau;
+                        if (residentId) {
+                            const createdTimestamp = localStorage.getItem(`resident_${residentId}_created`);
+                            if (createdTimestamp) {
+                                const createdDate = new Date(parseInt(createdTimestamp));
+                                if (createdDate.getFullYear() === currentYear && 
+                                    createdDate.getMonth() === currentMonth) {
+                                    newResidentsThisMonth++;
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Hiển thị biến động
+                let changeText = '';
+                let changeClass = '';
+                if (newResidentsThisMonth > 0) {
+                    changeText = `+${newResidentsThisMonth} Cư dân mới`;
+                    changeClass = 'text-success';
+                } else if (newResidentsThisMonth < 0) {
+                    changeText = `${newResidentsThisMonth} Cư dân`;
+                    changeClass = 'text-danger';
+                } else {
+                    changeText = 'Không thay đổi';
+                    changeClass = 'text-gray-600';
+                }
+
+                $('#monthlyChangeCard').text(changeText).removeClass('text-success text-danger text-gray-600').addClass(changeClass);
+            } catch (error) {
+                console.error('Error calculating monthly change:', error);
+                $('#monthlyChangeCard').text('Không xác định');
+            }
+        }
+        
+        // Lấy thẻ Canvas - đảm bảo chạy sau DOM ready
+        $(document).ready(function() {
+        var ctx = document.getElementById("myBarChart");
+            if (!ctx) {
+                console.error('[index.html] Không tìm thấy canvas #myBarChart');
+                return;
+            }
+        
+        // Khởi tạo biểu đồ
+        var myBarChart = new Chart(ctx, {
+            type: 'bar', // Loại biểu đồ: Cột
+            data: {
+                labels: ["Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11"], // Trục ngang
+                datasets: [{
+                    label: "Tổng thu",
+                    backgroundColor: "#4e73df", // Màu cột
+                    hoverBackgroundColor: "#2e59d9",
+                    borderColor: "#4e73df",
+                    data: [50000000, 55000000, 60000000, 75000000, 80000000, 85000000], // Dữ liệu giả lập
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
+                scales: {
+                    xAxes: [{
+                        gridLines: { display: false, drawBorder: false },
+                        ticks: { maxTicksLimit: 6 },
+                        barPercentage: 0.6 // Độ rộng của cột
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            min: 0,
+                            maxTicksLimit: 5,
+                            padding: 10,
+                            // Thêm chữ VNĐ vào trục dọc
+                            callback: function(value) { return value.toLocaleString('vi-VN') + ' đ'; }
+                        },
+                        gridLines: { color: "rgb(234, 236, 244)", zeroLineColor: "rgb(234, 236, 244)", drawBorder: false, borderDash: [2], zeroLineBorderDash: [2] }
+                    }],
+                },
+                legend: { display: false },
+                tooltips: {
+                    titleMarginBottom: 10,
+                    titleFontColor: '#6e707e',
+                    titleFontSize: 14,
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    caretPadding: 10,
+                    callbacks: {
+                        label: function(tooltipItem, chart) {
+                            var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                            return datasetLabel + ': ' + tooltipItem.yLabel.toLocaleString('vi-VN') + ' VNĐ';
+                        }
+                    }
+                },
+            }
+        });
+        });
+    </script>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Bạn muốn đăng xuất?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Chọn "Đăng xuất" bên dưới nếu bạn muốn kết thúc phiên làm việc.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
+                    <button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
+
+    <!-- Modal Tạo Khoản Thu -->
+    <div class="modal fade" id="addFeeModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Tạo Khoản Thu Mới</h5>
+                    <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="khoanThuForm">
+                        <input type="hidden" id="khoanThuId">
+                        <div class="form-group">
+                            <label>Tên khoản thu</label>
+                            <input type="text" class="form-control" id="tenKhoanThu" placeholder="VD: Phí dịch vụ T12/2025" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Loại phí</label>
+                            <select class="form-control" id="loaiPhiSelect" required>
+                                <option value="">Chọn loại phí</option>
+                                <option value="BatBuoc">Bắt buộc</option>
+                                <option value="TuNguyen">Tự nguyện</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="donGiaArea">
+                            <label>Đơn giá (VNĐ/m2)</label>
+                            <input type="number" class="form-control" id="donGia" value="7000" placeholder="Nhập số tiền trên 1m2" min="0">
+                            <small class="form-text text-muted">Hệ thống sẽ tự nhân với diện tích căn hộ.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Mô tả</label>
+                            <textarea class="form-control" id="moTa" rows="3" placeholder="Mô tả khoản thu"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Hạn nộp</label>
+                            <input type="date" class="form-control" id="hanNop">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="saveKhoanThuBtn">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Xử lý form tạo khoản thu trong modal
+        $(document).ready(function() {
+            $('#loaiPhiSelect').change(function() {
+                var selected = $(this).val();
+                if(selected === 'TuNguyen') {
+                    $('#donGiaArea').hide();
+                } else {
+                    $('#donGiaArea').show();
+                }
+            });
+
+            // Form submission
+            $('#saveKhoanThuBtn').on('click', async function() {
+                const form = $('#khoanThuForm');
+                if (!form[0].checkValidity()) {
+                    form[0].reportValidity();
+                    return;
+                }
+
+                const tenKhoanThu = $('#tenKhoanThu').val().trim();
+                if (!tenKhoanThu) {
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                        APIUtils.showError('Vui lòng nhập tên khoản thu');
+                    } else {
+                        alert('Vui lòng nhập tên khoản thu');
+                    }
+                    return;
+                }
+                
+                const loaiPhi = $('#loaiPhiSelect').val();
+                if (!loaiPhi) {
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                        APIUtils.showError('Vui lòng chọn loại phí');
+                    } else {
+                        alert('Vui lòng chọn loại phí');
+                    }
+                    return;
+                }
+                
+                let donGia = 0;
+                const donGiaStr = $('#donGia').val();
+                if (donGiaStr && donGiaStr.trim() !== '') {
+                    const parsed = parseFloat(donGiaStr);
+                    if (isNaN(parsed) || parsed < 0) {
+                        if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                            APIUtils.showError('Đơn giá phải là số hợp lệ và >= 0');
+                        } else {
+                            alert('Đơn giá phải là số hợp lệ và >= 0');
+                        }
+                        return;
+                    }
+                    donGia = parsed;
+                }
+                
+                const moTa = $('#moTa').val().trim();
+                
+                const khoanThu = {
+                    tenKhoanThu: tenKhoanThu,
+                    loaiPhi: loaiPhi,
+                    donGia: donGia,
+                    moTa: moTa
+                };
+
+                try {
+                    const btn = $('#saveKhoanThuBtn');
+                    const originalHtml = btn.html();
+                    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang lưu...');
+
+                    const result = await KhoanThuAPI.create(khoanThu);
+                    
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showSuccess) {
+                        APIUtils.showSuccess('Tạo khoản thu thành công');
+                    } else {
+                        alert('Tạo khoản thu thành công');
+                    }
+                    
+                    // Lưu timestamp khi tạo khoản thu
+                    const feeId = result.maKhoanThu || result.id;
+                    if (feeId) {
+                        localStorage.setItem(`fee_${feeId}_created`, Date.now().toString());
+                    }
+                    
+                    $('#addFeeModal').modal('hide');
+                    form[0].reset();
+                    
+                    // Cập nhật danh sách khoản thu mới cập nhật
+                    loadRecentFees();
+                    
+                    // Trigger event để các trang khác biết
+                    window.dispatchEvent(new Event('khoanThuCreated'));
+                    localStorage.setItem('khoanThuUpdated', Date.now().toString());
+                    
+                } catch (error) {
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                        APIUtils.showError(error.message);
+                    } else {
+                        alert('Lỗi: ' + error.message);
+                    }
+                } finally {
+                    const btn = $('#saveKhoanThuBtn');
+                    btn.prop('disabled', false).html('Lưu');
+                }
+            });
+
+            // Reset form when modal is closed
+            $('#addFeeModal').on('hidden.bs.modal', function() {
+                $('#khoanThuForm')[0].reset();
+                $('#donGiaArea').show();
+            });
+        });
+
+        /**
+         * Tính toán thời gian tương đối (time ago)
+         */
+        function getTimeAgo(timestamp) {
+            if (!timestamp) return 'Không xác định';
+            
+            const now = Date.now();
+            const diff = now - timestamp; // milliseconds
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (seconds < 60) {
+                return 'Vừa xong';
+            } else if (minutes < 60) {
+                return `${minutes} phút trước`;
+            } else if (hours < 24) {
+                return `${hours} giờ trước`;
+            } else if (days === 1) {
+                return 'Hôm qua';
+            } else if (days < 7) {
+                return `${days} ngày trước`;
+            } else {
+                const date = new Date(timestamp);
+                return date.toLocaleDateString('vi-VN');
+            }
+        }
+
+        /**
+         * Lấy badge class dựa trên thời gian
+         */
+        function getBadgeClass(timestamp) {
+            if (!timestamp) return 'badge-secondary';
+            
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (minutes < 5) {
+                return 'badge-success'; // Vừa xong - xanh lá
+            } else if (hours < 1) {
+                return 'badge-primary'; // Dưới 1 giờ - xanh dương
+            } else if (days < 1) {
+                return 'badge-info'; // Dưới 1 ngày - xanh nhạt
+            } else if (days < 7) {
+                return 'badge-warning'; // Dưới 1 tuần - vàng
+            } else {
+                return 'badge-secondary'; // Cũ hơn - xám
+            }
+        }
+
+        /**
+         * Lấy hoặc tạo timestamp cho khoản thu
+         * Lưu vào localStorage để đảm bảo tồn tại sau khi restart
+         */
+        function getFeeTimestamp(item) {
+            const feeId = item.maKhoanThu || item.id;
+            if (!feeId) return null;
+
+            // Thử lấy từ localStorage (lưu vĩnh viễn)
+            const storedTimestamp = localStorage.getItem(`fee_${feeId}_created`);
+            if (storedTimestamp) {
+                return parseInt(storedTimestamp);
+            }
+
+            // Nếu có ngayTao từ backend
+            if (item.ngayTao) {
+                const timestamp = new Date(item.ngayTao).getTime();
+                // Lưu vào localStorage để dùng lần sau
+                localStorage.setItem(`fee_${feeId}_created`, timestamp.toString());
+                return timestamp;
+            }
+
+            // Nếu chưa có timestamp, ước tính và lưu lại
+            // Sử dụng thứ tự ID để ước tính (ID lớn hơn = mới hơn)
+            const allFees = window.allFees || [];
+            if (allFees.length === 0) return null;
+
+            // Sắp xếp theo ID
+            const sortedFees = [...allFees].sort((a, b) => {
+                const idA = a.maKhoanThu || a.id || 0;
+                const idB = b.maKhoanThu || b.id || 0;
+                return idA - idB;
+            });
+
+            // Tìm vị trí của item hiện tại
+            const currentIndex = sortedFees.findIndex(f => (f.maKhoanThu || f.id) === feeId);
+            if (currentIndex === -1) return null;
+
+            // Ước tính: giả sử khoản thu đầu tiên được tạo cách đây 30 ngày
+            // Mỗi khoản thu cách nhau 1 ngày
+            const daysAgo = sortedFees.length - currentIndex - 1;
+            const estimatedTimestamp = Date.now() - (daysAgo * 24 * 60 * 60 * 1000);
+
+            // Lưu timestamp ước tính vào localStorage để dùng lần sau
+            localStorage.setItem(`fee_${feeId}_created`, estimatedTimestamp.toString());
+
+            return estimatedTimestamp;
+        }
+
+        /**
+         * Load danh sách khoản thu mới cập nhật
+         */
+        async function loadRecentFees() {
+            try {
+                const data = await KhoanThuAPI.getAll();
+                const list = $('#recentFeesList');
+                list.empty();
+
+                if (!data || data.length === 0) {
+                    list.html('<li class="list-group-item text-center text-muted">Chưa có khoản thu nào</li>');
+                    return;
+                }
+
+                // Lưu toàn bộ danh sách để tính timestamp
+                window.allFees = data;
+
+                // Sắp xếp theo thời gian tạo
+                const sorted = data.map(item => ({
+                    ...item,
+                    timestamp: getFeeTimestamp(item)
+                })).sort((a, b) => {
+                    // Sắp xếp theo timestamp (mới nhất trước)
+                    if (a.timestamp && b.timestamp) {
+                        return b.timestamp - a.timestamp;
+                    }
+                    // Nếu không có timestamp, sắp xếp theo ID
+                    return (b.maKhoanThu || b.id || 0) - (a.maKhoanThu || a.id || 0);
+                });
+
+                // Lấy 3 khoản thu mới nhất
+                const recent = sorted.slice(0, 3);
+
+                recent.forEach((item) => {
+                    const timestamp = item.timestamp;
+                    const timeAgo = getTimeAgo(timestamp);
+                    const badgeClass = getBadgeClass(timestamp);
+
+                    const li = `
+                        <li class="list-group-item d-flex justify-content-between align-items-center" data-fee-id="${item.maKhoanThu || item.id}" data-timestamp="${timestamp || ''}">
+                            ${item.tenKhoanThu || 'Khoản thu không tên'}
+                            <span class="badge ${badgeClass} badge-pill">${timeAgo}</span>
+                        </li>
+                    `;
+                    list.append(li);
+                });
+
+                // Đảm bảo tất cả khoản thu đều có timestamp trong localStorage
+                // Điều này đảm bảo timestamp được lưu lại sau khi restart
+                data.forEach(item => {
+                    const feeId = item.maKhoanThu || item.id;
+                    if (feeId) {
+                        // Nếu chưa có timestamp, tạo và lưu
+                        if (!localStorage.getItem(`fee_${feeId}_created`)) {
+                            getFeeTimestamp(item); // Hàm này sẽ tự động lưu timestamp
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading recent fees:', error);
+                $('#recentFeesList').html('<li class="list-group-item text-center text-danger">Lỗi khi tải dữ liệu</li>');
+            }
+        }
+
+        /**
+         * Cập nhật thời gian hiển thị định kỳ
+         */
+        function startTimeUpdater() {
+            // Cập nhật mỗi phút
+            setInterval(() => {
+                const items = $('#recentFeesList li[data-timestamp]');
+                items.each(function() {
+                    const $item = $(this);
+                    const timestamp = parseInt($item.attr('data-timestamp'));
+                    if (timestamp) {
+                        const timeAgo = getTimeAgo(timestamp);
+                        const badgeClass = getBadgeClass(timestamp);
+                        $item.find('.badge').text(timeAgo).removeClass().addClass(`badge ${badgeClass} badge-pill`);
+                    }
+                });
+            }, 60000); // Cập nhật mỗi 60 giây
+        }
+
+        /**
+         * Xuất danh sách cư dân ra file CSV
+         */
+        async function exportResidentsList() {
+            try {
+                const btn = $('#btnQuickExportResidents');
+                const originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Đang xuất...');
+
+                // Lấy danh sách cư dân từ API
+                const residents = await NhanKhauAPI.getAll();
+
+                if (!residents || residents.length === 0) {
+                    alert('Không có dữ liệu cư dân để xuất');
+                    btn.prop('disabled', false).html(originalHtml);
+                    return;
+                }
+
+                // Tạo CSV content
+                let csv = 'DANH SÁCH CƯ DÂN\n';
+                csv += `Ngày xuất: ${new Date().toLocaleString('vi-VN')}\n\n`;
+                csv += 'STT,Họ tên,Giới tính,Ngày sinh,CMND/CCCD,Số điện thoại,Địa chỉ,Tình trạng cư trú\n';
+
+                residents.forEach((resident, index) => {
+                    const row = [
+                        index + 1,
+                        `"${resident.hoTen || ''}"`,
+                        `"${resident.gioiTinh || ''}"`,
+                        `"${resident.ngaySinh || ''}"`,
+                        `"${resident.cmndCccd || ''}"`,
+                        `"${resident.soDienThoai || ''}"`,
+                        `"${resident.diaChi || ''}"`,
+                        `"${resident.tinhTrang || ''}"`
+                    ];
+                    csv += row.join(',') + '\n';
+                });
+
+                // Tạo blob và download
+                const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `DanhSachCuDan_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                if (typeof APIUtils !== 'undefined' && APIUtils.showSuccess) {
+                    APIUtils.showSuccess('Đã xuất danh sách cư dân thành công!');
+                } else {
+                    alert('Đã xuất danh sách cư dân thành công!');
+                }
+
+            } catch (error) {
+                console.error('[exportResidentsList] Lỗi:', error);
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Lỗi khi xuất danh sách cư dân: ' + error.message);
+                } else {
+                    alert('Lỗi khi xuất danh sách cư dân: ' + error.message);
+                }
+            } finally {
+                const btn = $('#btnQuickExportResidents');
+                btn.prop('disabled', false).html('<i class="fas fa-file-export mr-2"></i> Xuất danh sách cư dân');
+            }
+        }
+    </script>
+
+
+    <script>
+        // Kiểm tra quyền Admin trước khi điều hướng
+        function checkAdminBeforeNavigate(event) {
+            try {
+                const userInfo = sessionStorage.getItem('currentUser');
+                if (!userInfo) {
+                    event.preventDefault();
+                    alert('Vui lòng đăng nhập!');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                const user = JSON.parse(userInfo);
+                const role = user.vaiTro || user.role || '';
+                
+                // Debug: log để kiểm tra giá trị role
+                console.log('Current user:', user);
+                console.log('Role value:', role);
+                console.log('Role type:', typeof role);
+                
+                // Kiểm tra nhiều giá trị có thể là Admin
+                const isAdmin = role === 'BanQuanLy' || 
+                               role === 'Ban Quản lý' || 
+                               role === 'Admin' ||
+                               role === 'admin' ||
+                               role === 'BANQUANLY' ||
+                               role.toLowerCase() === 'banquanly';
+                
+                if (!isAdmin) {
+                    event.preventDefault();
+                    alert('Bạn không có quyền truy cập trang này! (Role: ' + role + ')');
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('Error checking admin role:', error);
+                event.preventDefault();
+                return false;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Bluemoon - Đăng nhập</title>
+
+    <!-- Custom fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <!-- Custom styles -->
+    <link href="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #224abe; /* Màu nền xanh đậm cho admin */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .card-login {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 1rem 3rem rgba(0,0,0,0.175);
+        }
+        .btn-admin {
+            background-color: #224abe;
+            color: white;
+            font-weight: bold;
+            border-radius: 2rem;
+            padding: 0.75rem;
+        }
+        .btn-admin:hover {
+            background-color: #1a3a9c;
+            color: white;
+        }
+        .form-control-user {
+            border-radius: 2rem;
+            padding: 1.5rem 1rem;
+        }
+        .sidebar-brand-icon {
+            color: #224abe;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+            <div class="col-xl-5 col-lg-6 col-md-9">
+                <div class="card card-login o-hidden border-0 my-5">
+                    <div class="card-body p-0">
+                        <!-- Nested Row within Card Body -->
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="p-5">
+                                    <div class="text-center">
+                                        <div class="sidebar-brand-icon rotate-n-15 mb-3">
+                                            <i class="fas fa-building fa-3x"></i>
+                                        </div>
+                                        <h1 class="h4 text-gray-900 mb-4 font-weight-bold">Ban Quản Lý BlueMoon</h1>
+                                        <p class="mb-4 text-gray-500 small">Vui lòng đăng nhập bằng tài khoản được cấp</p>
+                                    </div>
+                                    
+                                    <form class="user" id="adminLoginForm">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control form-control-user"
+                                                id="username" aria-describedby="usernameHelp"
+                                                placeholder="Tên đăng nhập" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="password" class="form-control form-control-user"
+                                                id="password" placeholder="Mật khẩu" required>
+                                        </div>
+                                        <div id="loginError" class="alert alert-danger" style="display: none;"></div>
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox small">
+                                                <input type="checkbox" class="custom-control-input" id="customCheck">
+                                                <label class="custom-control-label" for="customCheck">Ghi nhớ tôi</label>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-admin btn-user btn-block">
+                                            <span id="loginBtnText">Đăng Nhập Quản Trị</span>
+                                            <span id="loginBtnSpinner" class="spinner-border spinner-border-sm" style="display: none;"></span>
+                                        </button>
+                                    </form>
+                                    
+                                    <hr>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
+    <script src="js/api.js"></script>
+
+    <script>
+        $('#adminLoginForm').on('submit', async function(e) {
+            e.preventDefault();
+            const username = $('#username').val();
+            const password = $('#password').val();
+            
+            if (!username || !password) {
+                $('#loginError').text('Vui lòng nhập đầy đủ thông tin').show();
+                return;
+            }
+            
+            $('#loginBtnText').hide();
+            $('#loginBtnSpinner').show();
+            $('#loginError').hide();
+            $(this).find('button[type="submit"]').prop('disabled', true);
+            
+            try {
+                const result = await AuthAPI.login({ username: username, password: password });
+                if (result.success && result.data) {
+                    // Store user info in sessionStorage
+                    sessionStorage.setItem('currentUser', JSON.stringify(result.data));
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    
+                    // Store role in localStorage for RBAC (ưu tiên vaiTro từ backend)
+                    const userRole = result.data.vaiTro || result.data.role || null;
+                    if (userRole) {
+                        localStorage.setItem('role', userRole);
+                    }
+                    
+                    // Redirect to dashboard
+                    window.location.href = 'index.html';
+                } else {
+                    $('#loginError').text(result.message || 'Đăng nhập thất bại').show();
+                }
+            } catch (error) {
+                $('#loginError').text(error.message || 'Lỗi kết nối đến server').show();
+            } finally {
+                $('#loginBtnText').show();
+                $('#loginBtnSpinner').hide();
+                $(this).find('button[type="submit"]').prop('disabled', false);
+            }
+        });
+    </script>
+
+</body>
+</html>

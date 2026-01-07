@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Bluemoon - Phương Tiện</title>
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+</head>
+<body id="page-top">
+    <div id="wrapper">
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
+            </a>
+
+            <hr class="sidebar-divider my-0">
+
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="can-ho.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Cư dân</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="khoan-thu.html">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Khoản thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="thong-ke.html">
+                    <i class="fas fa-fw fa-chart-bar"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
+                </a>
+            </li>
+
+            <li class="nav-item" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                    <i class="fas fa-fw fa-user-cog"></i>
+                    <span>Tài khoản</span>
+                </a>
+            </li>
+
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="ho-so.html">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                    </nav>
+
+                <div class="container-fluid">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Quản lý Phương Tiện</h1>
+                        <a href="#" class="btn btn-primary btn-icon-split shadow-sm" data-toggle="modal" data-target="#addPhuongTienModal">
+                            <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
+                            <span class="text">Đăng ký phương tiện mới</span>
+                        </a>
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách phương tiện</h6>
+                            <div class="input-group" style="width: 300px;">
+                                <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm biển số, tên chủ xe, loại xe..." onkeyup="handleSearch(event)">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="performSearch()">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()" title="Xóa tìm kiếm">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Biển số</th>
+                                            <th>Loại xe</th>
+                                            <th>Tên chủ xe</th>
+                                            <th>Mã hộ</th>
+                                            <th>Ngày đăng ký</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="phuongTienTableBody">
+                                        <tr><td colspan="7" class="text-center">Đang tải dữ liệu...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto"><div class="copyright text-center my-auto"><span>Copyright &copy; BlueMoon 2025</span></div></div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addPhuongTienModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Đăng Ký Phương Tiện Mới</h5>
+                    <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="phuongTienForm">
+                        <input type="hidden" id="phuongTienId">
+                        <div class="form-group">
+                            <label>Mã hộ gia đình <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="maHo" required min="1" placeholder="Nhập mã hộ">
+                        </div>
+                        <div class="form-group">
+                            <label>Biển số <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="bienSo" required placeholder="VD: 30A-12345" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label>Loại xe</label>
+                            <select class="form-control" id="loaiXe">
+                                <option value="">-- Chọn loại xe --</option>
+                                <option value="Xe máy">Xe máy</option>
+                                <option value="Xe ô tô">Xe ô tô</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tên chủ xe</label>
+                            <input type="text" class="form-control" id="tenChuXe" placeholder="Tên người sở hữu phương tiện" maxlength="200">
+                        </div>
+                        <div class="form-group">
+                            <label>Ngày đăng ký</label>
+                            <input type="date" class="form-control" id="ngayDangKy">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="savePhuongTienBtn">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
+    
+    <script>
+        // Load user info and avatar
+        $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
+            loadUserDisplay();
+            if (typeof updateNavbarAvatar !== 'undefined') {
+                updateNavbarAvatar();
+            } else {
+                try {
+                    const userStr = sessionStorage.getItem('currentUser');
+                    if (userStr) {
+                        const user = JSON.parse(userStr);
+                        if (user && user.id) {
+                            const imageKey = `profileImage_${user.id}`;
+                            let imageData = sessionStorage.getItem(imageKey);
+                            if (!imageData) {
+                                imageData = localStorage.getItem(imageKey);
+                            }
+                            if (imageData) {
+                                $('#navbarAvatar').attr('src', imageData);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('[phuong-tien] Error loading avatar:', error);
+                }
+            }
+        });
+        
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                    $('#userDisplayName').text(displayName);
+                } else {
+                    $('#userDisplayName').text('Người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                $('#userDisplayName').text('Người dùng');
+            }
+        }
+    </script>
+    
+    <script>
+        let dataTable;
+        let editingId = null;
+        let hoGiaDinhMap = {};
+
+        $(document).ready(async function() {
+            await loadHoGiaDinh();
+            await loadPhuongTien();
+
+            // Form submission
+            $('#savePhuongTienBtn').on('click', async function() {
+                const form = $('#phuongTienForm');
+                if (!form[0].checkValidity()) {
+                    form[0].reportValidity();
+                    return;
+                }
+
+                const maHo = parseInt($('#maHo').val());
+                const bienSo = $('#bienSo').val().trim();
+                const loaiXe = $('#loaiXe').val();
+                const tenChuXe = $('#tenChuXe').val().trim();
+                const ngayDangKy = $('#ngayDangKy').val();
+
+                if (!maHo || maHo <= 0) {
+                    APIUtils.showError('Vui lòng nhập mã hộ gia đình hợp lệ');
+                    return;
+                }
+
+                if (!bienSo) {
+                    APIUtils.showError('Vui lòng nhập biển số');
+                    return;
+                }
+
+                const phuongTien = {
+                    maHo: maHo,
+                    bienSo: bienSo,
+                    loaiXe: loaiXe || null,
+                    tenChuXe: tenChuXe || null,
+                    ngayDangKy: ngayDangKy || null
+                };
+
+                const btn = $('#savePhuongTienBtn');
+                const originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang lưu...');
+
+                try {
+                    if (editingId) {
+                        phuongTien.id = editingId;
+                        await PhuongTienAPI.update(editingId, phuongTien);
+                        APIUtils.showSuccess('Cập nhật phương tiện thành công');
+                    } else {
+                        await PhuongTienAPI.create(phuongTien);
+                        APIUtils.showSuccess('Đăng ký phương tiện thành công');
+                    }
+                    $('#addPhuongTienModal').modal('hide');
+                    form[0].reset();
+                    editingId = null;
+                    // Reload với từ khóa tìm kiếm hiện tại (nếu có)
+                    const currentSearch = $('#searchInput').val();
+                    await loadPhuongTien(currentSearch);
+                } catch (error) {
+                    let errorMessage = error.message || 'Có lỗi xảy ra';
+                    if (error.detail) {
+                        errorMessage = error.detail;
+                    }
+                    if (errorMessage.includes('duplicate') || errorMessage.includes('đã tồn tại') || errorMessage.includes('already exists')) {
+                        errorMessage = 'Biển số này đã được đăng ký. Vui lòng kiểm tra lại.';
+                    }
+                    APIUtils.showError(errorMessage);
+                } finally {
+                    btn.prop('disabled', false).html(originalHtml);
+                }
+            });
+
+            // Reset form when modal is closed
+            $('#addPhuongTienModal').on('hidden.bs.modal', function() {
+                $('#phuongTienForm')[0].reset();
+                editingId = null;
+                $('.modal-title').text('Đăng Ký Phương Tiện Mới');
+            });
+        });
+
+        async function loadHoGiaDinh() {
+            try {
+                const data = await HoGiaDinhAPI.getAll();
+                hoGiaDinhMap = {};
+                data.forEach(ho => {
+                    const id = ho.id;
+                    hoGiaDinhMap[id] = ho.maHo || `Hộ ${id}`;
+                });
+            } catch (error) {
+                console.error('Error loading HoGiaDinh:', error);
+            }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('vi-VN');
+        }
+
+        async function loadPhuongTien(searchKeyword = null) {
+            try {
+                let data;
+                if (searchKeyword && searchKeyword.trim()) {
+                    data = await PhuongTienAPI.search(searchKeyword.trim());
+                } else {
+                    data = await PhuongTienAPI.getAll();
+                }
+                
+                const tbody = $('#phuongTienTableBody');
+                tbody.empty();
+
+                if (!data || data.length === 0) {
+                    const emptyMessage = searchKeyword && searchKeyword.trim() 
+                        ? `Không tìm thấy phương tiện nào với từ khóa "${searchKeyword}"`
+                        : 'Chưa có phương tiện nào';
+                    tbody.html(`<tr><td colspan="7" class="text-center">${emptyMessage}</td></tr>`);
+                    if (dataTable) {
+                        dataTable.destroy();
+                    }
+                    return;
+                }
+
+                data.forEach((item, index) => {
+                    const itemId = item.id;
+                    const maHo = hoGiaDinhMap[item.maHo] || `Hộ ${item.maHo}`;
+                    
+                    const row = `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${item.bienSo || ''}</strong></td>
+                            <td>${item.loaiXe || '-'}</td>
+                            <td>${item.tenChuXe || '-'}</td>
+                            <td>${maHo}</td>
+                            <td>${formatDate(item.ngayDangKy)}</td>
+                            <td class="text-center">
+                                <button class="btn btn-warning btn-circle btn-sm" onclick="editPhuongTien(${itemId})" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-circle btn-sm" onclick="deletePhuongTien(${itemId})" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+
+                if (dataTable) {
+                    dataTable.destroy();
+                }
+                dataTable = $('#dataTable').DataTable({
+                    "language": {
+                        "search": "Tìm kiếm:",
+                        "paginate": { "next": ">", "previous": "<" }
+                    }
+                });
+            } catch (error) {
+                $('#phuongTienTableBody').html(`<tr><td colspan="7" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
+                APIUtils.showError('Không thể tải danh sách phương tiện: ' + error.message);
+            }
+        }
+
+        function handleSearch(event) {
+            // Tìm kiếm khi nhấn Enter
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                performSearch();
+            }
+        }
+
+        async function performSearch() {
+            const keyword = $('#searchInput').val();
+            await loadPhuongTien(keyword);
+        }
+
+        async function clearSearch() {
+            $('#searchInput').val('');
+            await loadPhuongTien();
+        }
+
+        async function editPhuongTien(id) {
+            try {
+                const data = await PhuongTienAPI.getAll();
+                const item = data.find(d => d.id === id);
+                if (!item) {
+                    APIUtils.showError('Không tìm thấy phương tiện');
+                    return;
+                }
+
+                editingId = id;
+                $('#phuongTienId').val(id);
+                $('#maHo').val(item.maHo);
+                $('#bienSo').val(item.bienSo || '');
+                $('#loaiXe').val(item.loaiXe || '');
+                $('#tenChuXe').val(item.tenChuXe || '');
+                $('#ngayDangKy').val(item.ngayDangKy || '');
+
+                $('.modal-title').text('Sửa Phương Tiện');
+                $('#addPhuongTienModal').modal('show');
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+
+        async function deletePhuongTien(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa phương tiện này?')) {
+                return;
+            }
+
+            try {
+                await PhuongTienAPI.delete(id);
+                APIUtils.showSuccess('Xóa phương tiện thành công');
+                // Reload với từ khóa tìm kiếm hiện tại (nếu có)
+                const currentSearch = $('#searchInput').val();
+                await loadPhuongTien(currentSearch);
+            } catch (error) {
+                APIUtils.showError(error.message);
+            }
+        }
+    </script>
+    
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Bạn muốn đăng xuất?</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">Chọn "Đăng xuất" bên dưới nếu bạn muốn kết thúc phiên làm việc.</div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
+                    <button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
+        $(document).ready(function() {
+            try {
+                const userInfo = sessionStorage.getItem('currentUser');
+                if (userInfo) {
+                    const user = JSON.parse(userInfo);
+                    const role = user.vaiTro || user.role || '';
+                
+                // Debug: log để kiểm tra giá trị role
+                console.log('Current user:', user);
+                console.log('Role value:', role);
+                console.log('Role type:', typeof role);
+                
+                // Kiểm tra nhiều giá trị có thể là Admin
+                const isAdmin = role === 'BanQuanLy' || 
+                               role === 'Ban Quản lý' || 
+                               role === 'Admin' ||
+                               role === 'admin' ||
+                               role === 'BANQUANLY' ||
+                               role.toLowerCase() === 'banquanly';
+                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
+                        $('#menuTaiKhoan').show();
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking admin role:', error);
+            }
+        });
+    </script>
+</body>
+</html>

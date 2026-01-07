@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Bluemoon - Hộ Gia Đình</title>
+
+    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    
+    <style>
+        .nav-tabs .nav-link { color: #858796; }
+        .nav-tabs .nav-link.active { font-weight: bold; color: #4e73df; border-bottom: 3px solid #4e73df; }
+        .card-unpaid-header { cursor: pointer; background-color: #f8f9fc; border-bottom: 1px solid #e3e6f0; }
+        .card-unpaid-header:hover { background-color: #eaecf4; }
+    </style>
+</head>
+
+<body id="page-top">
+
+    <div id="wrapper">
+
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-building"></i></div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
+            </a>
+            <hr class="sidebar-divider my-0">
+
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="can-ho.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Cư dân</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="khoan-thu.html">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Khoản thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="thong-ke.html">
+                    <i class="fas fa-fw fa-chart-bar"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
+                </a>
+            </li>
+
+            <li class="nav-item" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                    <i class="fas fa-fw fa-user-cog"></i>
+                    <span>Tài khoản</span>
+                </a>
+            </li>
+
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    <ul class="navbar-nav ml-auto">
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
+                                <a class="dropdown-item" href="ho-so.html"><i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Hồ sơ</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="container-fluid">
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Quản lý Hộ Gia Đình</h1>
+                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#addHouseholdModal">
+                            <i class="fas fa-plus fa-sm text-white-50"></i> Thêm hộ gia đình
+                        </a>
+                    </div>
+                    
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách Hộ Gia Đình</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="householdTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Mã hộ</th>
+                                            <th>Số phòng</th>
+                                            <th>Diện tích (m²)</th>
+                                            <th>Chủ hộ</th>
+                                            <th>Ngày bắt đầu</th>
+                                            <th>Ngày kết thúc</th>
+                                            <th>Ghi chú</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                            </thead>
+                                    <tbody id="householdTableBody">
+                                        <tr><td colspan="8" class="text-center">Đang tải dữ liệu...</td></tr>
+                                            </tbody>
+                                        </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto"><div class="copyright text-center my-auto"><span>Copyright &copy; BlueMoon 2025</span></div></div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Bạn muốn đăng xuất?</h5><button class="close" data-dismiss="modal"><span>×</span></button></div>
+                <div class="modal-body">Chọn "Đăng xuất" để kết thúc phiên làm việc.</div>
+                <div class="modal-footer"><button class="btn btn-secondary" data-dismiss="modal">Hủy</button><button class="btn btn-primary" type="button" onclick="logout()">Đăng xuất</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="js/sb-admin-2.min.js"></script>
+    <script src="vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/rbac.js"></script>
+
+    <!-- Modal Thêm/Sửa Hộ Gia Đình -->
+    <div class="modal fade" id="addHouseholdModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Thêm Hộ Gia Đình</h5>
+                    <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="householdForm">
+                        <div class="form-group">
+                            <label>Số phòng <span class="text-danger">*</span></label>
+                            <select class="form-control" id="soPhong" required>
+                                <option value="">-- Chọn phòng --</option>
+                            </select>
+                            <small class="form-text text-muted">Danh sách phòng có sẵn kèm trạng thái</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ngày bắt đầu ở <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="ngayBatDau" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ngayKetThuc">Ngày kết thúc (Chuyển đi)</label>
+                            <input type="date" class="form-control" id="ngayKetThuc">
+                            <small class="form-text text-primary">
+                                <i class="fas fa-info-circle"></i> 
+                                Chỉ nhập khi hộ gia đình chuyển đi. Phòng sẽ tự động chuyển sang trạng thái "Trống".
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ghi chú</label>
+                            <textarea class="form-control" id="ghiChu" rows="3" placeholder="Ghi chú về hộ gia đình"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="saveHouseholdBtn">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load và hiển thị thông tin user
+        $(document).ready(function() {
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            applySidebarRBAC();
+
+            loadUserDisplay();
+        });
+        
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    const displayName = (user.hoTen && user.hoTen.trim()) || (user.tenDangNhap && user.tenDangNhap.trim()) || 'Người dùng';
+                    $('#userDisplayName').text(displayName);
+                    
+                    // Load avatar
+                    if (user && user.id) {
+                        const imageKey = `profileImage_${user.id}`;
+                        let imageData = sessionStorage.getItem(imageKey);
+                        if (!imageData) {
+                            imageData = localStorage.getItem(imageKey);
+                        }
+                        if (imageData) {
+                            $('#navbarAvatar').attr('src', imageData);
+                        }
+                    }
+                } else {
+                    $('#userDisplayName').text('Người dùng');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                $('#userDisplayName').text('Người dùng');
+            }
+        }
+        
+        let householdTable;
+        let editingHouseholdId = null;
+
+        $(document).ready(async function() {
+            await loadHouseholds();
+            
+            // Load rooms when modal is shown (for adding new household)
+            $('#addHouseholdModal').on('show.bs.modal', async function() {
+                if (!editingHouseholdId) {
+                    await loadRooms();
+
+                    // Lấy ngày hiện tại định dạng yyyy-MM-dd để gán vào input type="date"
+                    const today = new Date().toISOString().split('T')[0];
+                    $('#ngayBatDau').val(today);
+                }
+            });
+            
+            // Form submission
+            $('#saveHouseholdBtn').on('click', async function() {
+                await saveHousehold();
+            });
+
+            // Reset form when modal is closed
+            $('#addHouseholdModal').on('hidden.bs.modal', function() {
+                $('#householdForm')[0].reset();
+                editingHouseholdId = null;
+                $('.modal-title').text('Thêm Hộ Gia Đình');
+                $('#soPhong').html('<option value="">-- Chọn phòng --</option>');
+            });
+        });
+
+        async function loadRooms(currentSoPhong = null) {
+            try {
+                const rooms = await PhongAPI.getAll();
+                const soPhongSelect = $('#soPhong');
+                
+                // Clear existing options except the first one
+                soPhongSelect.html('<option value="">-- Chọn phòng --</option>');
+                
+                rooms.forEach(room => {
+                    const soPhong = room.soPhong;
+                    const dienTich = room.dienTich ? parseFloat(room.dienTich).toLocaleString('vi-VN') : 'N/A';
+                    const trangThaiSuDung = room.trangThaiSuDung || 'Trống';
+                    const isOccupied = trangThaiSuDung === 'Đã có hộ';
+                    // Allow selecting the current room when editing
+                    const isCurrentRoom = currentSoPhong !== null && soPhong === currentSoPhong;
+                    const shouldDisable = isOccupied && !isCurrentRoom;
+                    
+                    const optionText = `Phòng ${soPhong} - ${dienTich} m² - ${trangThaiSuDung}`;
+                    const option = $('<option></option>')
+                        .attr('value', soPhong)
+                        .text(optionText)
+                        .prop('disabled', shouldDisable);
+                    
+                    if (shouldDisable) {
+                        option.css('color', '#999');
+                    }
+                    
+                    soPhongSelect.append(option);
+                });
+            } catch (error) {
+                console.error('Error loading rooms:', error);
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Không thể tải danh sách phòng: ' + error.message);
+                }
+            }
+        }
+
+        async function loadHouseholds() {
+            try {
+                const households = await HoGiaDinhAPI.getAll();
+                const residents = await NhanKhauAPI.getAll();
+        
+                // --- PHẦN 1: TẠO MAP TRA CỨU THEO CCCD (QUAN TRỌNG - KHÔNG ĐƯỢC XÓA) ---
+                const residentMapByCCCD = {};
+                if (residents && Array.isArray(residents)) {
+                    residents.forEach(r => {
+                        if (r.soCCCD) {
+                            // Tạo từ điển: Chìa khóa là số CCCD -> Giá trị là thông tin người đó
+                            residentMapByCCCD[r.soCCCD.toString().trim()] = r;
+                        }
+                    });
+                }
+
+                const tbody = $('#householdTableBody');
+                tbody.empty();
+
+                if (!households || households.length === 0) {
+                    tbody.html('<tr><td colspan="8" class="text-center">Chưa có hộ gia đình nào</td></tr>');
+                    return;
+                }
+
+                // --- PHẦN 2: HIỂN THỊ DỮ LIỆU ---
+                const rows = households.map((household, index) => {
+                    // 1. Khởi tạo giá trị mặc định
+                    let tenChuHo = '<span class="text-muted font-italic">Chưa xác định</span>';
+
+                    // 2. Lấy CCCD chủ hộ từ record
+                    const cccdChuHo = household.maChuHo ? household.maChuHo.toString().trim() : null;
+
+                    // 3. Tra cứu trong Map đã tạo ở Phần 1
+                    if (cccdChuHo) {
+                        const chuHo = residentMapByCCCD[cccdChuHo];
+                        if (chuHo && chuHo.hoTen) {
+                            tenChuHo = `<span class="text-primary font-weight-bold">${chuHo.hoTen}</span>`;
+                        }
+                    }
+
+                    // 4. Trả về HTML
+                    return `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td><strong>${household.maHo || 'H' + household.id}</strong></td>
+                            <td>${household.soPhong || '-'}</td>
+                            <td>${household.dienTich ? (typeof household.dienTich === 'number' ? household.dienTich.toLocaleString('vi-VN') : household.dienTich) : '-'}</td>
+                    
+                            <td>${tenChuHo}</td>
+                    
+                            <td>${household.thoiGianBatDauO ? formatDate(household.thoiGianBatDauO) : '-'}</td>
+                            <td>${household.thoiGianKetThucO ? formatDate(household.thoiGianKetThucO) : '---'}</td>
+                            <td>${household.ghiChu || '-'}</td>
+                            <td class="text-center">
+                                <button class="btn btn-warning btn-circle btn-sm" onclick="editHousehold(${household.id})" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+        
+                tbody.append(rows.join(''));
+
+                // Khởi tạo lại DataTable (giữ nguyên)
+                if (householdTable) {
+                    householdTable.destroy();
+                }
+                householdTable = $('#householdTable').DataTable({
+                    "language": {
+                        "search": "Tìm kiếm:",
+                        "paginate": { "next": ">", "previous": "<" }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading households:', error);
+                $('#householdTableBody').html(`<tr><td colspan="8" class="text-center text-danger">Lỗi: ${error.message}</td></tr>`);
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Không thể tải danh sách hộ gia đình: ' + error.message);
+                }
+            }
+        }
+
+        async function saveHousehold() {
+            const form = $('#householdForm');
+            if (!form[0].checkValidity()) {
+                form[0].reportValidity();
+                return;
+            }
+
+            const soPhongStr = $('#soPhong').val();
+            const soPhong = soPhongStr ? parseInt(soPhongStr) : null;
+            const ghiChu = $('#ghiChu').val().trim();
+            
+            // Lấy giá trị ngày
+            const ngayBatDauVal = $('#ngayBatDau').val();
+            const thoiGianBatDauO = ngayBatDauVal ? (ngayBatDauVal + 'T00:00:00') : null;
+            const ngayKetThucVal = $('#ngayKetThuc').val();
+            const thoiGianKetThucO = ngayKetThucVal ? (ngayKetThucVal + 'T00:00:00') : null;
+    
+            if (!soPhong) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError('Vui lòng chọn số phòng');
+                } else {
+                    alert('Vui lòng chọn số phòng');
+                }
+                return;
+            }
+
+            const householdData = {
+                soPhong: soPhong,
+                ghiChu: ghiChu || null,
+                thoiGianBatDauO: thoiGianBatDauO,
+                thoiGianKetThucO: thoiGianKetThucO
+            };
+
+            try {
+                const btn = $('#saveHouseholdBtn');
+                const originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang lưu...');
+
+                if (editingHouseholdId) {
+                    await HoGiaDinhAPI.update(editingHouseholdId, householdData);
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showSuccess) {
+                        APIUtils.showSuccess('Cập nhật hộ gia đình thành công');
+                    } else {
+                        alert('Cập nhật hộ gia đình thành công');
+                    }
+                } else {
+                    await HoGiaDinhAPI.create(householdData);
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showSuccess) {
+                        APIUtils.showSuccess('Thêm hộ gia đình thành công');
+                    } else {
+                        alert('Thêm hộ gia đình thành công');
+                    }
+                }
+
+                $('#addHouseholdModal').modal('hide');
+                form[0].reset();
+                editingHouseholdId = null;
+                
+                // Reload households list to show updated data
+                await loadHouseholds();
+            } catch (error) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError(error.message);
+                } else {
+                    alert('Lỗi: ' + error.message);
+                }
+            } finally {
+                const btn = $('#saveHouseholdBtn');
+                btn.prop('disabled', false).html('Lưu');
+            }
+        }
+
+        async function editHousehold(id) {
+            try {
+                const households = await HoGiaDinhAPI.getAll();
+                const household = households.find(h => h.id === id);
+                
+                const tbody = $('#householdTableBody');
+                tbody.empty();
+
+                if (!household) {
+                    if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                        APIUtils.showError('Không tìm thấy hộ gia đình');
+                    } else {
+                        alert('Không tìm thấy hộ gia đình');
+                    }
+                    return;
+                }
+
+                editingHouseholdId = id;
+                
+                // Load rooms before showing modal (pass current soPhong to allow selecting it)
+                await loadRooms(household.soPhong);
+                
+                $('#soPhong').val(household.soPhong || '');
+                $('#ghiChu').val(household.ghiChu || '');
+
+                const formatForInput = (dateStr) => {
+                    if (!dateStr) return '';
+                    // Lấy phần yyyy-MM-dd từ chuỗi ISO
+                    return dateStr.split('T')[0];
+                };
+
+                $('#ngayBatDau').val(formatForInput(household.thoiGianBatDauO));
+                $('#ngayKetThuc').val(formatForInput(household.thoiGianKetThucO));
+
+                $('.modal-title').text('Sửa Hộ Gia Đình');
+                $('#addHouseholdModal').modal('show');
+            } catch (error) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError(error.message);
+                } else {
+                    alert('Lỗi: ' + error.message);
+                }
+            }
+        }
+
+        async function deleteHousehold(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa hộ gia đình này?')) {
+                return;
+            }
+
+            try {
+                await HoGiaDinhAPI.delete(id);
+                if (typeof APIUtils !== 'undefined' && APIUtils.showSuccess) {
+                    APIUtils.showSuccess('Xóa hộ gia đình thành công');
+                } else {
+                    alert('Xóa hộ gia đình thành công');
+                }
+                await loadHouseholds();
+            } catch (error) {
+                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
+                    APIUtils.showError(error.message);
+                } else {
+                    alert('Lỗi: ' + error.message);
+                }
+            }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('vi-VN');
+            } catch (e) {
+                return dateStr;
+            }
+        }
+    </script>
+
+    <script>
+        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
+        $(document).ready(function() {
+            try {
+                const userInfo = sessionStorage.getItem('currentUser');
+                if (userInfo) {
+                    const user = JSON.parse(userInfo);
+                    const role = user.vaiTro || user.role || '';
+                
+                // Debug: log để kiểm tra giá trị role
+                console.log('Current user:', user);
+                console.log('Role value:', role);
+                console.log('Role type:', typeof role);
+                
+                // Kiểm tra nhiều giá trị có thể là Admin
+                const isAdmin = role === 'BanQuanLy' || 
+                               role === 'Ban Quản lý' || 
+                               role === 'Admin' ||
+                               role === 'admin' ||
+                               role === 'BANQUANLY' ||
+                               role.toLowerCase() === 'banquanly';
+                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
+                        $('#menuTaiKhoan').show();
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking admin role:', error);
+            }
+        });
+    </script>
+</body>
+</html>
