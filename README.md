@@ -122,12 +122,12 @@ Giữ Ctrl và nhấn vào đường dẫn http://localhost:7070/
 
 ### Hướng Dẫn Sử Dụng
 * Thông tin đăng nhập mặc định
-** Tài khoản: admin
-** Mật khẩu: 123456
+Tài khoản: admin
+Mật khẩu: 123456
 
 * Chi tiết các chức năng
-** Tạo tải khoản: Vào mục Tài khoản, tạo thêm tài khoản cho chhir chức năng Quản lý dân cư, Quản lý thu phí
-** Sử dụng phần mềm
+Tạo tải khoản: Vào mục Tài khoản, tạo thêm tài khoản cho chhir chức năng Quản lý dân cư, Quản lý thu phí
+Sử dụng phần mềm
 
 ### Đóng Góp và Báo Cáo Lỗi
 Chúng tôi hoan nghênh mọi đóng góp để dự án hoàn thiện hơn!
