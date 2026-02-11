@@ -2,8 +2,6 @@
 
 > **BlueMoon** là giải pháp phần mềm toàn diện hỗ trợ Ban quản lý chung cư trong việc vận hành, quản lý cư dân và kiểm soát tài chính một cách hiệu quả, minh bạch.
 
----
-
 ## 📖 Giới Thiệu Dự Án
 
 Dự án được xây dựng nhằm giải quyết bài toán quản lý cho chung cư **BlueMoon**, tập trung vào hai nghiệp vụ cốt lõi: **Quản lý dân cư** và **Quản lý thu phí**.
@@ -16,9 +14,7 @@ Dự án được xây dựng nhằm giải quyết bài toán quản lý cho ch
 | **Diện tích sàn** | 450m² |
 | **Thời gian** | Khởi công 2021 \| Hoàn thành 2023 |
 
----
-
-## 🌟 Tính Năng Chính
+## Tính Năng Chính
 
 Hệ thống được chia thành các phân hệ chính sau:
 
@@ -51,11 +47,9 @@ Hệ thống được chia thành các phân hệ chính sau:
 * **Framework/Library:** Javalin (Web Server), JDBC/Hibernate (tùy thực tế dự án).
 * **Frontend:** HTML, CSS, JavaScript (Giao diện web).
 
----
+## Hướng Dẫn Cài Đặt
 
-## 🚀 Hướng Dẫn Cài Đặt
-
-### ⚙️ Yêu Cầu Hệ Thống (Prerequisites)
+### Yêu Cầu Hệ Thống (Prerequisites)
 Để chạy được dự án, máy tính của bạn cần đáp ứng:
 * **OS:** Windows 10 trở lên.
 * **Java:** JDK 20 trở lên.
@@ -128,12 +122,12 @@ Giữ Ctrl và nhấn vào đường dẫn http://localhost:7070/
 
 ### Hướng Dẫn Sử Dụng
 * Thông tin đăng nhập mặc định
-Tài khoản: admin
-Mật khẩu: 123456
+** Tài khoản: admin
+** Mật khẩu: 123456
 
 * Chi tiết các chức năng
-- Tạo tải khoản: Vào mục Tài khoản, tạo thêm tài khoản cho chhir chức năng Quản lý dân cư, Quản lý thu phí
-- Sử dụng phần mềm
+** Tạo tải khoản: Vào mục Tài khoản, tạo thêm tài khoản cho chhir chức năng Quản lý dân cư, Quản lý thu phí
+** Sử dụng phần mềm
 
 ### Đóng Góp và Báo Cáo Lỗi
 Chúng tôi hoan nghênh mọi đóng góp để dự án hoàn thiện hơn!
