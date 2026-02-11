@@ -63,57 +63,93 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
 
     @Override
     public boolean save(ChiTietThu chiTiet) {
-        if (chiTiet == null) {
-            logger.log(Level.WARNING, "Cannot save ChiTietThu: chiTiet is null");
-            return false;
+        // 1. Kiểm tra ID: Nếu > 0 thì là Cập nhật, ngược lại là Thêm mới
+        if (chiTiet.getId() > 0) {
+            return update(chiTiet);
+        } 
+        
+        // 2. (Tuỳ chọn) Kiểm tra xem khoản thu này đã có trong phiếu chưa để tránh trùng lặp
+        // Nếu đã có (trùng maPhieu và maKhoan) -> Chuyển sang Update
+        int existingId = findIdByPhieuAndKhoan(chiTiet.getMaPhieu(), chiTiet.getMaKhoan());
+        if (existingId > 0) {
+            chiTiet.setId(existingId);
+            return update(chiTiet);
         }
 
-        // Validate required fields
-        if (chiTiet.getMaPhieu() <= 0) {
-            logger.log(Level.WARNING, "Cannot save ChiTietThu: maPhieu is invalid");
-            return false;
-        }
+        // 3. Nếu chưa có -> Thêm mới
+        return insert(chiTiet);
+    }
 
-        if (chiTiet.getMaKhoan() <= 0) {
-            logger.log(Level.WARNING, "Cannot save ChiTietThu: maKhoan is invalid");
-            return false;
-        }
+    // --- CÁC HÀM PHỤ TRỢ (Private) ---
 
-        // Validate donGia and soLuong (thanhTien sẽ được tính = soLuong * donGia)
-        if (chiTiet.getDonGia() == null || chiTiet.getSoLuong() == null) {
-            logger.log(Level.WARNING, "Cannot save ChiTietThu: donGia or soLuong is null");
-            return false;
-        }
+    private boolean insert(ChiTietThu chiTiet) {
+        String sql = "INSERT INTO ChiTietThu (maPhieu, maKhoan, soLuong, donGia, thanhTien, ghiChu) VALUES (?, ?, ?, ?, ?, ?)";
+        
+        try (java.sql.Connection conn = DatabaseConnector.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            
+            // Tính thành tiền
+            BigDecimal thanhTien = chiTiet.getSoLuong().multiply(chiTiet.getDonGia());
 
-        // Tính thanhTien = soLuong * donGia
-        BigDecimal thanhTien = chiTiet.getSoLuong().multiply(chiTiet.getDonGia());
-
-        try (Connection conn = DatabaseConnector.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(INSERT)) {
-
-            pstmt.setInt(1, chiTiet.getMaPhieu());
-            pstmt.setInt(2, chiTiet.getMaKhoan());
-            pstmt.setBigDecimal(3, chiTiet.getSoLuong());
-            pstmt.setBigDecimal(4, chiTiet.getDonGia());
-            pstmt.setBigDecimal(5, thanhTien);
-            pstmt.setString(6, chiTiet.getGhiChu()); // ghiChu từ model
-
-            int rowsAffected = pstmt.executeUpdate();
-            boolean success = rowsAffected > 0;
-
-            if (success) {
-                logger.log(Level.INFO, "Successfully saved ChiTietThu for maPhieu: " + chiTiet.getMaPhieu());
-            } else {
-                logger.log(Level.WARNING, "Failed to save ChiTietThu for maPhieu: " + chiTiet.getMaPhieu());
+            ps.setInt(1, chiTiet.getMaPhieu());
+            ps.setInt(2, chiTiet.getMaKhoan());
+            ps.setBigDecimal(3, chiTiet.getSoLuong());
+            ps.setBigDecimal(4, chiTiet.getDonGia());
+            ps.setBigDecimal(5, thanhTien); // Lưu thành tiền đã tính
+            ps.setString(6, chiTiet.getGhiChu());
+            
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                // Cập nhật lại ID vừa sinh ra cho object
+                try (java.sql.ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        chiTiet.setId(rs.getInt(1));
+                    }
+                }
+                return true;
             }
-
-            return success;
-
-        } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error saving ChiTietThu for maPhieu: " + chiTiet.getMaPhieu(), e);
+            return false;
+        } catch (java.sql.SQLException e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private boolean update(ChiTietThu chiTiet) {
+        String sql = "UPDATE ChiTietThu SET soLuong = ?, donGia = ?, thanhTien = ?, ghiChu = ? WHERE id = ?";
+        
+        try (java.sql.Connection conn = DatabaseConnector.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            // Tính lại thành tiền mới
+            BigDecimal thanhTien = chiTiet.getSoLuong().multiply(chiTiet.getDonGia());
+
+            ps.setBigDecimal(1, chiTiet.getSoLuong());
+            ps.setBigDecimal(2, chiTiet.getDonGia());
+            ps.setBigDecimal(3, thanhTien);
+            ps.setString(4, chiTiet.getGhiChu());
+            ps.setInt(5, chiTiet.getId()); // Quan trọng: Điều kiện WHERE id = ...
+            
+            return ps.executeUpdate() > 0;
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private int findIdByPhieuAndKhoan(int maPhieu, int maKhoan) {
+        String sql = "SELECT id FROM ChiTietThu WHERE maPhieu = ? AND maKhoan = ?";
+        try (java.sql.Connection conn = DatabaseConnector.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, maPhieu);
+            ps.setInt(2, maKhoan);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("id");
+            }
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 
     @Override
@@ -352,6 +388,23 @@ public class ChiTietThuServiceImpl implements ChiTietThuService {
         }
         
         return chiTiet;
+    }
+
+    @Override
+    public boolean delete(int id) {
+        String sql = "DELETE FROM ChiTietThu WHERE id = ?";
+        
+        try (java.sql.Connection conn = DatabaseConnector.getConnection();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+            
+        } catch (java.sql.SQLException e) {
+            logger.log(Level.SEVERE, "Error deleting detail id: " + id, e);
+            e.printStackTrace();
+            return false;
+        }
     }
 }
 

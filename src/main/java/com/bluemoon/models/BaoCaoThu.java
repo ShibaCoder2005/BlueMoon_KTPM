@@ -1,7 +1,7 @@
 package com.bluemoon.models;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * DTO cho báo cáo thu (Revenue Report).
@@ -13,13 +13,13 @@ public class BaoCaoThu {
     private int maHo;
     
     /** Số phòng */
-    private int soPhong;
+    private String soPhong;
     
     /** Tên chủ hộ */
     private String chuHo;
     
     /** Ngày thu */
-    private LocalDateTime ngayThu;
+    private LocalDate ngayThu;
     
     /** Tổng số tiền */
     private BigDecimal soTien;
@@ -34,13 +34,19 @@ public class BaoCaoThu {
     private String trangThai;
     
     /** Hình thức thu */
-    private String hinhThucThu;
+    private String hinhThuc;
+
+    /** Người thu */
+    private String nguoiThu;
+
+    /** Mã thu */
+    private int maPhieu;
 
     public BaoCaoThu() {}
 
-    public BaoCaoThu(int maHo, int soPhong, String chuHo, LocalDateTime ngayThu, 
+    public BaoCaoThu(int maHo, String soPhong, String chuHo, LocalDate ngayThu, 
                     BigDecimal soTien, String noiDung, String tenDot, 
-                    String trangThai, String hinhThucThu) {
+                    String trangThai, String hinhThuc, int maPhieu) {
         this.maHo = maHo;
         this.soPhong = soPhong;
         this.chuHo = chuHo;
@@ -49,20 +55,21 @@ public class BaoCaoThu {
         this.noiDung = noiDung;
         this.tenDot = tenDot;
         this.trangThai = trangThai;
-        this.hinhThucThu = hinhThucThu;
+        this.hinhThuc = hinhThuc;
+        this.maPhieu = maPhieu;
     }
 
     public int getMaHo() { return maHo; }
     public void setMaHo(int maHo) { this.maHo = maHo; }
 
-    public int getSoPhong() { return soPhong; }
-    public void setSoPhong(int soPhong) { this.soPhong = soPhong; }
+    public String getSoPhong() { return soPhong; }
+    public void setSoPhong(String soPhong) { this.soPhong = soPhong; }
 
     public String getChuHo() { return chuHo; }
     public void setChuHo(String chuHo) { this.chuHo = chuHo; }
 
-    public LocalDateTime getNgayThu() { return ngayThu; }
-    public void setNgayThu(LocalDateTime ngayThu) { this.ngayThu = ngayThu; }
+    public LocalDate getNgayThu() { return ngayThu; }
+    public void setNgayThu(LocalDate ngayThu) { this.ngayThu = ngayThu; }
 
     public BigDecimal getSoTien() { return soTien; }
     public void setSoTien(BigDecimal soTien) { this.soTien = soTien; }
@@ -76,7 +83,13 @@ public class BaoCaoThu {
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
 
-    public String getHinhThucThu() { return hinhThucThu; }
-    public void setHinhThucThu(String hinhThucThu) { this.hinhThucThu = hinhThucThu; }
+    public String getHinhThuc() { return hinhThuc; }
+    public void setHinhThuc(String hinhThuc) { this.hinhThuc = hinhThuc; }
+
+    public String getNguoiThu() { return nguoiThu; }
+    public void setNguoiThu(String nguoiThu) { this.nguoiThu = nguoiThu; }
+
+    public int getMaPhieu() { return maPhieu; }
+    public void setMaPhieu(int maPhieu) { this.maPhieu = maPhieu; }
 }
 

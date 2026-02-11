@@ -88,6 +88,7 @@ public interface ThongKeService {
      *         - "totalHouseholds": Tổng số hộ gia đình
      */
     Map<String, Object> getResidentDemographics();
+
 }
 
 

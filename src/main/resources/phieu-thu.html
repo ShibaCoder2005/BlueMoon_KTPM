@@ -4,10 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Bluemoon - Phiếu Thu</title>
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 </head>
 <body id="page-top">
     <div id="wrapper">
@@ -26,6 +27,13 @@
                 <a class="nav-link" href="index.html">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phong.html">
+                    <i class="fas fa-fw fa-door-open"></i>
+                    <span>Căn hộ</span>
                 </a>
             </li>
 
@@ -86,7 +94,7 @@
             </li>
 
             <li class="nav-item" id="menuTaiKhoan">
-                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                <a class="nav-link" href="tai-khoan.html">
                     <i class="fas fa-fw fa-user-cog"></i>
                     <span>Tài khoản</span>
                 </a>
@@ -218,8 +226,6 @@
                                     <select class="form-control" id="trangThai">
                                         <option value="ChuaThu">Chưa thu</option>
                                         <option value="DaThu">Đã thu</option>
-                                        <option value="DaThanhToan">Đã thanh toán</option>
-                                        <option value="ChuaDu">Chưa đủ</option>
                                     </select>
                                 </div>
                             </div>
@@ -276,13 +282,20 @@
     <script src="vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/rbac.js"></script>
+    
     
     <script>
+        if (typeof checkPageAccess === 'function') {
+            checkPageAccess(['KeToan']); 
+        }
+
         // Load user info and avatar
         $(document).ready(function() {
+
             // Apply RBAC: Ẩn/hiện menu items dựa trên role
-            applySidebarRBAC();
+            if (typeof applySidebarRBAC === 'function') {
+                applySidebarRBAC();
+            }
 
             loadUserDisplay();
             if (typeof updateNavbarAvatar !== 'undefined') {
@@ -676,8 +689,6 @@
             const statusMap = {
                 'ChuaThu': { text: 'Chưa thu', class: 'badge-warning' },
                 'DaThu': { text: 'Đã thu', class: 'badge-success' },
-                'DaThanhToan': { text: 'Đã thanh toán', class: 'badge-success' },
-                'ChuaDu': { text: 'Chưa đủ', class: 'badge-info' }
             };
             const status = statusMap[trangThai] || { text: trangThai, class: 'badge-secondary' };
             return `<span class="badge ${status.class}">${status.text}</span>`;
@@ -716,8 +727,8 @@
                                 <button class="btn btn-primary btn-circle btn-sm" onclick="viewInvoice(${itemId})" title="Xem hóa đơn">
                                     <i class="fas fa-file-invoice"></i>
                                 </button>
-                                <button class="btn btn-info btn-circle btn-sm" onclick="viewPhieuThu(${itemId})" title="Xem chi tiết">
-                                    <i class="fas fa-eye"></i>
+                                <button class="btn btn-info btn-circle btn-sm" onclick="openDetailModal(${itemId})" title="Quản lý chi tiết">
+                                    <i class="fas fa-list-ul"></i>
                                 </button>
                                 <button class="btn btn-warning btn-circle btn-sm" onclick="editPhieuThu(${itemId})" title="Sửa">
                                     <i class="fas fa-edit"></i>
@@ -1043,9 +1054,184 @@
                 }
                 APIUtils.showError(errorMessage);
             }
+        }  
+
+        // --- LOGIC QUẢN LÝ CHI TIẾT THU (MODAL) ---
+        let currentPhieuId = null;
+        let khoanThuList = []; 
+
+        // 1. Mở Modal và load dữ liệu
+        async function openDetailModal(phieuId) {
+            currentPhieuId = phieuId;
+            
+            // Reset giao diện
+            $('#modalMaPhieu').text(phieuId);
+            $('#tbodyChiTiet').html('<tr><td colspan="5" class="text-center">Đang tải...</td></tr>');
+            $('#formChiTiet').hide(); 
+            
+            $('#modalChiTietThu').modal('show');
+
+            // Load song song các dữ liệu cần thiết
+            await Promise.all([
+                loadHeaderInfo(phieuId),
+                loadDetailList(phieuId),
+                loadKhoanThuDropdown() 
+            ]);
+        }
+
+        // 2. Load thông tin Header (Hộ, Đợt, Tổng tiền)
+        async function loadHeaderInfo(id) {
+            try {
+                const data = await PhieuThuAPI.getById(id);
+                // Lấy tên từ map đã load sẵn
+                const tenHo = hoGiaDinhMap[data.maHo] || `Hộ ${data.maHo}`;
+                const tenDot = dotThuMap[data.maDot] || `Đợt ${data.maDot}`;
+                
+                $('#modalTenHo').text(tenHo);
+                $('#modalDotThu').text(tenDot);
+                $('#modalTongTien').text(APIUtils.formatCurrency(data.tongTien));
+            } catch (e) { console.error(e); }
+        }
+
+        // 3. Load bảng danh sách chi tiết
+        async function loadDetailList(id) {
+            try {
+                // Gọi API lấy chi tiết
+                const list = await ChiTietThuAPI.getByPhieuThu(id); 
+                const tbody = $('#tbodyChiTiet');
+                tbody.empty();
+
+                if (!list || list.length === 0) {
+                    tbody.html('<tr><td colspan="5" class="text-center font-italic text-gray-500">Chưa có khoản thu nào. Hãy thêm mới!</td></tr>');
+                    return;
+                }
+
+                let html = '';
+                list.forEach(item => {
+                    html += `
+                        <tr>
+                            <td>${item.tenKhoan || 'Khoản #' + item.maKhoan}</td>
+                            <td class="text-center">${item.soLuong}</td>
+                            <td class="text-right">${APIUtils.formatCurrency(item.donGia)}</td>
+                            <td class="text-right font-weight-bold">${APIUtils.formatCurrency(item.thanhTien)}</td>
+                            <td class="text-center">
+                                <button class="btn btn-warning btn-sm btn-circle" onclick="editDetail(${item.id}, ${item.maKhoan}, ${item.soLuong}, ${item.donGia})" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm btn-circle" onclick="deleteDetail(${item.id})" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.html(html);
+            } catch (e) {
+                $('#tbodyChiTiet').html('<tr><td colspan="5" class="text-danger text-center">Lỗi tải dữ liệu: ' + e.message + '</td></tr>');
+            }
+        }
+
+        // 4. Load Dropdown Khoản Thu (Chỉ load 1 lần để dùng lại)
+        async function loadKhoanThuDropdown() {
+            if (khoanThuList.length > 0) return;
+            try {
+                const res = await KhoanThuAPI.getAll();
+                khoanThuList = res;
+                const select = $('#detailMaKhoan');
+                select.empty().append('<option value="">-- Chọn khoản thu --</option>');
+                
+                res.forEach(k => {
+                    // Lưu đơn giá vào data-price để JS tự điền giá khi chọn
+                    select.append(`<option value="${k.id}" data-price="${k.donGia}">${k.tenKhoan}</option>`);
+                });
+            } catch (e) { console.error("Lỗi load khoản thu", e); }
+        }
+
+        // --- CÁC HÀM XỬ LÝ FORM ---
+        
+        // Hiện form thêm mới
+        function showAddForm() {
+            $('#detailId').val(''); // ID rỗng = Thêm mới
+            $('#frmChiTiet')[0].reset();
+            $('#detailMaKhoan').prop('disabled', false);
+            $('#detailThanhTien').val('');
+            $('#formChiTiet').slideDown();
+        }
+
+        // Hiện form sửa
+        function editDetail(id, maKhoan, soLuong, donGia) {
+            $('#detailId').val(id);
+            $('#detailMaKhoan').val(maKhoan).prop('disabled', true); // Không cho sửa tên khoản
+            $('#detailSoLuong').val(soLuong);
+            $('#detailDonGia').val(donGia);
+            calcTotal();
+            $('#formChiTiet').slideDown();
+        }
+
+        // Tự động điền giá khi chọn khoản thu
+        function autoFillPrice() {
+            const price = $('#detailMaKhoan').find(':selected').data('price');
+            if(price !== undefined) {
+                $('#detailDonGia').val(price);
+                calcTotal();
+            }
+        }
+
+        // Tính thành tiền realtime
+        function calcTotal() {
+            const sl = parseFloat($('#detailSoLuong').val()) || 0;
+            const dg = parseFloat($('#detailDonGia').val()) || 0;
+            $('#detailThanhTien').val(APIUtils.formatCurrency(sl * dg));
+        }
+
+        // LƯU CHI TIẾT
+        async function saveChiTiet() {
+            const maKhoan = $('#detailMaKhoan').val();
+            const soLuong = $('#detailSoLuong').val();
+            const donGia = $('#detailDonGia').val();
+
+            if (!maKhoan || !soLuong || !donGia) {
+                APIUtils.showError("Vui lòng nhập đủ thông tin!");
+                return;
+            }
+
+            const payload = {
+                id: $('#detailId').val() || 0,
+                maPhieu: currentPhieuId,
+                maKhoan: parseInt(maKhoan),
+                soLuong: parseFloat(soLuong),
+                donGia: parseFloat(donGia)
+            };
+
+            try {
+                await ChiTietThuAPI.save(payload);
+                $('#formChiTiet').slideUp();
+                APIUtils.showSuccess("Đã lưu chi tiết!");
+                
+                // Reload lại dữ liệu để thấy sự thay đổi
+                await loadDetailList(currentPhieuId);
+                await loadHeaderInfo(currentPhieuId); // Cập nhật tổng tiền trên Modal
+                await loadPhieuThu(); // Cập nhật tổng tiền ở bảng chính
+            } catch (e) {
+                APIUtils.showError(e.message);
+            }
+        }
+
+        // XÓA CHI TIẾT
+        async function deleteDetail(id) {
+            if(!confirm("Bạn chắc chắn muốn xóa khoản này?")) return;
+            try {
+                await ChiTietThuAPI.delete(id);
+                APIUtils.showSuccess("Đã xóa!");
+                await loadDetailList(currentPhieuId);
+                await loadHeaderInfo(currentPhieuId);
+                await loadPhieuThu();
+            } catch (e) {
+                APIUtils.showError(e.message);
+            }
         }
     </script>
-    
+
     <!-- Logout Modal-->
     <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -1065,35 +1251,79 @@
         </div>
     </div>
 
-    <script>
-        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
-        $(document).ready(function() {
-            try {
-                const userInfo = sessionStorage.getItem('currentUser');
-                if (userInfo) {
-                    const user = JSON.parse(userInfo);
-                    const role = user.vaiTro || user.role || '';
-                
-                // Debug: log để kiểm tra giá trị role
-                console.log('Current user:', user);
-                console.log('Role value:', role);
-                console.log('Role type:', typeof role);
-                
-                // Kiểm tra nhiều giá trị có thể là Admin
-                const isAdmin = role === 'BanQuanLy' || 
-                               role === 'Ban Quản lý' || 
-                               role === 'Admin' ||
-                               role === 'admin' ||
-                               role === 'BANQUANLY' ||
-                               role.toLowerCase() === 'banquanly';
-                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
-                        $('#menuTaiKhoan').show();
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking admin role:', error);
-            }
-        });
-    </script>
+    <div class="modal fade" id="modalChiTietThu" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document"> <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-invoice"></i> Chi tiết phiếu thu #<span id="modalMaPhieu"></span>
+                </h5>
+                <button class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+            
+                <div class="alert alert-secondary row mb-3">
+                    <div class="col-md-4"><strong>Hộ gia đình:</strong> <span id="modalTenHo">...</span></div>
+                    <div class="col-md-4"><strong>Đợt thu:</strong> <span id="modalDotThu">...</span></div>
+                    <div class="col-md-4"><strong>Tổng tiền hiện tại:</strong> <span id="modalTongTien" class="text-danger font-weight-bold">0 đ</span></div>
+                </div>
+
+                <div id="formChiTiet" class="card mb-4 border-left-success" style="display: none;">
+                    <div class="card-body">
+                        <h6 class="font-weight-bold text-success">Nhập khoản thu</h6>
+                        <form id="frmChiTiet">
+                            <input type="hidden" id="detailId"> 
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>Khoản thu</label>
+                                    <select class="form-control" id="detailMaKhoan" onchange="autoFillPrice()">
+                                        <option value="">-- Chọn khoản --</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Số lượng</label>
+                                    <input type="number" class="form-control" id="detailSoLuong" value="1" oninput="calcTotal()">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Đơn giá</label>
+                                    <input type="number" class="form-control" id="detailDonGia" oninput="calcTotal()">
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Thành tiền</label>
+                                    <input type="text" class="form-control" id="detailThanhTien" disabled>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-right">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="$('#formChiTiet').slideUp()">Hủy</button>
+                                <button type="button" class="btn btn-success btn-sm" onclick="saveChiTiet()">Lưu lại</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mb-2">
+                    <h6 class="font-weight-bold">Danh sách khoản thu</h6>
+                    <button class="btn btn-success btn-sm" onclick="showAddForm()">
+                        <i class="fas fa-plus"></i> Thêm khoản thu
+                    </button>
+                </div>
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Tên khoản</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Thành tiền</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyChiTiet"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

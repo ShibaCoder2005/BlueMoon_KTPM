@@ -6,10 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Bluemoon - Dân Cư</title>
 
-    <!-- Thay thế link local bằng CDN -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 </head>
 
@@ -32,6 +31,13 @@
                 <a class="nav-link" href="index.html">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phong.html">
+                    <i class="fas fa-fw fa-door-open"></i>
+                    <span>Căn hộ</span>
                 </a>
             </li>
 
@@ -83,6 +89,7 @@
                     <span>Thống kê</span>
                 </a>
             </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="bao-cao.html">
                     <i class="fas fa-fw fa-file-alt"></i>
@@ -91,7 +98,7 @@
             </li>
 
             <li class="nav-item" id="menuTaiKhoan">
-                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                <a class="nav-link" href="tai-khoan.html">
                     <i class="fas fa-fw fa-user-cog"></i>
                     <span>Tài khoản</span>
                 </a>
@@ -100,8 +107,8 @@
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
-
         </ul>
+        
         <div id="content-wrapper" class="d-flex flex-column">
 
             <div id="content">
@@ -134,20 +141,31 @@
 
                 <div class="container-fluid">
 
-                    <h1 class="h3 mb-2 text-gray-800">Danh Sách Cư Dân</h1>
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Danh Sách Cư Dân</h1>
+    
+                        <div>
+                            <a href="#" class="btn btn-info btn-icon-split shadow-sm mr-2" id="btnViewResidentHistory">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-history"></i>
+                                </span>
+                                <span class="text">Lịch sử nhân khẩu</span>
+                            </a>
+        
+                            <a href="#" class="btn btn-primary btn-icon-split shadow-sm" id="btnAddResident" data-toggle="modal" data-target="#residentModal">
+                                <span class="icon text-white-50">
+                                    <i class="fas fa-user-plus"></i>
+                                </span>
+                                <span class="text">Thêm Cư dân</span>
+                            </a>
+                        </div>
+                    </div>
+
                     <p class="mb-4">Quản lý thông tin chi tiết cư dân, hộ khẩu và tình trạng cư trú.</p>
                     
                     <div class="card shadow mb-4">
                         <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                             <h6 class="m-0 font-weight-bold text-primary">Dữ liệu tổng hợp</h6>
-                            <div>
-                                <button type="button" class="d-none d-sm-inline-block btn btn-sm btn-info shadow-sm mr-2" id="btnViewResidentHistory">
-                                    <i class="fas fa-history fa-sm text-white-50"></i> Lịch sử nhân khẩu
-                                </button>
-                                <button type="button" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" id="btnAddResident" data-toggle="modal" data-target="#residentModal">
-                                <i class="fas fa-user-plus fa-sm text-white-50"></i> Thêm Cư dân
-                                </button>
-                            </div>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -414,15 +432,21 @@
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/rbac.js"></script>
+    
 
     <script>
         let dataTable;
         let editingResidentId = null;
 
         $(document).ready(async function() {
+            if (typeof checkPageAccess === 'function') {
+                checkPageAccess(['BanQuanLy']);
+            }
+
             // Apply RBAC: Ẩn/hiện menu items dựa trên role
-            applySidebarRBAC();
+            if (typeof applySidebarRBAC === 'function') {
+                applySidebarRBAC();
+            }
 
             // Load và hiển thị thông tin user
             loadUserDisplay();
@@ -1161,33 +1185,19 @@
 
 
     <script>
-        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
+        // 1. Phân quyền: Chỉ cho Admin & Ban Quản Lý (Kế toán bị chặn)
+        if (typeof checkPageAccess === 'function') {
+            checkPageAccess(['BanQuanLy']);
+        }
+
         $(document).ready(function() {
-            try {
-                const userInfo = sessionStorage.getItem('currentUser');
-                if (userInfo) {
-                    const user = JSON.parse(userInfo);
-                    const role = user.vaiTro || user.role || '';
-                
-                // Debug: log để kiểm tra giá trị role
-                console.log('Current user:', user);
-                console.log('Role value:', role);
-                console.log('Role type:', typeof role);
-                
-                // Kiểm tra nhiều giá trị có thể là Admin
-                const isAdmin = role === 'BanQuanLy' || 
-                               role === 'Ban Quản lý' || 
-                               role === 'Admin' ||
-                               role === 'admin' ||
-                               role === 'BANQUANLY' ||
-                               role.toLowerCase() === 'banquanly';
-                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
-                        $('#menuTaiKhoan').show();
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking admin role:', error);
+            // 2. Xử lý Menu: Tự động Ẩn Thu phí & Ẩn Tài khoản (theo api.js mới)
+            if (typeof applySidebarRBAC === 'function') {
+                applySidebarRBAC();
             }
+
+            // 3. Tải dữ liệu
+            loadUserDisplay();
         });
     </script>
 </body>

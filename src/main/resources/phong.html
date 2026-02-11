@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Bluemoon - Căn hộ</title>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+
+    <div id="wrapper">
+
+        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">BlueMoon</div>
+            </a>
+
+            <hr class="sidebar-divider my-0">
+
+            <li class="nav-item">
+                <a class="nav-link" href="index.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item active">
+                <a class="nav-link" href="phong.html">
+                    <i class="fas fa-fw fa-door-open"></i>
+                    <span>Căn hộ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="can-ho.html">
+                    <i class="fas fa-fw fa-home"></i>
+                    <span>Hộ gia đình</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="danh-sach-dan-cu.html">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Cư dân</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="khoan-thu.html">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Khoản thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="dot-thu.html">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Đợt thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phieu-thu.html">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Phiếu thu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phuong-tien.html">
+                    <i class="fas fa-fw fa-car"></i>
+                    <span>Phương tiện</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="thong-ke.html">
+                    <i class="fas fa-fw fa-chart-bar"></i>
+                    <span>Thống kê</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="bao-cao.html">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>Báo cáo</span>
+                </a>
+            </li>
+
+            <li class="nav-item" id="menuTaiKhoan">
+                <a class="nav-link" href="tai-khoan.html">
+                    <i class="fas fa-fw fa-user-cog"></i>
+                    <span>Tài khoản</span>
+                </a>
+            </li>
+
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+        </ul>
+
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+                    
+                    <ul class="navbar-nav ml-auto">
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small" id="userDisplayName">Đang tải...</span>
+                                <img class="img-profile rounded-circle" id="navbarAvatar" src="img/undraw_profile.svg" style="object-fit: cover;">
+                            </a>
+                            
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="ho-so.html">
+                                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Hồ sơ
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+
+                    </ul>
+                </nav>
+
+                <div class="container-fluid">
+
+                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                        <h1 class="h3 mb-0 text-gray-800">Quản lý Phòng</h1>
+                        <a href="#" class="btn btn-primary btn-icon-split shadow-sm" 
+                            data-toggle="modal" data-target="#phongModal" 
+                            onclick="prepareAddModal()"> <span class="icon text-white-50">
+                                <i class="fas fa-plus"></i>
+                            </span>
+                            <span class="text">Thêm Phòng mới</span>
+                        </a>
+                    </div>
+
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Danh sách Phòng</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Số Phòng (Mã)</th>
+                                            <th>Diện tích (m²)</th>
+                                            <th>Giá tiền (VNĐ)</th>
+                                            <th>Trạng thái</th>
+                                            <th>Ghi chú</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tableBody">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto"><span>Copyright &copy; BlueMoon 2025</span></div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="modal fade" id="phongModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="phongModalLabel">Thông tin Phòng</h5>
+                    <button class="close text-white" type="button" data-dismiss="modal"><span>×</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="phongForm">
+                        <input type="hidden" id="isEditMode" value="false">
+                        
+                        <div class="form-group">
+                            <label>Số phòng (Mã định danh) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="soPhong" required placeholder="Nhập số phòng (VD: 101, 202)">
+                            <small class="text-muted">Nhập số nguyên, không trùng lặp.</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>Diện tích (m²)</label>
+                                <input type="number" step="0.01" class="form-control" id="dienTich" placeholder="0.00">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Giá tiền (VNĐ)</label>
+                                <input type="number" step="1000" class="form-control" id="giaTien" placeholder="0">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Trạng thái</label>
+                            <select class="form-control" id="trangThai">
+                                <option value="Trong">Trống</option>
+                                <option value="DangO">Đang ở</option>
+                                <option value="BaoTri">Bảo trì</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ghi chú</label>
+                            <textarea class="form-control" id="ghiChu" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Hủy</button>
+                    <button class="btn btn-primary" type="button" onclick="savePhong()">Lưu thông tin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+    <script src="js/api.js"></script>
+
+    <script>
+        // Biến toàn cục
+        let isEditing = false;
+        let currentSoPhong = null;
+
+        // Chạy khi trang tải xong
+        $(document).ready(function() {
+            // 1. Kiểm tra quyền truy cập (nếu có)
+            if (typeof checkPageAccess === 'function') {
+                checkPageAccess(['BanQuanLy']);
+            }
+            
+            // 2. Load thông tin người dùng
+            loadUserDisplay();
+
+            // 3. Load dữ liệu bảng
+            loadPhong();
+
+            // 4. Gán sự kiện nút Lưu
+            $('#savePhongBtn').click(function() {
+                savePhong();
+            });
+        });
+
+        // Hàm hiển thị tên người dùng (giữ nguyên logic của bạn)
+        function loadUserDisplay() {
+            try {
+                const userStr = sessionStorage.getItem('currentUser');
+                if (userStr && userStr !== "undefined" && userStr !== "null") {
+                    const user = JSON.parse(userStr);
+                    const displayName = user.hoTen || user.tenDangNhap || 'Admin';
+                    $('#userDisplayName').text(displayName);
+                    if (user.id) {
+                        const imageKey = `profileImage_${user.id}`;
+                        let imageData = sessionStorage.getItem(imageKey);
+                        if (imageData) $('#navbarAvatar').attr('src', imageData);
+                    }
+                } else {
+                    $('#userDisplayName').text('Admin');
+                }
+            } catch (e) {
+                console.error("Lỗi hiển thị user:", e);
+                $('#userDisplayName').text('Admin');
+            }
+        }
+
+        // --- HÀM QUAN TRỌNG: TẢI DANH SÁCH PHÒNG ---
+        async function loadPhong() {
+            try {
+                // Gọi API lấy danh sách
+                const data = await apiRequest('/phong', 'GET');
+                
+                const tbody = $('#dataTable tbody');
+                tbody.empty(); // Xóa sạch bảng cũ để tránh trùng lặp
+
+                if (!data || data.length === 0) {
+                    tbody.html('<tr><td colspan="6" class="text-center">Chưa có dữ liệu</td></tr>');
+                    return;
+                }
+
+                data.forEach(item => {
+                    // 1. SỬA LỖI TÊN BIẾN: Dùng item.trangThai (chuẩn Java Model)
+                    let badgeClass = 'badge-secondary';
+                    let statusText = 'Không rõ';
+                    let isDangO = false; // Cờ đánh dấu phòng đang ở
+                    
+                    // Kiểm tra null để tránh lỗi
+                    const trangThai = item.trangThai || ''; 
+
+                    if(trangThai === 'Trong') { 
+                        badgeClass = 'badge-success'; 
+                        statusText = 'Trống'; 
+                    }
+                    else if(trangThai === 'DangO') { 
+                        badgeClass = 'badge-primary'; 
+                        statusText = 'Đang ở'; 
+                        isDangO = true; // Đánh dấu là đang ở
+                    }
+                    else if(trangThai === 'BaoTri') { 
+                        badgeClass = 'badge-warning'; 
+                        statusText = 'Bảo trì'; 
+                    }
+
+                    // 2. LOGIC KHÓA NÚT: Nếu đang ở -> Disable nút Sửa & Xóa
+                    const disableAttr = isDangO ? 'disabled style="cursor: not-allowed; opacity: 0.6;" title="Phòng đang có người ở"' : '';
+                    // Nếu đang ở thì không gán hàm onclick, ngược lại thì gán bình thường
+                    const editAction = isDangO ? '' : `onclick="openEditModal(${item.soPhong})"`;
+                    const deleteAction = isDangO ? '' : `onclick="deletePhong(${item.soPhong})"`;
+
+                    const row = `
+                        <tr>
+                            <td>${item.soPhong}</td>
+                            <td>${item.dienTich} m²</td>
+                            <td>${new Intl.NumberFormat('vi-VN').format(item.giaTien)} đ</td>
+                            <td><span class="badge ${badgeClass}">${statusText}</span></td>
+                            <td>${item.ghiChu || ''}</td>
+                            <td class="text-center">
+                                <button class="btn btn-warning btn-sm" ${editAction} ${disableAttr}>
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" ${deleteAction} ${disableAttr}>
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+
+                // Khởi tạo lại DataTable nếu cần (tùy chọn)
+                // if ($.fn.DataTable.isDataTable('#dataTable')) {
+                //     $('#dataTable').DataTable().destroy();
+                // }
+                // $('#dataTable').DataTable();
+
+            } catch (error) {
+                console.error(error);
+                alert("Lỗi tải dữ liệu: " + error.message);
+            }
+        }
+
+        // Mở form thêm mới
+        function openAddModal() {
+            isEditing = false;
+            currentSoPhong = null;
+            
+            $('#formPhong')[0].reset();
+            $('#modalTitle').text('Thêm Phòng Mới');
+            $('#soPhong').prop('disabled', false); // Cho nhập số phòng
+            $('#trangThai').val('Trong'); // Mặc định là Trống
+            
+            $('#phongModal').modal('show');
+        }
+
+        // Mở form sửa
+        async function openEditModal(soPhong) {
+            isEditing = true;
+            currentSoPhong = soPhong;
+
+            try {
+                const phong = await apiRequest(`/phong/${soPhong}`, 'GET');
+                
+                $('#soPhong').val(phong.soPhong);
+                $('#dienTich').val(phong.dienTich);
+                $('#giaTien').val(phong.giaTien);
+                // SỬA: Dùng đúng tên biến trangThai
+                $('#trangThai').val(phong.trangThai); 
+                $('#ghiChu').val(phong.ghiChu);
+
+                $('#modalTitle').text(`Sửa Phòng ${soPhong}`);
+                $('#soPhong').prop('disabled', true); // Cấm sửa số phòng
+                
+                $('#phongModal').modal('show');
+
+            } catch (e) {
+                alert("Không thể lấy thông tin phòng: " + e.message);
+            }
+        }
+
+        // Lưu (Thêm hoặc Sửa)
+        async function savePhong() {
+            const payload = {
+                soPhong: parseInt($('#soPhong').val()),
+                dienTich: parseFloat($('#dienTich').val()),
+                giaTien: parseFloat($('#giaTien').val()),
+                trangThai: $('#trangThai').val(),
+                ghiChu: $('#ghiChu').val()
+            };
+
+            if(!payload.soPhong || !payload.dienTich) {
+                alert("Vui lòng nhập Số phòng và Diện tích!");
+                return;
+            }
+
+            try {
+                if (isEditing) {
+                    // PUT: Cập nhật
+                    await apiRequest(`/phong/${currentSoPhong}`, 'PUT', payload);
+                    alert("Cập nhật thành công!");
+                } else {
+                    // POST: Thêm mới
+                    await apiRequest('/phong', 'POST', payload);
+                    alert("Thêm mới thành công!");
+                }
+
+                $('#phongModal').modal('hide');
+                loadPhong(); // Tải lại bảng để thấy thay đổi
+            } catch (error) {
+                alert("Lỗi khi lưu: " + (error.message || error));
+            }
+        }
+
+        // Xóa phòng
+        async function deletePhong(soPhong) {
+            if(!confirm(`Bạn có chắc muốn xóa phòng ${soPhong}?`)) return;
+
+            try {
+                await apiRequest(`/phong/${soPhong}`, 'DELETE');
+                alert("Đã xóa!");
+                loadPhong(); // Tải lại bảng
+            } catch (error) {
+                alert("Không thể xóa (Lỗi: " + error.message + ")");
+            }
+        }
+    </script>
+</body>
+</html>

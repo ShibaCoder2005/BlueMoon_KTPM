@@ -235,7 +235,11 @@ const PhieuThuAPI = {
 };
 
 const PhongAPI = {
-    getAll: () => apiRequest('/phong', 'GET')
+    getAll: () => apiRequest('/phong', 'GET'),
+    getById: (id) => apiRequest(`/phong/${id}`, 'GET'),
+    create: (data) => apiRequest('/phong', 'POST', data),
+    update: (id, data) => apiRequest(`/phong/${id}`, 'PUT', data),
+    delete: (id) => apiRequest(`/phong/${id}`, 'DELETE')
 };
 
 const PhuongTienAPI = {
@@ -261,111 +265,53 @@ const LichSuNhanKhauAPI = {
     create: (data) => apiRequest('/nhan-khau/lich-su', 'POST', data)
 };
 
+// --- THỐNG KÊ API ---
 const ThongKeAPI = {
-    dashboard: () => apiRequest('/thong-ke/dashboard', 'GET'),
-    getDashboard: () => apiRequest('/thong-ke/dashboard', 'GET'),
-    revenue: (params) => {
-        const queryParams = new URLSearchParams();
-        if (params.fromDate) queryParams.append('fromDate', params.fromDate);
-        if (params.toDate) queryParams.append('toDate', params.toDate);
-        const queryString = queryParams.toString();
-        return apiRequest(`/thong-ke/revenue${queryString ? '?' + queryString : ''}`, 'GET');
+    // 1. Dashboard tổng quan
+    getDashboardStats: () => apiRequest('/thong-ke/dashboard', 'GET'),
+    
+    // 2. Biểu đồ doanh thu
+    getRevenueStats: (fromDate, toDate) => {
+        let url = '/thong-ke/doanh-thu';
+        if (fromDate && toDate) url += `?from=${fromDate}&to=${toDate}`;
+        return apiRequest(url, 'GET');
     },
-    revenueTotal: (params) => {
-        const queryParams = new URLSearchParams();
-        if (params.fromDate) queryParams.append('fromDate', params.fromDate);
-        if (params.toDate) queryParams.append('toDate', params.toDate);
-        const queryString = queryParams.toString();
-        return apiRequest(`/thong-ke/revenue/total${queryString ? '?' + queryString : ''}`, 'GET');
-    },
-    revenueDetails: (params) => {
-        const queryParams = new URLSearchParams();
-        if (params.fromDate) queryParams.append('fromDate', params.fromDate);
-        if (params.toDate) queryParams.append('toDate', params.toDate);
-        const queryString = queryParams.toString();
-        return apiRequest(`/thong-ke/revenue/details${queryString ? '?' + queryString : ''}`, 'GET');
-    },
-    debt: () => apiRequest('/thong-ke/debt', 'GET'),
-    debtTotal: () => apiRequest('/thong-ke/debt/total', 'GET'),
-    debtDetails: () => apiRequest('/thong-ke/debt/details', 'GET'),
-    report: (maDotThu) => apiRequest(`/thong-ke/report/${maDotThu}`, 'GET'),
-    demographics: () => apiRequest('/thong-ke/demographics', 'GET')
+    
+    // 3. Biểu đồ nhân khẩu
+    getDemographics: () => apiRequest('/thong-ke/nhan-khau', 'GET'),
+
+    // 4. Biểu đồ công nợ (MỚI THÊM)
+    getDebtStats: () => apiRequest('/thong-ke/cong-no', 'GET'),
+
+    // 5. Chi tiết công nợ (MỚI THÊM)
+    getDebtDetails: () => apiRequest('/thong-ke/cong-no/chi-tiet', 'GET')
 };
 
+// --- BÁO CÁO API ---
 const BaoCaoAPI = {
-    // Revenue Report
+    // Báo cáo thu (theo tháng/năm hoặc khoảng ngày)
     getRevenueReport: (params) => {
-        const queryParams = new URLSearchParams();
-        if (params.month) queryParams.append('month', params.month);
-        if (params.year) queryParams.append('year', params.year);
-        if (params.fromDate) queryParams.append('fromDate', params.fromDate);
-        if (params.toDate) queryParams.append('toDate', params.toDate);
-        const queryString = queryParams.toString();
-        return apiRequest(`/reports/revenue${queryString ? '?' + queryString : ''}`, 'GET');
+        const query = new URLSearchParams(params).toString();
+        return apiRequest(`/bao-cao/thu?${query}`, 'GET');
     },
-    exportRevenue: async (params) => {
-        const queryParams = new URLSearchParams();
-        if (params.month) queryParams.append('month', params.month);
-        if (params.year) queryParams.append('year', params.year);
-        if (params.fromDate) queryParams.append('fromDate', params.fromDate);
-        if (params.toDate) queryParams.append('toDate', params.toDate);
-        const queryString = queryParams.toString();
-        
-        const response = await fetch(`/api/reports/export/revenue${queryString ? '?' + queryString : ''}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${sessionStorage.getItem('accessToken') || ''}`
-            }
-        });
-        
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`Export failed: ${text}`);
-        }
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `BaoCaoThu_${params.fromDate || params.month}_${params.toDate || params.year}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-    },
-    // Debt Report
+
+    // Báo cáo công nợ (theo đợt)
     getDebtReport: (maDot) => {
-        const queryParams = new URLSearchParams();
-        if (maDot) queryParams.append('maDot', maDot);
-        const queryString = queryParams.toString();
-        return apiRequest(`/reports/debt${queryString ? '?' + queryString : ''}`, 'GET');
+        const url = maDot ? `/bao-cao/cong-no?maDot=${maDot}` : '/bao-cao/cong-no';
+        return apiRequest(url, 'GET');
     },
+
+    // Xuất Excel Báo cáo thu
+    exportRevenue: async (params) => {
+        const query = new URLSearchParams(params).toString();
+        // Với file binary, ta dùng window.open hoặc fetch blob
+        window.open(`/api/bao-cao/thu/export?${query}`, '_blank');
+    },
+
+    // Xuất Excel Công nợ
     exportDebt: async (maDot) => {
-        const queryParams = new URLSearchParams();
-        if (maDot) queryParams.append('maDot', maDot);
-        const queryString = queryParams.toString();
-        
-        const response = await fetch(`/api/reports/export/debt${queryString ? '?' + queryString : ''}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${sessionStorage.getItem('accessToken') || ''}`
-            }
-        });
-        
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(`Export failed: ${text}`);
-        }
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `BaoCaoCongNo_${new Date().toISOString().split('T')[0]}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        const query = maDot ? `?maDot=${maDot}` : '';
+        window.open(`/api/bao-cao/cong-no/export${query}`, '_blank');
     }
 };
 
@@ -391,6 +337,17 @@ const ThongBaoAPI = {
     },
     create: (data) => apiRequest('/thong-bao', 'POST', data),
     delete: (id) => apiRequest(`/thong-bao/${id}`, 'DELETE')
+};
+
+const ChiTietThuAPI = {
+    // Lấy danh sách chi tiết của 1 phiếu
+    getByPhieuThu: (maPhieu) => apiRequest(`/phieu-thu/${maPhieu}/chi-tiet`, 'GET'),
+    
+    // Lưu (Thêm mới hoặc Cập nhật)
+    save: (data) => apiRequest('/chi-tiet-thu', 'POST', data),
+    
+    // Xóa chi tiết
+    delete: (id) => apiRequest(`/chi-tiet-thu/${id}`, 'DELETE')
 };
 
 const APIUtils = {
@@ -650,3 +607,86 @@ function updateNavbarAvatar() {
 if (typeof window !== 'undefined') {
     window.updateNavbarAvatar = updateNavbarAvatar;
 }
+
+/**
+ * 1. Hàm bảo vệ trang - Phiên bản chặn triệt để
+ */
+function checkPageAccess(allowedRoles) {
+    try {
+        const userStr = sessionStorage.getItem('currentUser');
+        if (!userStr) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const user = JSON.parse(userStr);
+        const role = (user.vaiTro || user.role || '').toLowerCase();
+        const normalizedAllowed = allowedRoles.map(r => r.toLowerCase());
+
+        // A. BẢO VỆ TRANG
+        // Nếu không phải Admin và không có quyền
+        if (role !== 'admin' && role !== 'quantrivien' && !normalizedAllowed.includes(role)) {
+            
+            // --- CHẶN GIAO DIỆN NGAY LẬP TỨC ---
+            // Ẩn toàn bộ nội dung trang web để không bị lộ
+            document.body.style.display = 'none';
+            // -----------------------------------
+
+            alert('Bạn không có quyền truy cập trang này!');
+            window.location.href = 'index.html'; 
+            return;
+        }
+
+        // B. XỬ LÝ MENU (Nếu được phép vào)
+        // Vì checkPageAccess giờ chạy trước $(document).ready, ta cần chờ DOM
+        if (window.jQuery) {
+            $(document).ready(function() { applySidebarRBAC_Internal(role); });
+        } else {
+            document.addEventListener('DOMContentLoaded', function() { applySidebarRBAC_Internal(role); });
+        }
+
+    } catch (e) {
+        console.error("Lỗi checkPageAccess:", e);
+        window.location.href = 'login.html';
+    }
+}
+
+/**
+ * 2. Hàm xử lý hiển thị Menu (Được gọi tự động bên trên)
+ * Hàm này cũng có thể được gọi độc lập từ applySidebarRBAC() nếu trang web yêu cầu
+ */
+function applySidebarRBAC_Internal(role) {
+    console.log("[RBAC] Setup menu cho:", role);
+
+    // Nhóm 1: BAN QUẢN LÝ (Ẩn Thu phí, Báo cáo, Tài khoản)
+    if (role === 'banquanly' || role === 'quanlycudan') {
+        const hideList = ['khoan-thu.html', 'dot-thu.html', 'phieu-thu.html', 'bao-cao.html', 'bao-cao-thu.html', 'bao-cao-cong-no.html'];
+        hideList.forEach(page => $(`a[href*="${page}"]`).closest('li').hide());
+        $('#menuTaiKhoan').hide();
+    } 
+    // Nhóm 2: KẾ TOÁN (Ẩn Dân cư, Tài khoản)
+    else if (role === 'ketoan' || role === 'quanlythuphi') {
+        const hideList = ['phong.html', 'can-ho.html', 'danh-sach-dan-cu.html', 'phuong-tien.html'];
+        hideList.forEach(page => $(`a[href*="${page}"]`).closest('li').hide());
+        $('#menuTaiKhoan').hide();
+    }
+    // Nhóm 3: ADMIN (Hiện Tài khoản)
+    else if (role === 'admin' || role === 'quantrivien') {
+        $('#menuTaiKhoan').show();
+    }
+}
+
+/**
+ * 3. Hàm Wrapper để tương thích với code cũ ở HTML
+ * Các trang HTML đang gọi hàm này, nên ta giữ lại tên hàm này để không bị lỗi.
+ */
+function applySidebarRBAC() {
+    const userStr = sessionStorage.getItem('currentUser');
+    if (userStr) {
+        const role = (JSON.parse(userStr).vaiTro || '').toLowerCase();
+        applySidebarRBAC_Internal(role);
+    }
+}
+
+// Hàm giữ chỗ cho Dashboard (tránh lỗi ở index.html)
+function applyDashboardRBAC() {}

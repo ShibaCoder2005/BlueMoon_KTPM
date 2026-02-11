@@ -12,7 +12,7 @@ public class BaoCaoCongNo {
     private int maHo;
     
     /** Số phòng */
-    private int soPhong;
+    private String soPhong;
     
     /** Tên chủ hộ */
     private String chuHo;
@@ -40,7 +40,7 @@ public class BaoCaoCongNo {
 
     public BaoCaoCongNo() {}
 
-    public BaoCaoCongNo(int maHo, int soPhong, String chuHo, String tenDot, 
+    public BaoCaoCongNo(int maHo, String soPhong, String chuHo, String tenDot, 
                       int maDot, BigDecimal tongTien, BigDecimal daThu, 
                       BigDecimal conNo, String trangThai, String ghiChu) {
         this.maHo = maHo;
@@ -58,8 +58,8 @@ public class BaoCaoCongNo {
     public int getMaHo() { return maHo; }
     public void setMaHo(int maHo) { this.maHo = maHo; }
 
-    public int getSoPhong() { return soPhong; }
-    public void setSoPhong(int soPhong) { this.soPhong = soPhong; }
+    public String getSoPhong() { return soPhong; }
+    public void setSoPhong(String soPhong) { this.soPhong = soPhong; }
 
     public String getChuHo() { return chuHo; }
     public void setChuHo(String chuHo) { this.chuHo = chuHo; }

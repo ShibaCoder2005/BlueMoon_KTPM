@@ -6,17 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Bluemoon - Hộ Gia Đình</title>
 
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-    
-    <style>
-        .nav-tabs .nav-link { color: #858796; }
-        .nav-tabs .nav-link.active { font-weight: bold; color: #4e73df; border-bottom: 3px solid #4e73df; }
-        .card-unpaid-header { cursor: pointer; background-color: #f8f9fc; border-bottom: 1px solid #e3e6f0; }
-        .card-unpaid-header:hover { background-color: #eaecf4; }
-    </style>
+    <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 </head>
 
 <body id="page-top">
@@ -24,16 +17,27 @@
     <div id="wrapper">
 
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
             <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-                <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-building"></i></div>
+                <div class="sidebar-brand-icon rotate-n-15">
+                    <i class="fas fa-building"></i>
+                </div>
                 <div class="sidebar-brand-text mx-3">BlueMoon</div>
             </a>
+
             <hr class="sidebar-divider my-0">
 
             <li class="nav-item">
                 <a class="nav-link" href="index.html">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phong.html">
+                    <i class="fas fa-fw fa-door-open"></i>
+                    <span>Căn hộ</span>
                 </a>
             </li>
 
@@ -85,6 +89,7 @@
                     <span>Thống kê</span>
                 </a>
             </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="bao-cao.html">
                     <i class="fas fa-fw fa-file-alt"></i>
@@ -93,7 +98,7 @@
             </li>
 
             <li class="nav-item" id="menuTaiKhoan">
-                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                <a class="nav-link" href="tai-khoan.html">
                     <i class="fas fa-fw fa-user-cog"></i>
                     <span>Tài khoản</span>
                 </a>
@@ -132,8 +137,12 @@
                 <div class="container-fluid">
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Quản lý Hộ Gia Đình</h1>
-                        <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#addHouseholdModal">
-                            <i class="fas fa-plus fa-sm text-white-50"></i> Thêm hộ gia đình
+                        <a href="#" class="btn btn-primary btn-icon-split shadow-sm" 
+                            data-toggle="modal" data-target="#addHouseholdModal">
+                            <span class="icon text-white-50">
+                                <i class="fas fa-plus"></i>
+                            </span>
+                            <span class="text">Thêm Hộ gia đình</span>
                         </a>
                     </div>
                     
@@ -190,7 +199,7 @@
     <script src="vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/rbac.js"></script>
+    
 
     <!-- Modal Thêm/Sửa Hộ Gia Đình -->
     <div class="modal fade" id="addHouseholdModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -239,11 +248,18 @@
     </div>
 
     <script>
+        
         // Load và hiển thị thông tin user
         $(document).ready(function() {
-            // Apply RBAC: Ẩn/hiện menu items dựa trên role
-            applySidebarRBAC();
+            if (typeof checkPageAccess === 'function') {
+                checkPageAccess(['BanQuanLy']);
+            }
 
+            // Apply RBAC: Ẩn/hiện menu items dựa trên role
+            if (typeof applySidebarRBAC === 'function') {
+                applySidebarRBAC();
+            }
+            
             loadUserDisplay();
         });
         
@@ -308,38 +324,47 @@
 
         async function loadRooms(currentSoPhong = null) {
             try {
-                const rooms = await PhongAPI.getAll();
+                // 1. Gọi API lấy tất cả danh sách phòng
+                const rooms = await PhongAPI.getAll(); 
                 const soPhongSelect = $('#soPhong');
-                
-                // Clear existing options except the first one
+        
+                // 2. Reset dropdown về trạng thái ban đầu
                 soPhongSelect.html('<option value="">-- Chọn phòng --</option>');
-                
+        
                 rooms.forEach(room => {
                     const soPhong = room.soPhong;
-                    const dienTich = room.dienTich ? parseFloat(room.dienTich).toLocaleString('vi-VN') : 'N/A';
-                    const trangThaiSuDung = room.trangThaiSuDung || 'Trống';
-                    const isOccupied = trangThaiSuDung === 'Đã có hộ';
-                    // Allow selecting the current room when editing
-                    const isCurrentRoom = currentSoPhong !== null && soPhong === currentSoPhong;
-                    const shouldDisable = isOccupied && !isCurrentRoom;
-                    
-                    const optionText = `Phòng ${soPhong} - ${dienTich} m² - ${trangThaiSuDung}`;
-                    const option = $('<option></option>')
-                        .attr('value', soPhong)
-                        .text(optionText)
-                        .prop('disabled', shouldDisable);
-                    
-                    if (shouldDisable) {
-                        option.css('color', '#999');
+                    // Chuẩn hóa trạng thái (mặc định là 'Trong' nếu null)
+                    const trangThai = room.trangThai || 'Trong'; 
+
+                    // Chỉ hiển thị phòng nếu thỏa mãn 1 trong 2 điều kiện:
+                    // 1. Phòng đang TRỐNG ('Trong') -> Để chọn mới.
+                    // 2. Phòng chính là phòng hiện tại của hộ này ('currentSoPhong') -> Để giữ nguyên khi sửa.
+                    const isAvailable = (trangThai === 'Trong');
+                    const isCurrentRoom = (currentSoPhong !== null && soPhong == currentSoPhong);
+
+                    if (isAvailable || isCurrentRoom) {
+                        // Chỉ tạo option nếu thỏa mãn điều kiện trên
+                        const dienTich = room.dienTich ? parseFloat(room.dienTich).toLocaleString('vi-VN') : '0';
+                
+                        // Text hiển thị gọn gàng hơn
+                        const optionText = `Phòng ${soPhong} - ${dienTich} m²`; 
+                
+                        const option = $('<option></option>')
+                            .attr('value', soPhong)
+                            .text(optionText);
+                
+                        // Nếu là phòng hiện tại đang ở (khi sửa), tự động chọn nó
+                        if (isCurrentRoom) {
+                            option.attr('selected', 'selected');
+                        }
+
+                        soPhongSelect.append(option);
                     }
-                    
-                    soPhongSelect.append(option);
+                    // Ngược lại: Không làm gì cả (Phòng sẽ bị ẩn hoàn toàn)
                 });
             } catch (error) {
                 console.error('Error loading rooms:', error);
-                if (typeof APIUtils !== 'undefined' && APIUtils.showError) {
-                    APIUtils.showError('Không thể tải danh sách phòng: ' + error.message);
-                }
+                alert('Không thể tải danh sách phòng: ' + error.message);
             }
         }
 
@@ -578,33 +603,19 @@
     </script>
 
     <script>
-        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
+        // 1. Bảo vệ trang: Chỉ cho phép Admin và Ban Quản Lý (Chặn Kế toán)
+        if (typeof checkPageAccess === 'function') {
+            checkPageAccess(['BanQuanLy']); 
+        }
+
         $(document).ready(function() {
-            try {
-                const userInfo = sessionStorage.getItem('currentUser');
-                if (userInfo) {
-                    const user = JSON.parse(userInfo);
-                    const role = user.vaiTro || user.role || '';
-                
-                // Debug: log để kiểm tra giá trị role
-                console.log('Current user:', user);
-                console.log('Role value:', role);
-                console.log('Role type:', typeof role);
-                
-                // Kiểm tra nhiều giá trị có thể là Admin
-                const isAdmin = role === 'BanQuanLy' || 
-                               role === 'Ban Quản lý' || 
-                               role === 'Admin' ||
-                               role === 'admin' ||
-                               role === 'BANQUANLY' ||
-                               role.toLowerCase() === 'banquanly';
-                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
-                        $('#menuTaiKhoan').show();
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking admin role:', error);
+            // 2. Xử lý Menu: Ẩn menu Thu phí, Hiện menu Tài khoản (theo logic trong api.js)
+            if (typeof applySidebarRBAC === 'function') {
+                applySidebarRBAC();
             }
+
+            // 3. Tải dữ liệu
+            loadUserDisplay();
         });
     </script>
 </body>

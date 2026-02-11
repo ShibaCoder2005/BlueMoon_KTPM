@@ -12,11 +12,10 @@
     <title>Bluemoon - Tài khoản</title>
 
     <!-- Custom fonts for this template-->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-
-    <!-- Custom styles for this template (SB Admin 2 CDN)-->
-    <link href="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 
     <style>
         /* Custom CSS nhỏ để căn chỉnh đẹp hơn */
@@ -56,6 +55,13 @@
                 <a class="nav-link" href="index.html">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Trang chủ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="phong.html">
+                    <i class="fas fa-fw fa-door-open"></i>
+                    <span>Căn hộ</span>
                 </a>
             </li>
 
@@ -116,7 +122,7 @@
             </li>
 
             <li class="nav-item active" id="menuTaiKhoan">
-                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                <a class="nav-link" href="tai-khoan.html">
                     <i class="fas fa-fw fa-user-cog"></i>
                     <span>Tài khoản</span>
                 </a>
@@ -178,9 +184,12 @@
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
                         <h1 class="h3 mb-0 text-gray-800">Quản lý Tài khoản</h1>
-                        <button onclick="handleCreate()" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                            <i class="fas fa-plus fa-sm text-white-50"></i> Tạo tài khoản mới
-                        </button>
+                        <a href="#" class="btn btn-primary btn-icon-split shadow-sm" onclick="handleCreate()">
+                            <span class="icon text-white-50">
+                                <i class="fas fa-plus"></i>
+                            </span>
+                            <span class="text">Tạo tài khoản mới</span>
+                        </a>
                     </div>
 
                     <!-- Content Row: Filter -->
@@ -203,6 +212,7 @@
                                     <label for="roleFilter">Vai trò</label>
                                     <select id="roleFilter" onchange="applyFilters()" class="form-control">
                                         <option value="all">Tất cả</option>
+                                        <option value="Admin">Quản trị viên</option>
                                         <option value="BanQuanLy">Ban Quản lý</option>
                                         <option value="KeToan">Kế toán</option>
                                     </select>
@@ -331,6 +341,7 @@
                             <label for="vaiTro">Vai trò <span class="text-danger">*</span></label>
                             <select class="form-control" id="vaiTro" required>
                                 <option value="">Chọn vai trò</option>
+                                <option value="Admin">Quản trị viên</option>
                                 <option value="BanQuanLy">Ban Quản lý</option>
                                 <option value="KeToan">Kế toán</option>
                             </select>
@@ -374,7 +385,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/rbac.js"></script>
+    
 
     <!-- Custom Script cho logic Quản lý Tài khoản -->
     <script>
@@ -411,9 +422,17 @@
                 // Badge Vai trò
                 const accRole = acc.vaiTro || acc.role || '';
                 let roleBadge = '<span class="badge badge-secondary">Khác</span>';
-                if (accRole === 'BanQuanLy' || accRole === 'Ban Quản lý' || accRole === 'Admin') {
+
+                // 1. Check Admin trước (Màu đỏ - Danger)
+                if (accRole === 'Admin' || accRole === 'admin' || accRole === 'Quản Trị Viên') {
+                    roleBadge = '<span class="badge badge-danger">Quản Trị Viên</span>';
+                } 
+                // 2. Check Ban Quản Lý (Màu xanh dương - Primary)
+                else if (accRole === 'BanQuanLy' || accRole === 'Ban Quản lý') {
                     roleBadge = '<span class="badge badge-primary">Ban Quản lý</span>';
-                } else if (accRole === 'KeToan' || accRole === 'Kế toán') {
+                } 
+                // 3. Check Kế Toán (Màu xanh ngọc - Info)
+                else if (accRole === 'KeToan' || accRole === 'Kế toán') {
                     roleBadge = '<span class="badge badge-info">Kế toán</span>';
                 }
 
@@ -456,7 +475,7 @@
                             <button onclick="handleEdit(${acc.id || acc.maTaiKhoan})" class="btn btn-primary btn-sm action-btn mr-1" title="Sửa">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="handleDelete(${acc.id || acc.maTaiKhoan})" class="btn btn-danger btn-sm action-btn" title="Xóa tài khoản ${acc.tenDangNhap || acc.username || ''}">
+                            <button onclick="handleDelete(${acc.id || acc.maTaiKhoan})" class="btn btn-danger btn-sm action-btn" title="Xóa tài khoản">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
@@ -548,44 +567,7 @@
             applyFilters();
         }
 
-        // 5. Kiểm tra quyền Admin
-        function checkAdminAccess() {
-            try {
-                const userInfo = sessionStorage.getItem('currentUser');
-                if (!userInfo) {
-                    window.location.href = 'login.html';
-                    return false;
-                }
-                const user = JSON.parse(userInfo);
-                const role = user.vaiTro || user.role || '';
-                
-                // Debug: log để kiểm tra giá trị role
-                console.log('Current user:', user);
-                console.log('Role value:', role);
-                console.log('Role type:', typeof role);
-                
-                // Kiểm tra nhiều giá trị có thể là Admin
-                const isAdmin = role === 'BanQuanLy' || 
-                               role === 'Ban Quản lý' || 
-                               role === 'Admin' ||
-                               role === 'admin' ||
-                               role === 'BANQUANLY' ||
-                               role.toLowerCase() === 'banquanly';
-                
-                if (!isAdmin) {
-                    alert('Bạn không có quyền truy cập trang này! (Role: ' + role + ')');
-                    window.location.href = 'index.html';
-                    return false;
-                }
-                return true;
-            } catch (error) {
-                console.error('Error checking admin access:', error);
-                window.location.href = 'login.html';
-                return false;
-            }
-        }
-
-        // 6. Các hành động
+        // 5. Các hành động
         function handleCreate() {
             $('#accountForm')[0].reset();
             $('#accountId').val('');
@@ -818,12 +800,17 @@
 
         // Init
         $(document).ready(function() {
-            // Apply RBAC: Ẩn/hiện menu items dựa trên role
-            applySidebarRBAC();
-
-            if (!checkAdminAccess()) {
-                return;
+            // 1. Bảo vệ trang: Chỉ Admin mới được vào quản lý tài khoản
+            if (typeof checkPageAccess === 'function') {
+                checkPageAccess(['Admin']); 
             }
+
+            // 2. Ẩn menu thừa
+            if (typeof applySidebarRBAC === 'function') {
+                applySidebarRBAC();
+            }
+
+            // 3. Tải dữ liệu
             loadUserDisplay();
             loadAccounts();
         });

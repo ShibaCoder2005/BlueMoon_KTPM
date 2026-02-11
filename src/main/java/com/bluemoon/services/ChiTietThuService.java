@@ -43,5 +43,12 @@ public interface ChiTietThuService {
      * @return true nếu thành công
      */
     boolean deleteByMaPhieu(int maPhieu);
+
+    /**
+     * Xóa một chi tiết thu theo ID.
+     * @param id ID của chi tiết thu cần xóa
+     * @return true nếu xóa thành công
+     */
+    boolean delete(int id);
 }
 

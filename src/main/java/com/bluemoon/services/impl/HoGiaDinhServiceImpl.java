@@ -23,10 +23,10 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
 
     private static final Logger logger = Logger.getLogger(HoGiaDinhServiceImpl.class.getName());
 
-    // SQL Queries - PostgreSQL table names
-    // Lưu ý: Database mới không có maHo, dienTich, ngayTao
+    // Database không có maHo, dienTich, ngayTao
     // maChuHo là VARCHAR(20) tham chiếu đến NhanKhau.soCCCD
     // JOIN với Phong để lấy diện tích
+    
     private static final String SELECT_ALL = 
             "SELECT h.id, h.soPhong, h.maChuHo, h.trangThai, h.ghiChu, h.thoiGianBatDauO, h.thoiGianKetThucO, p.dienTich " +
             "FROM HoGiaDinh h LEFT JOIN Phong p ON h.soPhong = p.soPhong ORDER BY h.id";
@@ -60,6 +60,9 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
             "SELECT h.id, h.soPhong, h.maChuHo, h.trangThai, h.ghiChu, h.thoiGianBatDauO, h.thoiGianKetThucO, p.dienTich " +
             "FROM HoGiaDinh h LEFT JOIN Phong p ON h.soPhong = p.soPhong " +
             "WHERE h.ghiChu LIKE ? ORDER BY h.id";
+
+    private static final String UPDATE_PHONG_STATUS = 
+            "UPDATE Phong SET trangThai = ? WHERE soPhong = ?";
 
     @Override
     public List<HoGiaDinh> getAllHoGiaDinh() {
@@ -153,6 +156,17 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
 
             if (success) {
                 logger.log(Level.INFO, "Successfully added household with soPhong: " + hoGiaDinh.getSoPhong());
+
+                // Cập nhật trạng thái phòng thành "DangO"
+                try (PreparedStatement psUpdate = conn.prepareStatement(UPDATE_PHONG_STATUS)) {
+                    psUpdate.setString(1, "DangO");
+                    psUpdate.setInt(2, hoGiaDinh.getSoPhong());
+                    psUpdate.executeUpdate();
+                } catch (SQLException e) {
+                    logger.log(Level.WARNING, "Failed to update room status to DangO", e);
+                    // Không throw lỗi để giữ transaction thêm hộ thành công, chỉ log warning
+                }
+
             } else {
                 logger.log(Level.WARNING, "Failed to add household with soPhong: " + hoGiaDinh.getSoPhong());
             }
@@ -236,6 +250,11 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
 
     @Override
     public boolean deleteHoGiaDinh(int id) {
+
+        // Lấy thông tin hộ cũ để biết số phòng nào mà trả lại
+        HoGiaDinh oldData = findById(id);
+        if (oldData == null) return false;
+
         try (Connection conn = DatabaseConnector.getConnection()) {
             // Constraint Check: Check for dependencies in NhanKhau table
             int nhanKhauCount = 0;
@@ -279,6 +298,18 @@ public class HoGiaDinhServiceImpl implements HoGiaDinhService {
 
                 if (success) {
                     logger.log(Level.INFO, "Successfully deleted household with id: " + id);
+
+                    // Trả lại trạng thái phòng thành "Trong" (nếu tìm thấy dữ liệu cũ)
+                    if (oldData != null && oldData.getSoPhong() > 0) {
+                        try (PreparedStatement psUpdate = conn.prepareStatement(UPDATE_PHONG_STATUS)) {
+                            psUpdate.setString(1, "Trong");
+                            psUpdate.setInt(2, oldData.getSoPhong());
+                            psUpdate.executeUpdate();
+                        } catch (SQLException e) {
+                            logger.log(Level.WARNING, "Failed to update room status to Trong", e);
+                        }
+                    }
+
                 } else {
                     logger.log(Level.WARNING, "Failed to delete household with id: " + id);
                 }

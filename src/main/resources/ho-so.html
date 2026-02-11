@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Bluemoon - Hồ Sơ</title>
 
-    <!-- CDN CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css" rel="stylesheet">
 </head>
 
 <body id="page-top">
@@ -36,6 +36,13 @@
             </li>
 
             <li class="nav-item">
+                <a class="nav-link" href="phong.html">
+                    <i class="fas fa-fw fa-door-open"></i>
+                    <span>Căn hộ</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link" href="can-ho.html">
                     <i class="fas fa-fw fa-home"></i>
                     <span>Hộ gia đình</span>
@@ -48,7 +55,7 @@
                     <span>Cư dân</span>
                 </a>
             </li>
-            
+
             <li class="nav-item">
                 <a class="nav-link" href="khoan-thu.html">
                     <i class="fas fa-fw fa-file-invoice-dollar"></i>
@@ -92,7 +99,7 @@
             </li>
 
             <li class="nav-item" id="menuTaiKhoan">
-                <a class="nav-link" href="tai-khoan.html" onclick="return checkAdminBeforeNavigate(event)">
+                <a class="nav-link" href="tai-khoan.html">
                     <i class="fas fa-fw fa-user-cog"></i>
                     <span>Tài khoản</span>
                 </a>
@@ -101,7 +108,6 @@
             <div class="text-center d-none d-md-inline">
                 <button class="rounded-circle border-0" id="sidebarToggle"></button>
             </div>
-
         </ul>
         <!-- End of Sidebar -->
 
@@ -304,15 +310,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/js/sb-admin-2.min.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/rbac.js"></script>
+    
     
     <script>
         let currentUser = null;
         
         // Load và hiển thị thông tin user
         $(document).ready(function() {
+            // Bảo vệ trang (Cho phép cả 3 role)
+            if (typeof checkPageAccess === 'function') {
+                checkPageAccess(['Admin', 'BanQuanLy', 'KeToan']);
+            }
+
             // Apply RBAC: Ẩn/hiện menu items dựa trên role
-            applySidebarRBAC();
+            if (typeof applySidebarRBAC === 'function') {
+                applySidebarRBAC();
+            }
 
             loadUserProfile();
             loadUserDisplay();
@@ -661,38 +674,6 @@
             }
         }
     </script>
-
-
-    <script>
-        // Kiểm tra quyền Admin để hiển thị menu Tài khoản
-        $(document).ready(function() {
-            try {
-                const userInfo = sessionStorage.getItem('currentUser');
-                if (userInfo) {
-                    const user = JSON.parse(userInfo);
-                    const role = user.vaiTro || user.role || '';
-                
-                // Debug: log để kiểm tra giá trị role
-                console.log('Current user:', user);
-                console.log('Role value:', role);
-                console.log('Role type:', typeof role);
-                
-                // Kiểm tra nhiều giá trị có thể là Admin
-                const isAdmin = role === 'BanQuanLy' || 
-                               role === 'Ban Quản lý' || 
-                               role === 'Admin' ||
-                               role === 'admin' ||
-                               role === 'BANQUANLY' ||
-                               role.toLowerCase() === 'banquanly';
-                    if (role === 'BanQuanLy' || role === 'Ban Quản lý') {
-                        $('#menuTaiKhoan').show();
-                    }
-                }
-            } catch (error) {
-                console.error('Error checking admin role:', error);
-            }
-        });
-    </script>
+    
 </body>
-
 </html>
