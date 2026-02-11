@@ -2,7 +2,7 @@
 
 > **BlueMoon** là giải pháp phần mềm toàn diện hỗ trợ Ban quản lý chung cư trong việc vận hành, quản lý cư dân và kiểm soát tài chính một cách hiệu quả, minh bạch.
 
-## 📖 Giới Thiệu Dự Án
+## 1. Giới Thiệu Dự Án
 
 Dự án được xây dựng nhằm giải quyết bài toán quản lý cho chung cư **BlueMoon**, tập trung vào hai nghiệp vụ cốt lõi: **Quản lý dân cư** và **Quản lý thu phí**.
 
@@ -14,32 +14,32 @@ Dự án được xây dựng nhằm giải quyết bài toán quản lý cho ch
 | **Diện tích sàn** | 450m² |
 | **Thời gian** | Khởi công 2021 \| Hoàn thành 2023 |
 
-## Tính Năng Chính
+## 2. Tính Năng Chính
 
 Hệ thống được chia thành các phân hệ chính sau:
 
-### 1. Quản Lý Dân Cư
+### 2.1. Quản Lý Dân Cư
 * **Quản lý Phòng/Căn hộ:** Theo dõi trạng thái, thông tin chi tiết từng căn hộ.
 * **Quản lý Hộ gia đình:** Quản lý thông tin chủ hộ và các thành viên.
 * **Quản lý Nhân khẩu:** Theo dõi biến động dân cư (tạm trú, tạm vắng).
 * **Quản lý Phương tiện:** Kiểm soát xe máy, ô tô của cư dân.
 
-### 2. Quản Lý Thu Phí
+### 2.2. Quản Lý Thu Phí
 * **Danh mục Khoản thu:** Thiết lập các loại phí (dịch vụ, vệ sinh, gửi xe, đóng góp...).
 * **Đợt thu phí:** Tạo và quản lý các đợt thu theo tháng/quý.
 * **Phiếu thu:** Tự động tạo phiếu thu, in ấn và theo dõi trạng thái thanh toán.
 
-### 3. Báo Cáo & Thống Kê
+### 2.3. Báo Cáo & Thống Kê
 * Thống kê tình hình dân cư.
 * Báo cáo doanh thu, công nợ chi tiết.
 
-### 4. Bảo Mật
+### 2.4. Bảo Mật
 * Hệ thống đăng nhập/đăng xuất an toàn.
 * Phân quyền người dùng (Admin, Ban quản lý...).
 
 ---
 
-## Công Nghệ Sử Dụng
+## 3. Công Nghệ Sử Dụng
 
 * **Ngôn ngữ:** Java (JDK 23)
 * **Build Tool:** Maven
@@ -47,9 +47,9 @@ Hệ thống được chia thành các phân hệ chính sau:
 * **Framework/Library:** Javalin (Web Server), JDBC/Hibernate (tùy thực tế dự án).
 * **Frontend:** HTML, CSS, JavaScript (Giao diện web).
 
-## Hướng Dẫn Cài Đặt
+## 4. Hướng Dẫn Cài Đặt
 
-### Yêu Cầu Hệ Thống (Prerequisites)
+### 4.1. Yêu Cầu Hệ Thống (Prerequisites)
 Để chạy được dự án, máy tính của bạn cần đáp ứng:
 * **OS:** Windows 10 trở lên.
 * **Java:** JDK 20 trở lên.
@@ -57,7 +57,7 @@ Hệ thống được chia thành các phân hệ chính sau:
 * **Database:** PostgreSQL 17
 * **Phần cứng:** RAM tối thiểu 8GB.
 
-### 📥 Các Bước Cài Đặt
+### 4.2. Các Bước Cài Đặt
 
 #### Bước 1: Clone dự án
 1. Mở CMD hoặc Terminal và chạy lệnh:
@@ -120,14 +120,14 @@ mvn exec:java -Dexec.mainClass=com.bluemoon.WebServer
 * Chạy phân mềm
 Giữ Ctrl và nhấn vào đường dẫn http://localhost:7070/
 
-### Hướng Dẫn Sử Dụng
+### 5. Hướng Dẫn Sử Dụng
 * Thông tin đăng nhập mặc định: Tài khoản: admin, Mật khẩu: 123456
 * Chi tiết các chức năng: Vào mục Tài khoản, tạo thêm tài khoản cho chức năng Quản lý dân cư, Quản lý thu phí và sử dụng phần mềm
 
-### Đóng Góp và Báo Cáo Lỗi
+### 6. Đóng Góp và Báo Cáo Lỗi
 Chúng tôi hoan nghênh mọi đóng góp để dự án hoàn thiện hơn!
 Nếu gặp vấn đề trong quá trình sử dụng, vui lòng tạo Issue với đầy đủ thông tin: mô tả lỗi, các bước tái hiện và hình ảnh minh họa (nếu có).
 
-### Tác Giả
+### 7. Tác Giả
 
-### Giấy Phép
+### 8. Giấy Phép
